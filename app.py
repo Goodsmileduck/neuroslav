@@ -14,7 +14,7 @@ from settings import *
 #from database import db
 from aiohttp_healthcheck import HealthCheck
 
-DIALOG_ID = '2514ff74-bc13-4ed1-9843-72606bba9909'
+DIALOG_ID = '974ba786-f234-413b-a3c9-1e4010e22980'
 DIALOG_URL = "https://dialogs.yandex.ru/store/skills/0bdc015e-skazki-ot-kejsi"
 
 
