@@ -39,7 +39,7 @@ def handler(request):
         logging.info(f'Moving from scene {current_scene.id()} to {next_scene.id()}')
         return next_scene.reply(request)
     else:
-        logging.warn(f'Failed to parse user request at scene {current_scene.id()}')
+        logging.warning(f'Failed to parse user request at scene {current_scene.id()}')
         return current_scene.fallback(request)
 
 if __name__ == '__main__':
