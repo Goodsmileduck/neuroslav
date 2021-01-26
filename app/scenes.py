@@ -19,8 +19,8 @@ from state import STATE_RESPONSE_KEY
 class Scene(ABC):
 
     @classmethod
-    def id(cls):
-        return cls.__name__
+    def id(self):
+        return self.__name__
 
     """Генерация ответа сцены"""
     @abstractmethod
@@ -35,11 +35,11 @@ class Scene(ABC):
         return next_scene
 
     @abstractmethod
-    def handle_global_intents(self):
+    def handle_global_intents(self, request):
         raise NotImplementedError()
 
     @abstractmethod
-    def handle_local_intents(request: Request) -> Optional[str]:
+    def handle_local_intents(self, request: Request) -> Optional[str]:
         raise NotImplementedError()
 
     def fallback(self, request: Request):
