@@ -76,7 +76,7 @@ class Main(Scene):
 
 class Welcome(Main):
     def reply(self, request: Request):
-        text = ('Добро пожаловать в Навык Викторина Великого Новгорода')
+        text = 'Добро пожаловать в Навык Викторина Великого Новгорода. Это твой первый запуск. Хочешь сыграть?'
         return self.make_response(text, buttons=[
             button('Давай играть', hide=True)])
 
