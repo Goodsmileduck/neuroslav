@@ -70,7 +70,7 @@ class Scene(ABC):
 
 class Main(Scene):
     def handle_global_intents(self, request):
-        if intents.START_QUIZ in request.intents: 
+        if intents.START_QUIZ in request.get('request', {}).get('intents', {}):
             return StartQuiz()
 
 
@@ -81,7 +81,8 @@ class Welcome(Main):
             button('Давай играть', hide=True)])
 
     def handle_local_intents(self, request: Request):
-        pass
+        if request.get('request', {}).get('command', None) == 'давай играть':
+            return StartQuiz()
 
 
 class StartQuiz(Main):
