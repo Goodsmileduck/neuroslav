@@ -59,7 +59,7 @@ class Scene(ABC):
         webhook_response = {
             'response': response,
             'version': '1.0',
-            'application_state': {'version': VERSION }
+            'application_state': {'version': VERSION },
             STATE_RESPONSE_KEY: {
                 'scene': self.id(),
             },
