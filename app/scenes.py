@@ -139,7 +139,7 @@ class AskQuestion(Main):
 
 class SkipQuestion(Main):
     def reply(self, request: Request):
-        if request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('clue'):
+        if request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('clue', None):
             # The clue has already given
             return AskQuestion()
         text = 'Дать подсказку?'
