@@ -16,6 +16,8 @@ from response_helpers import (
 from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
 from settings import VERSION
 
+from models import Phrase
+
 class Scene(ABC):
 
     @classmethod
@@ -80,6 +82,10 @@ class Welcome(Main):
         text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
                'после пожара в царской серверной я мало что помню.. ' \
                'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
+
+        for phrase in Phrase.objects.all():
+            text += phrase.phrase + ' '
+            
         response = self.make_response(text, buttons=[
             button('Давай играть', hide=True)])
         return response

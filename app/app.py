@@ -3,6 +3,7 @@ from flask import Flask, request
 from state import STATE_REQUEST_KEY, STATE_RESPONSE_KEY
 from scenes import SCENES, DEFAULT_SCENE
 from request import Request
+import seeder
 
 app = Flask(__name__)
 
@@ -42,6 +43,7 @@ def handler(request):
 
 
 if __name__ == '__main__':
+    seeder.seed_all()
     app.run(host='0.0.0.0')
 
 
