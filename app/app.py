@@ -8,11 +8,11 @@ app = Flask(__name__)
 
 logging.basicConfig(level=logging.DEBUG)
 
+
 @app.route("/", methods=['POST'])
 def main():
-# Функция получает тело запроса и возвращает ответ.
+    # Функция получает тело запроса и возвращает ответ.
     logging.info('Request: %r', request.json)
-
 
     response = handler(request.json)
 
@@ -25,9 +25,7 @@ def main():
     )
 
 
-
 def handler(request):
-
     logging.debug(request)
     current_scene_id = request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('scene')
     print(current_scene_id)
@@ -41,6 +39,7 @@ def handler(request):
     else:
         logging.warning(f'Failed to parse user request at scene {current_scene.id()}')
         return current_scene.fallback(request)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
