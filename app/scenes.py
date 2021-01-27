@@ -59,6 +59,7 @@ class Scene(ABC):
         webhook_response = {
             'response': response,
             'version': '1.0',
+            'application_state': {'version': VERSION }
             STATE_RESPONSE_KEY: {
                 'scene': self.id(),
             },
@@ -76,7 +77,7 @@ class Main(Scene):
 
 class Welcome(Main):
     def reply(self, request: Request):
-        text = VERSION+' Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
+        text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
                'после пожара в царской серверной я мало что помню.. ' \
                'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
         response = self.make_response(text, buttons=[
