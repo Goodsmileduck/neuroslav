@@ -162,6 +162,8 @@ class WrongAnswer(Main):
             return AskQuestion()
         elif request.get('request', {}).get('command', None) == 'нет':
             return Goodbye()
+        elif request.get('request', {}).get('command', None) == 'подскажи':
+            return AskQuestion.clue()
 
 
 class Goodbye(Main):
