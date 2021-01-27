@@ -125,10 +125,13 @@ class RightAnswer(Main):
         text = 'Верно!'
         return self.make_response(text, state={
             'screen': 'right_answer'
-        })
+        }, buttons=[
+            button('Дальше'),
+        ])
 
     def handle_local_intents(self, request: Request):
-        pass
+        if request.get('request', {}).get('command', None) == 'дальше':
+            return AskQuestion()
 
 
 class WrongAnswer(Main):
@@ -146,7 +149,18 @@ class WrongAnswer(Main):
         if request.get('request', {}).get('command', None) == 'да':
             return AskQuestion()
         elif request.get('request', {}).get('command', None) == 'нет':
-            return StartQuiz()
+            return Goodbye()
+
+
+class Goodbye(Main):
+    def reply(self, request: Request):
+        text = 'Буду рад видеть тебя снова!'
+        response = self.make_response(text)
+        response['end_session'] = True
+        return response
+
+    def handle_local_intents(self, request: Request):
+        pass
 
 
 def _list_scenes():
