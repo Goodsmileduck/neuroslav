@@ -14,7 +14,7 @@ from response_helpers import (
     image_gallery,
 )
 from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
-
+from settings import VERSION
 
 class Scene(ABC):
 
@@ -76,7 +76,7 @@ class Main(Scene):
 
 class Welcome(Main):
     def reply(self, request: Request):
-        text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
+        text = VERSION+'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
                'после пожара в царской серверной я мало что помню.. ' \
                'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
         response = self.make_response(text, buttons=[
