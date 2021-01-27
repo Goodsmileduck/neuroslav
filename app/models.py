@@ -8,6 +8,13 @@ BASE_DIFFICULTIES = [
 		(2, 'hard'),
 	]
 
+LEVELS = {
+	5: 'Купец',
+	10: 'Дворянин',
+	15: 'Вельможа',
+	20: 'Мудрец',
+}
+
 
 class Question(MongoModel):
 	QUESTION_TYPES = [
@@ -47,6 +54,9 @@ class User(MongoModel):
 	last_question = fields.ReferenceField(Question)
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)
 
+	def level(self):
+		points = self.user_question_set
+
 
 class UserQuestion(MongoModel):
 	user = fields.ReferenceField(User)
@@ -54,9 +64,4 @@ class UserQuestion(MongoModel):
 	passed = fields.BooleanField()
 
 
-LEVELS = {
-	5: 'Купец',
-	10: 'Дворянин',
-	15: 'Вельможа',
-	20: 'Мудрец',
-}
+
