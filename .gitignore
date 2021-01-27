@@ -1,3 +1,5 @@
 .env
 /.idea/
 /app/__pycache__/
+__init__.py
+.ngrok

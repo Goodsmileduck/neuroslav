@@ -1,0 +1,9 @@
+root:
+    $Skip $Question?
+
+$Skip:
+    пропусти
+    пропускаем
+
+$Question:
+    вопрос

@@ -1,0 +1,35 @@
+version: '3'
+services:
+  mongo:
+    container_name: mongo
+    image: mongo:4.0
+    restart: always
+    volumes:
+      - mongo-volume:/data/db
+    ports:
+      - 27017:27017
+  neuroslav:
+    container_name: neuroslav
+    image: neuroslav-dev
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - 5000:5000
+    volumes:
+      - ./app:/app
+    environment:
+      DB_HOST: mongo
+    depends_on:
+      - mongo
+  ngrok:
+    container_name: ngrok
+    image: wernight/ngrok
+    environment:
+      NGROK_DEBUG: "True"
+      NGROK_PORT: neuroslav:5000
+    ports:
+    - "4040:4040"
+volumes:
+  mongo-volume:
