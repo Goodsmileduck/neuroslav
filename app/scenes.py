@@ -99,7 +99,25 @@ class StartQuiz(Main):
         ])
 
     def handle_local_intents(self, request: Request):
-        pass
+        if request.get('request', {}).get('command', None) == 'да':
+            return AskQuestion()
+
+
+class AskQuestion(Main):
+    def reply(self, request: Request):
+        text = 'Да или нет?'
+        return self.make_response(text, state={
+            'screen': 'ask_question'
+        }, buttons=[
+            button('Да'),
+            button('Нет'),
+        ])
+
+    def handle_local_intents(self, request: Request):
+        if request.get('request', {}).get('command', None) == 'да':
+            return RightAnswer()
+        elif request.get('request', {}).get('command', None) == 'нет':
+            return WrondAnswer()
 
 
 class RightAnswer(Main):
@@ -108,6 +126,7 @@ class RightAnswer(Main):
         return self.make_response(text, state={
             'screen': 'right_answer'
         })
+
 
 class WrondAnswer(Main):
     def reply(self, request: Request):
