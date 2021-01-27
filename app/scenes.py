@@ -111,29 +111,48 @@ class AskQuestion(Main):
             button('Да'),
             button('Нет'),
             button('Подсказка'),
+            button('Пропустить'),
         ])
 
     def clue(self, request: Request):
         text = 'Сделал вид, что подсказал'
         return self.make_response(text, state={
             'question_id': 999,
-        }, buttons=[
-            button('Да'),
-            button('Нет'),
-        ])
+            'clue': True
+        })
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
         if request.get('request', {}).get('command', None) == 'да':
             return RightAnswer()
-        elif request.get('request', {}).get('command', None) == 'подсказка':
-            return AskQuestion.clue()
 
         # Handle local intents (skip question, clue)
+        if request.get('request', {}).get('command', None) == 'подсказка':
+            return AskQuestion.clue()
+        elif request.get('request', {}).get('command', None) == 'пропустить':
+            return AskQuestion.clue()
 
         # Assume answer as wrong
         if request.get('request', {}).get('command', None) == 'нет':
             return WrongAnswer()
+
+
+class SkipQuestion(Main):
+    def reply(self, request: Request):
+        if request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('clue'):
+            # The clue has already given
+            return AskQuestion()
+        text = 'Дать подсказку?'
+        return self.make_response(text, buttons=[
+            button('Да'),
+            button('нет'),
+        ])
+
+    def handle_local_intents(self, request: Request):
+        if request.get('request', {}).get('command', None) == 'да':
+            return AskQuestion.clue()
+        elif request.get('request', {}).get('command', None) == 'нет':
+            return AskQuestion()
 
 
 class RightAnswer(Main):
