@@ -110,12 +110,24 @@ class AskQuestion(Main):
         }, buttons=[
             button('Да'),
             button('Нет'),
+            button('Подсказка'),
+        ])
+
+    def clue(self, request: Request):
+        text = 'Сделал вид, что подсказал'
+        return self.make_response(text, state={
+            'question_id': 999,
+        }, buttons=[
+            button('Да'),
+            button('Нет'),
         ])
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
         if request.get('request', {}).get('command', None) == 'да':
             return RightAnswer()
+        elif request.get('request', {}).get('command', None) == 'подсказка':
+            return AskQuestion.clue()
 
         # Handle local intents (skip question, clue)
 
