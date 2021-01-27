@@ -156,7 +156,8 @@ class SkipQuestion(Main):
     def reply(self, request: Request):
         if request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('clue_given', None):
             # The clue has already given
-            return AskQuestion()
+            redirect = AskQuestion()
+            redirect.reply(request)
         text = 'Дать подсказку?'
         return self.make_response(text, buttons=[
             button('Да'),

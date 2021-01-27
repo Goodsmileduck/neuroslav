@@ -52,3 +52,11 @@ class UserQuestion(MongoModel):
 	user = fields.ReferenceField(User)
 	question = fields.ReferenceField(Question)
 	passed = fields.BooleanField()
+
+
+LEVELS = {
+	5: 'Купец',
+	10: 'Дворянин',
+	15: 'Вельможа',
+	20: 'Мудрец',
+}
