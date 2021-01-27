@@ -91,9 +91,7 @@ class Welcome(Main):
 class StartQuiz(Main):
     def reply(self, request: Request):
         text = 'Мы начинаем викторину!'
-        return self.make_response(text, state={
-            'screen': 'start_quiz'
-        }, buttons=[
+        return self.make_response(text, buttons=[
             button('Да'),
             button('Нет'),
         ])
@@ -105,27 +103,31 @@ class StartQuiz(Main):
 
 class AskQuestion(Main):
     def reply(self, request: Request):
+        # Asking random question
         text = 'Да или нет?'
         return self.make_response(text, state={
-            'screen': 'ask_question'
+            'question_id': 999,
         }, buttons=[
             button('Да'),
             button('Нет'),
         ])
 
     def handle_local_intents(self, request: Request):
+        # Check if response contains right answer
         if request.get('request', {}).get('command', None) == 'да':
             return RightAnswer()
-        elif request.get('request', {}).get('command', None) == 'нет':
+
+        # Handle local intents (skip question, clue)
+
+        # Assume answer as wrong
+        if request.get('request', {}).get('command', None) == 'нет':
             return WrongAnswer()
 
 
 class RightAnswer(Main):
     def reply(self, request: Request):
         text = 'Верно!'
-        return self.make_response(text, state={
-            'screen': 'right_answer'
-        }, buttons=[
+        return self.make_response(text, buttons=[
             button('Дальше'),
         ])
 
@@ -137,9 +139,7 @@ class RightAnswer(Main):
 class WrongAnswer(Main):
     def reply(self, request: Request):
         text = 'Не угадал, попробуешь ещё раз?'
-        return self.make_response(text, state={
-            'screen': 'wrong_answer'
-        }, buttons=[
+        return self.make_response(text, buttons=[
             button('Да'),
             button('Нет'),
             button('Подскажи'),
@@ -155,9 +155,7 @@ class WrongAnswer(Main):
 class Goodbye(Main):
     def reply(self, request: Request):
         text = 'Буду рад видеть тебя снова!'
-        response = self.make_response(text, state={
-            'screen': 'goodbye'
-        })
+        response = self.make_response(text)
         response['end_session'] = True
         return response
 
