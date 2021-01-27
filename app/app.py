@@ -1,6 +1,6 @@
 import logging, json
 from flask import Flask, request
-from state import STATE_REQUEST_KEY
+from state import STATE_REQUEST_KEY, STATE_RESPONSE_KEY
 from scenes import SCENES, DEFAULT_SCENE
 from request import Request
 
@@ -28,7 +28,7 @@ def main():
 def handler(request):
     logging.debug(request)
     current_scene_id = request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('scene')
-    print(current_scene_id)
+    print('CURRENT SCENE ID:', current_scene_id)
     if current_scene_id is None:
         return DEFAULT_SCENE().reply(request)
     current_scene = SCENES.get(current_scene_id, DEFAULT_SCENE)()

@@ -13,7 +13,7 @@ from response_helpers import (
     has_location,
     image_gallery,
 )
-from state import STATE_RESPONSE_KEY
+from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
 
 
 class Scene(ABC):
@@ -79,8 +79,9 @@ class Welcome(Main):
         text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
                'после пожара в царской серверной я мало что помню.. ' \
                'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
-        return self.make_response(text, buttons=[
+        response = self.make_response(text, buttons=[
             button('Давай играть', hide=True)])
+        return response
 
     def handle_local_intents(self, request: Request):
         if request.get('request', {}).get('command', None) == 'давай играть':
@@ -96,8 +97,28 @@ class StartQuiz(Main):
             button('Да'),
             button('Нет'),
         ])
+
     def handle_local_intents(self, request: Request):
         pass
+
+
+class RightAnswer(Main):
+    def reply(self, request: Request):
+        text = 'Верно!'
+        return self.make_response(text, state={
+            'screen': 'right_answer'
+        })
+
+class WrondAnswer(Main):
+    def reply(self, request: Request):
+        text = 'Не угадал, попробуешь ещё раз?'
+        return self.make_response(text, state={
+            'screen': 'wrong_answer'
+        }, buttons=[
+            button('Да'),
+            button('Нет'),
+            button('Подскажи'),
+        ])
 
 
 def _list_scenes():
