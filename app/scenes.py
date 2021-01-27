@@ -117,7 +117,7 @@ class AskQuestion(Main):
         if request.get('request', {}).get('command', None) == 'да':
             return RightAnswer()
         elif request.get('request', {}).get('command', None) == 'нет':
-            return WrondAnswer()
+            return WrongAnswer()
 
 
 class RightAnswer(Main):
@@ -131,7 +131,7 @@ class RightAnswer(Main):
         pass
 
 
-class WrondAnswer(Main):
+class WrongAnswer(Main):
     def reply(self, request: Request):
         text = 'Не угадал, попробуешь ещё раз?'
         return self.make_response(text, state={
@@ -143,7 +143,10 @@ class WrondAnswer(Main):
         ])
 
     def handle_local_intents(self, request: Request):
-        pass
+        if request.get('request', {}).get('command', None) == 'да':
+            return AskQuestion()
+        elif request.get('request', {}).get('command', None) == 'нет':
+            return StartQuiz()
 
 
 def _list_scenes():
