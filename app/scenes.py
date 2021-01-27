@@ -85,7 +85,7 @@ class Welcome(Main):
 
         for phrase in Phrase.objects.all():
             text += phrase.phrase + ' '
-            
+
         response = self.make_response(text, buttons=[
             button('Давай играть', hide=True)])
         return response

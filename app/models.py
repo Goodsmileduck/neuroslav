@@ -2,7 +2,7 @@ from pymodm import MongoModel, fields, connect
 import settings
 
 # Establish a connection to the database.
-connect('mongodb://' + settings.DB_HOST + ':' + settings.DB_PORT + '/' + settings.DB_NAME)
+connect('mongodb://' + settings.DB_HOST + ':' + str(settings.DB_PORT) + '/' + settings.DB_NAME)
 
 BASE_DIFFICULTIES = [
 		(1, 'easy'),
