@@ -127,6 +127,9 @@ class RightAnswer(Main):
             'screen': 'right_answer'
         })
 
+    def handle_local_intents(self, request: Request):
+        pass
+
 
 class WrondAnswer(Main):
     def reply(self, request: Request):
@@ -138,6 +141,9 @@ class WrondAnswer(Main):
             button('Нет'),
             button('Подскажи'),
         ])
+
+    def handle_local_intents(self, request: Request):
+        pass
 
 
 def _list_scenes():
