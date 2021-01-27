@@ -128,9 +128,9 @@ class AskQuestion(Main):
 
         # Handle local intents (skip question, clue)
         if request.get('request', {}).get('command', None) == 'подсказка':
-            return AskQuestion.clue()
+            self.clue(request)
         elif request.get('request', {}).get('command', None) == 'пропустить':
-            return AskQuestion.clue()
+            return SkipQuestion()
 
         # Assume answer as wrong
         if request.get('request', {}).get('command', None) == 'нет':
