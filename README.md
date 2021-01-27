@@ -18,6 +18,17 @@ don't delete it if don't want to lost data
 docker-compose up -d neuroslav
 ```
 
+# ReStart app after code change
+
+```
+docker-compose restart neuroslav
+```
+or
+```
+docker restart neuroslav
+```
+
+
 # Start ngrok
 
 ```
