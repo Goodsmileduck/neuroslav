@@ -114,11 +114,28 @@ class AskQuestion(Main):
             button('Пропустить'),
         ])
 
-    def clue(self, request: Request):
+    def handle_local_intents(self, request: Request):
+        # Check if response contains right answer
+        if request.get('request', {}).get('command', None) == 'да':
+            return RightAnswer()
+
+        # Handle local intents (skip question, clue)
+        if request.get('request', {}).get('command', None) == 'подсказка':
+            return GiveClue()
+        elif request.get('request', {}).get('command', None) == 'пропустить':
+            return SkipQuestion()
+
+        # Assume answer as wrong
+        if request.get('request', {}).get('command', None) == 'нет':
+            return WrongAnswer()
+
+
+class GiveClue(Main):
+    def reply(self, request: Request):
         text = 'Сделал вид, что подсказал'
         return self.make_response(text, state={
             'question_id': 999,
-            'clue': True
+            'clue_given': True
         })
 
     def handle_local_intents(self, request: Request):
@@ -127,9 +144,7 @@ class AskQuestion(Main):
             return RightAnswer()
 
         # Handle local intents (skip question, clue)
-        if request.get('request', {}).get('command', None) == 'подсказка':
-            self.clue(request)
-        elif request.get('request', {}).get('command', None) == 'пропустить':
+        if request.get('request', {}).get('command', None) == 'пропустить':
             return SkipQuestion()
 
         # Assume answer as wrong
@@ -139,7 +154,7 @@ class AskQuestion(Main):
 
 class SkipQuestion(Main):
     def reply(self, request: Request):
-        if request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('clue', None):
+        if request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('clue_given', None):
             # The clue has already given
             return AskQuestion()
         text = 'Дать подсказку?'
@@ -150,7 +165,7 @@ class SkipQuestion(Main):
 
     def handle_local_intents(self, request: Request):
         if request.get('request', {}).get('command', None) == 'да':
-            return AskQuestion.clue()
+            return GiveClue()
         elif request.get('request', {}).get('command', None) == 'нет':
             return AskQuestion()
 
@@ -182,7 +197,7 @@ class WrongAnswer(Main):
         elif request.get('request', {}).get('command', None) == 'нет':
             return Goodbye()
         elif request.get('request', {}).get('command', None) == 'подскажи':
-            return AskQuestion.clue()
+            return GiveClue()
 
 
 class Goodbye(Main):
