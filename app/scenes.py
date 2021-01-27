@@ -155,7 +155,9 @@ class WrongAnswer(Main):
 class Goodbye(Main):
     def reply(self, request: Request):
         text = 'Буду рад видеть тебя снова!'
-        response = self.make_response(text)
+        response = self.make_response(text, state={
+            'screen': 'goodbye'
+        })
         response['end_session'] = True
         return response
 
