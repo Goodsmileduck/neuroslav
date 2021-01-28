@@ -137,6 +137,7 @@ class AskQuestion(Main):
 
         return self.make_response(text, state={
             'question_id': question.id,
+            'give_confirmation': True,
             }, buttons=buttons)
 
     def handle_local_intents(self, request: Request):
@@ -173,7 +174,8 @@ class GiveClue(Main):
 
         return self.make_response(text, state={
             'question_id': question_id,
-            'clue_given': True
+            'clue_given': True,
+            'give_confirmation': True,
         }, buttons=buttons)
 
     def handle_local_intents(self, request: Request):
@@ -191,8 +193,7 @@ class GiveClue(Main):
             return SkipQuestion()
 
         # Assume answer as wrong
-        if request.get('request', {}).get('command', None) == 'ответить неправильно':
-            return WrongAnswer()
+        return WrongAnswer()
 
 
 class SkipQuestion(Main):
