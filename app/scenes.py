@@ -142,9 +142,7 @@ class AskQuestion(Main):
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
         question_id = in_session(request, 'question_id')
-        print(question_id)
-        question = Question.objects.raw({'_id': 1}).first()
-        print(question)
+        question = Question.objects.raw({'_id': question_id}).first()
         right_answers = [answer.answer for answer in question.right_answers]
         if request.get('request', {}).get('command', None) in right_answers:
             if give_fact():
@@ -163,19 +161,27 @@ class AskQuestion(Main):
 
 class GiveClue(Main):
     def reply(self, request: Request):
-        text = 'Сделал вид, что подсказал'
+        question_id = in_session(request, 'question_id')
+        question = Question.objects.raw({'_id': question_id}).first()
+        text = question.clue
+
+        # Add right answers to buttons
+        buttons = []
+        for answer in question.possible_answers:
+            buttons.append(button(answer.answer, hide=True))
+        buttons += [button('Пропустить', hide=True)]
+
         return self.make_response(text, state={
-            'question_id': in_session(request, 'question_id'),
+            'question_id': question_id,
             'clue_given': True
-        }, buttons=[
-            button('Ответить правильно', hide=True),
-            button('Ответить неправильно', hide=True),
-            button('Пропустить', hide=True),
-        ])
+        }, buttons=buttons)
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
-        if request.get('request', {}).get('command', None) == 'ответить правильно':
+        question_id = in_session(request, 'question_id')
+        question = Question.objects.raw({'_id': question_id}).first()
+        right_answers = [answer.answer for answer in question.right_answers]
+        if request.get('request', {}).get('command', None) in right_answers:
             if give_fact():
                 return GiveFact()
             return AskQuestion()
@@ -217,7 +223,7 @@ class GiveFact(Main):
         question = Question.objects.raw({'_id': 1}).first()
         text = 'Верно!\n' + question.interesting_fact
         return self.make_response(text, state={
-            'give_confirmation': True,
+            'give_confirmation': False,
         }, buttons=[
             button('Дальше', hide=True),
         ])
@@ -230,7 +236,7 @@ class GiveFact(Main):
 class WrongAnswer(Main):
     def reply(self, request: Request):
         text = 'Не угадал, попробуешь ещё раз?'
-        if request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('clue_given', None):
+        if in_session(request, 'clue_given'):
             return self.make_response(text, buttons=[
                 button('Да', hide=True),
                 button('Нет', hide=True),
