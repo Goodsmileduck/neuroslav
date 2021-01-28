@@ -9,6 +9,10 @@ def seed_phrases():
     Phrase(1, 'Именно так.').save()
     Phrase(1, 'Определённо.').save()
 
+    Phrase(2, 'Не угадал.').save()
+    Phrase(2, 'Не верно.').save()
+    Phrase(2, 'Реакция нейронов не обнаружена.').save()
+
 
 def seed_questions():
     Question(

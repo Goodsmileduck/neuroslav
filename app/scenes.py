@@ -244,7 +244,13 @@ class WrongAnswer(Main):
     def reply(self, request: Request):
         question_id = in_session(request, 'question_id')
         question = Question.objects.raw({'_id': question_id}).first()
-        text = 'Не угадал, попробуешь ещё раз?'
+        text = random.choice(list(Phrase.objects.raw({'phrase_type': 2}))).phrase
+
+        # Add right answers to buttons
+        buttons = []
+        for answer in question.possible_answers:
+            buttons.append(button(answer.answer, hide=True))
+        buttons += [button('Подсказка', hide=True), button('Пропустить', hide=True)]
         if in_session(request, 'clue_given'):
             return self.make_response(text, state={
                 'question_id': question_id,
@@ -254,6 +260,7 @@ class WrongAnswer(Main):
             ])
         return self.make_response(text, state={
             'question_id': question_id,
+            'give_confirmation': True,
         }, buttons=[
             button('Да', hide=True),
             button('Нет', hide=True),
@@ -261,12 +268,23 @@ class WrongAnswer(Main):
         ])
 
     def handle_local_intents(self, request: Request):
-        if request.get('request', {}).get('command', None) == 'да':
+        # Check if response contains right answer
+        question_id = in_session(request, 'question_id')
+        question = Question.objects.raw({'_id': question_id}).first()
+        right_answers = [answer.answer for answer in question.right_answers]
+        if request.get('request', {}).get('command', None) in right_answers:
+            if give_fact():
+                return GiveFact()
             return AskQuestion()
-        elif request.get('request', {}).get('command', None) == 'нет':
-            return Goodbye()
-        elif request.get('request', {}).get('command', None) == 'подскажи':
+
+        # Handle local intents (skip question, clue)
+        if request.get('request', {}).get('command', None) == 'подсказка':
             return GiveClue()
+        elif request.get('request', {}).get('command', None) == 'пропустить':
+            return SkipQuestion()
+
+        # Assume answer as wrong
+        return WrongAnswer()
 
 
 class Goodbye(Main):
