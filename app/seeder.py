@@ -5,7 +5,7 @@ from settings import DB_HOST, DB_PORT, DB_NAME
 CLIENT = MongoClient(DB_HOST, DB_PORT)
 
 def seed_phrases():
-    Phrase(1, 'Угадал?').save()
+    Phrase(1, 'Угадал!').save()
     Phrase(1, 'Именно так.').save()
     Phrase(1, 'Определённо.').save()
 
@@ -49,10 +49,10 @@ def seed_questions():
         confirmation_answer='Именно!',
         difficulty=3,
         right_answers=[
-            Answer('Софийский собор'),
-            Answer('Собор Софии'),
-            Answer('Собор Святой Софии'),
-            Answer('Святой Софии'),
+            Answer('софийский собор'),
+            Answer('собор софии'),
+            Answer('собор святой софии'),
+            Answer('святой софии'),
         ],
         interesting_fact='Интересный факт о Соборе Святой Софии',
         possible_answers=[
