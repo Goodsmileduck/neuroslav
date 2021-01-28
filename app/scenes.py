@@ -252,7 +252,9 @@ class WrongAnswer(Main):
                 button('Да', hide=True),
                 button('Нет', hide=True),
             ])
-        return self.make_response(text, buttons=[
+        return self.make_response(text, state={
+            'question_id': question_id,
+        }, buttons=[
             button('Да', hide=True),
             button('Нет', hide=True),
             button('Подскажи', hide=True),
