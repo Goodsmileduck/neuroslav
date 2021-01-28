@@ -1,7 +1,8 @@
 from pymodm import MongoModel, fields, connect
+import settings
 
 # Establish a connection to the database.
-connect('mongodb://localhost: ... ')
+connect('mongodb://' + settings.DB_HOST + ':' + str(settings.DB_PORT) + '/' + settings.DB_NAME)
 
 BASE_DIFFICULTIES = [
 		(1, 'easy'),
@@ -37,7 +38,7 @@ class RightAnswer(MongoModel):
 	answer = fields.CharField(max_length=512)
 
 
-class Phrases(MongoModel):
+class Phrase(MongoModel):
 	PHRASE_TYPES = [
 		(1, 'right_answer'),
 		(2, 'wrong_answer'),

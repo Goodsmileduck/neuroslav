@@ -14,7 +14,9 @@ from response_helpers import (
     image_gallery,
 )
 from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
+from settings import VERSION
 
+from models import Phrase
 
 class Scene(ABC):
 
@@ -59,6 +61,7 @@ class Scene(ABC):
         webhook_response = {
             'response': response,
             'version': '1.0',
+            'application_state': {'version': VERSION },
             STATE_RESPONSE_KEY: {
                 'scene': self.id(),
             },
@@ -79,6 +82,10 @@ class Welcome(Main):
         text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
                'после пожара в царской серверной я мало что помню.. ' \
                'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
+
+        for phrase in Phrase.objects.all():
+            text += phrase.phrase + ' '
+
         response = self.make_response(text, buttons=[
             button('Давай играть', hide=True)])
         return response
@@ -92,8 +99,8 @@ class StartQuiz(Main):
     def reply(self, request: Request):
         text = 'Мы начинаем викторину!'
         return self.make_response(text, buttons=[
-            button('Да'),
-            button('Нет'),
+            button('Да', hide=True),
+            button('Нет', hide=True),
         ])
 
     def handle_local_intents(self, request: Request):
@@ -108,10 +115,10 @@ class AskQuestion(Main):
         return self.make_response(text, state={
             'question_id': 999,
         }, buttons=[
-            button('Да'),
-            button('Нет'),
-            button('Подсказка'),
-            button('Пропустить'),
+            button('Да', hide=True),
+            button('Нет', hide=True),
+            button('Подсказка', hide=True),
+            button('Пропустить', hide=True),
         ])
 
     def handle_local_intents(self, request: Request):
@@ -160,8 +167,8 @@ class SkipQuestion(Main):
             redirect.reply(request)
         text = 'Дать подсказку?'
         return self.make_response(text, buttons=[
-            button('Да'),
-            button('нет'),
+            button('Да', hide=True),
+            button('нет', hide=True),
         ])
 
     def handle_local_intents(self, request: Request):
@@ -175,7 +182,7 @@ class RightAnswer(Main):
     def reply(self, request: Request):
         text = 'Верно!'
         return self.make_response(text, buttons=[
-            button('Дальше'),
+            button('Дальше', hide=True),
         ])
 
     def handle_local_intents(self, request: Request):
@@ -187,9 +194,9 @@ class WrongAnswer(Main):
     def reply(self, request: Request):
         text = 'Не угадал, попробуешь ещё раз?'
         return self.make_response(text, buttons=[
-            button('Да'),
-            button('Нет'),
-            button('Подскажи'),
+            button('Да', hide=True),
+            button('Нет', hide=True),
+            button('Подскажи', hide=True),
         ])
 
     def handle_local_intents(self, request: Request):
