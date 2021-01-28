@@ -31,15 +31,11 @@ class Question(MongoModel):
 	confirmation_picture = fields.CharField(max_length=512)
 	DIFFICULTIES = BASE_DIFFICULTIES + [(3, 'mixed')]
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)
+	right_answers = fields.EmbeddedDocumentListField('Answer')
+	possible_answers = fields.EmbeddedDocumentListField('Answer')
 
 
-class RightAnswer(MongoModel):
-	question = fields.ReferenceField(Question)
-	answer = fields.CharField(max_length=512)
-
-
-class PossibleAnswer(MongoModel):
-	question = fields.ReferenceField(Question)
+class Answer(MongoModel):
 	answer = fields.CharField(max_length=512)
 
 
@@ -57,7 +53,7 @@ class User(MongoModel):
 	DIFFICULTIES = BASE_DIFFICULTIES
 	identity = fields.CharField(max_length=128)
 	state = fields.CharField(max_length=128)
-	last_question = fields.ReferenceField(Question)
+	last_question = fields.EmbeddedDocumentField(Question)
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)
 
 	def points(self):

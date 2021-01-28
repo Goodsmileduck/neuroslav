@@ -1,4 +1,4 @@
-from models import Phrase, Question, RightAnswer, PossibleAnswer
+from models import Phrase, Question, Answer
 
 
 def seed_phrases():
@@ -8,22 +8,18 @@ def seed_phrases():
 
 
 def seed_questions():
-    question = Question(question_type=1,
-                        question='В каком году основан Новгород?',
-                        clue='Очень давно...',
-                        confirmation_answer='Правильно!!',
-                        difficulty=3)
-    question.save()
-    RightAnswer(question=question.id,
-                answer='859').save()
-    PossibleAnswer(question=question.id,
-                   answer='859').save()
-    PossibleAnswer(question=question.id,
-                   answer='1859').save()
-    PossibleAnswer(question=question.id,
-                   answer='1059').save()
-    PossibleAnswer(question=question.id,
-                   answer='887').save()
+    Question(question_type=1,
+            question='В каком году основан Новгород?',
+            clue='Очень давно...',
+            confirmation_answer='Правильно!!',
+            difficulty=3,
+            right_answers=[Answer('859')],
+            possible_answers=[
+                Answer('859'),
+                Answer('1859'),
+                Answer('1059'),
+                Answer('857'),
+            ]).save()
 
 
 def is_db_empty():

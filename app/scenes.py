@@ -17,6 +17,7 @@ from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
 from settings import VERSION
 
 from models import Phrase, Question
+import random
 
 def in_session(request: Request, parameter):
     return request.get('state', {}).get(STATE_REQUEST_KEY, {}).get(parameter, None)
@@ -111,6 +112,11 @@ class StartQuiz(Main):
             return AskQuestion()
 
 
+def give_fact():
+    n = random.randint(0, 10)
+    return n >= 7
+
+
 class AskQuestion(Main):
     def reply(self, request: Request):
         # Asking random question
@@ -123,13 +129,15 @@ class AskQuestion(Main):
         for answer in question.possible_answers:
             buttons.append(button(answer.answer, hide=True))
         return self.make_response(text, state={
-            'question_id': 999,
+            'question_id': question.id,
             }, buttons=buttons)
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
         if request.get('request', {}).get('command', None) == 'ответить правильно':
-            return RightAnswer()
+            if give_fact():
+                return GiveFact()
+            return AskQuestion()
 
         # Handle local intents (skip question, clue)
         if request.get('request', {}).get('command', None) == 'подсказка':
@@ -157,7 +165,9 @@ class GiveClue(Main):
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
         if request.get('request', {}).get('command', None) == 'ответить правильно':
-            return RightAnswer()
+            if give_fact():
+                return GiveFact()
+            return AskQuestion()
 
         # Handle local intents (skip question, clue)
         if request.get('request', {}).get('command', None) == 'пропустить':
@@ -189,9 +199,9 @@ class SkipQuestion(Main):
             return AskQuestion()
 
 
-class RightAnswer(Main):
+class GiveFact(Main):
     def reply(self, request: Request):
-        text = 'Верно!'
+        text = 'Верно!\nИнтересный факт: ...'
         return self.make_response(text, state={
             'give_confirmation': True,
         }, buttons=[
