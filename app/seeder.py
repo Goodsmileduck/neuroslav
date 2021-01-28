@@ -26,6 +26,21 @@ def seed_questions():
             Answer('857'),
         ]).save()
 
+    Question(
+        id=2,
+        question_type=1,
+        question='___В каком году основан Новгород?',
+        clue='___Очень давно...',
+        confirmation_answer='___Правильно!!',
+        difficulty=3,
+        right_answers=[Answer('859')],
+        possible_answers=[
+            Answer('859'),
+            Answer('1859'),
+            Answer('1059'),
+            Answer('857'),
+        ]).save()
+
 
 def is_db_empty():
     return Phrase.objects.all().count() == 0
