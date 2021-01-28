@@ -4,7 +4,7 @@ from state import STATE_REQUEST_KEY, STATE_RESPONSE_KEY
 from scenes import SCENES, DEFAULT_SCENE
 from request import Request
 import seeder
-import models
+import debug
 
 app = Flask(__name__)
 
@@ -45,5 +45,7 @@ def handler(request):
 
 if __name__ == '__main__':
     seeder.seed_all()
-
+    debug.test()
     app.run(host='0.0.0.0')
+
+
