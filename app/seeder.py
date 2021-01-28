@@ -29,13 +29,50 @@ def seed_questions():
 
     Question(
         id=2,
-        question_type=1,
+        question_type=2,
         question='Зачем это всё?',
         clue='Подсказка..',
         confirmation_answer='Верно!!',
-        difficulty=3,
+        difficulty=2,
         right_answers=[Answer('да')],
         interesting_fact='Просто интересный факт',
+        possible_answers=[
+            Answer('Да'),
+            Answer('Нет'),
+        ]).save()
+
+    Question(
+        id=3,
+        question_type=1,
+        question='Как называется главный новгородский храм?',
+        clue='Со...',
+        confirmation_answer='Именно!',
+        difficulty=3,
+        right_answers=[
+            Answer('Софийский собор'),
+            Answer('Собор Софии'),
+            Answer('Собор Святой Софии'),
+            Answer('Святой Софии'),
+        ],
+        interesting_fact='Интересный факт о Соборе Святой Софии',
+        possible_answers=[
+            Answer('Собор Святой Софии'),
+            Answer('Храм Христа Спасителя'),
+            Answer('Церковь Богородицы'),
+            Answer('Новгородский Собор'),
+        ]).save()
+
+    Question(
+        id=4,
+        question_type=2,
+        question='Подвергался ли Новгород монгольскому нашествию?',
+        clue='Может быть',
+        confirmation_answer='Именно!',
+        difficulty=3,
+        right_answers=[
+            Answer('Да'),
+        ],
+        interesting_fact='Батый не дошёл до города 200 км, и хоть Новгород платил дань Орде, но сохранил уникальные памятники древнерусской архитектуры и был единственным из древних русских городов, избежавшим упадка.',
         possible_answers=[
             Answer('Да'),
             Answer('Нет'),
