@@ -16,7 +16,7 @@ from response_helpers import (
 from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
 from settings import VERSION
 
-from models import Phrase
+from models import Phrase, Question
 
 class Scene(ABC):
 
@@ -111,9 +111,11 @@ class StartQuiz(Main):
 class AskQuestion(Main):
     def reply(self, request: Request):
         # Asking random question
+        questions = Question.objects.all()
         text = 'Да или нет?'
         return self.make_response(text, state={
             'question_id': 999,
+            'questions': list(questions.only('question_type'))
         }, buttons=[
             button('Ответить правильно', hide=True),
             button('Ответить неправильно', hide=True),
