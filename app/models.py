@@ -54,8 +54,16 @@ class User(MongoModel):
 	last_question = fields.ReferenceField(Question)
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)
 
+	def points(self):
+		points = self.user_question_set.raw({'passed': True}).count()  # ???
+		return points
+
 	def level(self):
-		points = self.user_question_set
+		points = self.points
+		for i in list(LEVELS.keys())[::-1]:
+			if points >= i:
+				return LEVELS[i]
+		return None
 
 
 class UserQuestion(MongoModel):
