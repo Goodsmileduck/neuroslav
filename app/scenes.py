@@ -115,15 +115,15 @@ class AskQuestion(Main):
         return self.make_response(text, state={
             'question_id': 999,
         }, buttons=[
-            button('Да', hide=True),
-            button('Нет', hide=True),
+            button('Ответить правильно', hide=True),
+            button('Ответить неправильно', hide=True),
             button('Подсказка', hide=True),
             button('Пропустить', hide=True),
         ])
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
-        if request.get('request', {}).get('command', None) == 'да':
+        if request.get('request', {}).get('command', None) == 'ответить правильно':
             return RightAnswer()
 
         # Handle local intents (skip question, clue)
@@ -133,7 +133,7 @@ class AskQuestion(Main):
             return SkipQuestion()
 
         # Assume answer as wrong
-        if request.get('request', {}).get('command', None) == 'нет':
+        if request.get('request', {}).get('command', None) == 'ответить неправильно':
             return WrongAnswer()
 
 
@@ -143,7 +143,11 @@ class GiveClue(Main):
         return self.make_response(text, state={
             'question_id': 999,
             'clue_given': True
-        })
+        }, buttons=[
+            button('Ответить правильно', hide=True),
+            button('Ответить неправильно', hide=True),
+            button('Пропустить', hide=True),
+        ])
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
@@ -195,6 +199,11 @@ class RightAnswer(Main):
 class WrongAnswer(Main):
     def reply(self, request: Request):
         text = 'Не угадал, попробуешь ещё раз?'
+        if request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('clue_given', None):
+            return self.make_response(text, buttons=[
+                button('Да', hide=True),
+                button('Нет', hide=True),
+            ])
         return self.make_response(text, buttons=[
             button('Да', hide=True),
             button('Нет', hide=True),
