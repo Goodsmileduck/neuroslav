@@ -18,6 +18,9 @@ from settings import VERSION
 
 from models import Phrase, Question
 
+def in_session(request: Request, parameter):
+    return request.get('state', {}).get(STATE_REQUEST_KEY, {}).get(parameter, None)
+
 class Scene(ABC):
 
     @classmethod
@@ -113,6 +116,8 @@ class AskQuestion(Main):
         # Asking random question
         questions = Question.objects.all()
         text = 'Да или нет?'
+        if in_session(request, 'give_confirmation'):
+            text = 'Верно!\n' + text
         return self.make_response(text, state={
             'question_id': 999,
             'questions': list(questions.only('question_type'))
@@ -189,7 +194,9 @@ class SkipQuestion(Main):
 class RightAnswer(Main):
     def reply(self, request: Request):
         text = 'Верно!'
-        return self.make_response(text, buttons=[
+        return self.make_response(text, state={
+            'give_confirmation': True,
+        }, buttons=[
             button('Дальше', hide=True),
         ])
 
