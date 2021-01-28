@@ -87,8 +87,8 @@ class Welcome(Main):
                'после пожара в царской серверной я мало что помню.. ' \
                'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
 
-        for phrase in Phrase.objects.all():
-            text += phrase.phrase + ' '
+        #for phrase in Phrase.objects.all():
+        #    text += phrase.phrase + ' '
 
         response = self.make_response(text, buttons=[
             button('Давай играть', hide=True)])
@@ -118,32 +118,52 @@ def give_fact():
 
 
 class AskQuestion(Main):
+    def __init__(self, give_clue=False, give_confirmation=False):
+        super(AskQuestion, self).__init__()
+        self.give_clue = give_clue
+        self.give_confirmation = give_confirmation
+        self.wrong_answer = False
+
     def reply(self, request: Request):
-        # If there's question_id in session, going on with same question
-        question_id = in_session(request, 'question_id')
-        if question_id:
+        clue_button = False
+
+        if self.give_clue:
+            question_id = in_session(request, 'question_id')
             question = Question.objects.raw({'_id': question_id}).first()
-        # Else asking random question
+            text = question.clue
+            state = {
+                'question_id': question.id,
+                'clue_given': True,
+            }
+
+        elif self.wrong_answer:
+            question_id = in_session(request, 'question_id')
+            question = Question.objects.raw({'_id': question_id}).first()
+            text = random.choice(list(Phrase.objects.raw({'phrase_type': 2}))).phrase
+            state = {'question_id': question.id}
+
+        # Asking random question
         else:
             questions = Question.objects.all()
             question = random.choice(list(questions))
-        text = question.question
-
-        # Give random confirmation phrase last answer was right
-        if in_session(request, 'give_confirmation'):
-            confirmation = random.choice(list(Phrase.objects.raw({'phrase_type': 1}))).phrase
-            text = confirmation + '\n' + text
+            text = question.question
+            # Give random confirmation phrase if last answer was right
+            if self.give_confirmation:
+                confirmation = random.choice(list(Phrase.objects.raw({'phrase_type': 1}))).phrase
+                text = confirmation + '\n' + text
+            state = {'clue_given': False, 'question_id': question.id}
+            clue_button = True
 
         # Add right answers to buttons
         buttons = []
         for answer in question.possible_answers:
             buttons.append(button(answer.answer, hide=True))
-        buttons += [button('Подсказка', hide=True), button('Пропустить', hide=True)]
+        if clue_button or (not in_session(request, 'clue_given') and not self.give_clue):
+            buttons.append(button('Подсказка', hide=True))
+        buttons.append(button('Пропустить', hide=True))
 
-        return self.make_response(text, state={
-            'question_id': question.id,
-            'give_confirmation': True,
-            }, buttons=buttons)
+        return self.make_response(text, state=state, buttons=buttons)
+
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
@@ -153,62 +173,25 @@ class AskQuestion(Main):
         if request.get('request', {}).get('command', None) in right_answers:
             if give_fact():
                 return GiveFact()
-            return AskQuestion()
+            return AskQuestion(give_confirmation=True)
 
         # Handle local intents (skip question, clue)
         if request.get('request', {}).get('command', None) == 'подсказка':
-            return GiveClue()
+            self.give_clue = True
+            return self
+
         elif request.get('request', {}).get('command', None) == 'пропустить':
-            return SkipQuestion()
-
-        # Assume answer as wrong
-        return WrongAnswer()
-
-
-class GiveClue(Main):
-    def reply(self, request: Request):
-        question_id = in_session(request, 'question_id')
-        question = Question.objects.raw({'_id': question_id}).first()
-        text = question.clue
-
-        # Add right answers to buttons
-        buttons = []
-        for answer in question.possible_answers:
-            buttons.append(button(answer.answer, hide=True))
-        buttons += [button('Пропустить', hide=True)]
-
-        return self.make_response(text, state={
-            'question_id': question_id,
-            'clue_given': True,
-            'give_confirmation': True,
-        }, buttons=buttons)
-
-    def handle_local_intents(self, request: Request):
-        # Check if response contains right answer
-        question_id = in_session(request, 'question_id')
-        question = Question.objects.raw({'_id': question_id}).first()
-        right_answers = [answer.answer for answer in question.right_answers]
-        if request.get('request', {}).get('command', None) in right_answers:
-            if give_fact():
-                return GiveFact()
+            if not in_session(request, 'clue_given'):
+                return SkipQuestion()
             return AskQuestion()
 
-        # Handle local intents (skip question, clue)
-        if request.get('request', {}).get('command', None) == 'пропустить':
-            return SkipQuestion()
-
         # Assume answer as wrong
-        return WrongAnswer()
+        self.wrong_answer = True
+        return self
 
 
 class SkipQuestion(Main):
     def reply(self, request: Request):
-        if request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('clue_given', None):
-            # The clue has already given
-            text = 'Подсказка уже была'
-            return self.make_response(text)
-            # redirect = AskQuestion()
-            # redirect.reply(request)
         text = 'Дать подсказку?'
         return self.make_response(text, state={
             'question_id': in_session(request, 'question_id'),
@@ -219,7 +202,7 @@ class SkipQuestion(Main):
 
     def handle_local_intents(self, request: Request):
         if request.get('request', {}).get('command', None) == 'да':
-            return GiveClue()
+            return AskQuestion(give_clue=True)
         elif request.get('request', {}).get('command', None) == 'нет':
             return AskQuestion()
 
@@ -229,62 +212,13 @@ class GiveFact(Main):
         question_id = in_session(request, 'question_id')
         question = Question.objects.raw({'_id': question_id}).first()
         text = 'Верно!\n' + question.interesting_fact
-        return self.make_response(text, state={
-            'give_confirmation': False,
-        }, buttons=[
+        return self.make_response(text, buttons=[
             button('Дальше', hide=True),
         ])
 
     def handle_local_intents(self, request: Request):
         if request.get('request', {}).get('command', None) == 'дальше':
-            return AskQuestion()
-
-
-class WrongAnswer(Main):
-    def reply(self, request: Request):
-        question_id = in_session(request, 'question_id')
-        question = Question.objects.raw({'_id': question_id}).first()
-        text = random.choice(list(Phrase.objects.raw({'phrase_type': 2}))).phrase
-
-        # Add right answers to buttons
-        buttons = []
-        for answer in question.possible_answers:
-            buttons.append(button(answer.answer, hide=True))
-        buttons += [button('Подсказка', hide=True), button('Пропустить', hide=True)]
-        if in_session(request, 'clue_given'):
-            return self.make_response(text, state={
-                'question_id': question_id,
-            }, buttons=[
-                button('Да', hide=True),
-                button('Нет', hide=True),
-            ])
-        return self.make_response(text, state={
-            'question_id': question_id,
-            'give_confirmation': True,
-        }, buttons=[
-            button('Да', hide=True),
-            button('Нет', hide=True),
-            button('Подскажи', hide=True),
-        ])
-
-    def handle_local_intents(self, request: Request):
-        # Check if response contains right answer
-        question_id = in_session(request, 'question_id')
-        question = Question.objects.raw({'_id': question_id}).first()
-        right_answers = [answer.answer for answer in question.right_answers]
-        if request.get('request', {}).get('command', None) in right_answers:
-            if give_fact():
-                return GiveFact()
-            return AskQuestion()
-
-        # Handle local intents (skip question, clue)
-        if request.get('request', {}).get('command', None) == 'подсказка':
-            return GiveClue()
-        elif request.get('request', {}).get('command', None) == 'пропустить':
-            return SkipQuestion()
-
-        # Assume answer as wrong
-        return WrongAnswer()
+            return AskQuestion(give_confirmation=True)
 
 
 class Goodbye(Main):

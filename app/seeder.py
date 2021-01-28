@@ -34,15 +34,15 @@ def seed_questions():
     Question(
         id=2,
         question_type=2,
-        question='Зачем это всё?',
-        clue='Подсказка..',
+        question='Верно?',
+        clue='Что тут думать?',
         confirmation_answer='Верно!!',
         difficulty=2,
-        right_answers=[Answer('да')],
+        right_answers=[Answer('верно')],
         interesting_fact='Просто интересный факт',
         possible_answers=[
-            Answer('Да'),
-            Answer('Нет'),
+            Answer('верно'),
+            Answer('не верно'),
         ]).save()
 
     Question(
