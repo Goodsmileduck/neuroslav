@@ -38,6 +38,11 @@ class RightAnswer(MongoModel):
 	answer = fields.CharField(max_length=512)
 
 
+class PossibleAnswer(MongoModel):
+	question = fields.ReferenceField(Question)
+	answer = fields.CharField(max_length=512)
+
+
 class Phrase(MongoModel):
 	PHRASE_TYPES = [
 		(1, 'right_answer'),
