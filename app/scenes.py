@@ -141,7 +141,9 @@ class AskQuestion(Main):
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
         question_id = in_session(request, 'question_id')
-        question = Question.objects.raw({'_id': question_id}).first()
+        print(question_id)
+        question = Question.objects.raw({'_id': 1}).first()
+        print(question)
         right_answers = [answer.answer for answer in question.right_answers]
         if request.get('request', {}).get('command', None) in right_answers:
             if give_fact():

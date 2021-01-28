@@ -23,7 +23,7 @@ class Question(MongoModel):
 		(2, 'yes/no'),
 		(3, 'picture'),
 	]
-	id = fields.IntegerField()
+	id = fields.IntegerField(primary_key=True)
 	question_type = fields.IntegerField(choices=QUESTION_TYPES)
 	question = fields.CharField(max_length=2048)
 	picture = fields.CharField(max_length=512)
