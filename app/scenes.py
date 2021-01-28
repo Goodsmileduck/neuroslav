@@ -122,19 +122,28 @@ class AskQuestion(Main):
         # Asking random question
         question = Question.objects.first()
         text = question.question
+
+        # Give random confirmation phrase last answer was right
         if in_session(request, 'give_confirmation'):
-            text = 'Верно!\n' + text
+            confirmation = Phrase.objects(phrase_type=1).order_by('?').first()
+            text = confirmation + '\n' + text
+
+        # Add right answers to buttons
         buttons = []
         for answer in question.possible_answers:
             buttons.append(button(answer.answer, hide=True))
         buttons += [button('Подсказка', hide=True), button('Пропустить', hide=True)]
+
         return self.make_response(text, state={
             'question_id': question.id,
             }, buttons=buttons)
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
-        if request.get('request', {}).get('command', None) == 'ответить правильно':
+        question_id = in_session(request, 'question_id')
+        question = Question.objects.raw({'_id': 1}).first()
+        right_answers = [answer.answer for answer in question.right_answers]
+        if request.get('request', {}).get('command', None) in right_answers:
             if give_fact():
                 return GiveFact()
             return AskQuestion()
@@ -154,7 +163,7 @@ class GiveClue(Main):
     def reply(self, request: Request):
         text = 'Сделал вид, что подсказал'
         return self.make_response(text, state={
-            'question_id': 999,
+            'question_id': in_session(request, 'question_id'),
             'clue_given': True
         }, buttons=[
             button('Ответить правильно', hide=True),
@@ -187,7 +196,9 @@ class SkipQuestion(Main):
             # redirect = AskQuestion()
             # redirect.reply(request)
         text = 'Дать подсказку?'
-        return self.make_response(text, buttons=[
+        return self.make_response(text, state={
+            'question_id': in_session(request, 'question_id'),
+        }, buttons=[
             button('Да', hide=True),
             button('нет', hide=True),
         ])
