@@ -1,5 +1,8 @@
 from models import Phrase, Question, Answer
+from pymongo import MongoClient
+from settings import DB_HOST, DB_PORT, DB_NAME
 
+CLIENT = MongoClient(DB_HOST, DB_PORT)
 
 def seed_phrases():
     Phrase(1, 'Угадал?').save()
@@ -29,6 +32,8 @@ def is_db_empty():
 
 
 def seed_all():
+    #drop db before migration
+    CLIENT.drop_database(DB_NAME)
     if is_db_empty():
         print('db is empty')
         seed_phrases()
