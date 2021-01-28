@@ -8,18 +8,20 @@ def seed_phrases():
 
 
 def seed_questions():
-    Question(question_type=1,
-            question='В каком году основан Новгород?',
-            clue='Очень давно...',
-            confirmation_answer='Правильно!!',
-            difficulty=3,
-            right_answers=[Answer('859')],
-            possible_answers=[
-                Answer('859'),
-                Answer('1859'),
-                Answer('1059'),
-                Answer('857'),
-            ]).save()
+    Question(
+        id=1,
+        question_type=1,
+        question='В каком году основан Новгород?',
+        clue='Очень давно...',
+        confirmation_answer='Правильно!!',
+        difficulty=3,
+        right_answers=[Answer('859')],
+        possible_answers=[
+            Answer('859'),
+            Answer('1859'),
+            Answer('1059'),
+            Answer('857'),
+        ]).save()
 
 
 def is_db_empty():
@@ -28,5 +30,6 @@ def is_db_empty():
 
 def seed_all():
     if is_db_empty():
+        print('db is empty')
         seed_phrases()
         seed_questions()

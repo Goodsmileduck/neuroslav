@@ -124,10 +124,10 @@ class AskQuestion(Main):
         text = question.question
         if in_session(request, 'give_confirmation'):
             text = 'Верно!\n' + text
-        buttons = [button('Подсказка', hide=True),
-                   button('Пропустить', hide=True)]
+        buttons = []
         for answer in question.possible_answers:
             buttons.append(button(answer.answer, hide=True))
+        buttons += [button('Подсказка', hide=True), button('Пропустить', hide=True)]
         return self.make_response(text, state={
             'question_id': question.id,
             }, buttons=buttons)

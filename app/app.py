@@ -4,6 +4,7 @@ from state import STATE_REQUEST_KEY, STATE_RESPONSE_KEY
 from scenes import SCENES, DEFAULT_SCENE
 from request import Request
 import seeder
+import models
 
 app = Flask(__name__)
 

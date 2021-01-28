@@ -23,6 +23,7 @@ class Question(MongoModel):
 		(2, 'yes/no'),
 		(3, 'picture'),
 	]
+	id = fields.IntegerField(primary_key=True)
 	question_type = fields.IntegerField(choices=QUESTION_TYPES)
 	question = fields.CharField(max_length=2048)
 	picture = fields.CharField(max_length=512)
@@ -34,9 +35,15 @@ class Question(MongoModel):
 	right_answers = fields.EmbeddedDocumentListField('Answer')
 	possible_answers = fields.EmbeddedDocumentListField('Answer')
 
+	def __str__(self):
+		return self.question
+
 
 class Answer(MongoModel):
 	answer = fields.CharField(max_length=512)
+
+	def __str__(self):
+		return self.answer
 
 
 class Phrase(MongoModel):
@@ -47,6 +54,9 @@ class Phrase(MongoModel):
 	]
 	phrase_type = fields.IntegerField(choices=PHRASE_TYPES)
 	phrase = fields.CharField(max_length=2048)
+
+	def __str__(self):
+		return self.phrase_type + ' - ' + self.phrase
 
 
 class User(MongoModel):
