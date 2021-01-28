@@ -17,7 +17,7 @@ from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
 from settings import VERSION
 
 from models import Phrase, Question
-import random
+import random, logging, settings
 
 def in_session(request: Request, parameter):
     return request.get('state', {}).get(STATE_REQUEST_KEY, {}).get(parameter, None)
@@ -118,10 +118,11 @@ def give_fact():
 
 
 class AskQuestion(Main):
-    def __init__(self, give_clue=False, give_confirmation=False):
+    def __init__(self, give_clue=False, give_confirmation=False, give_denial=False):
         super(AskQuestion, self).__init__()
         self.give_clue = give_clue
         self.give_confirmation = give_confirmation
+        self.give_denial = give_denial
         self.wrong_answer = False
 
     def reply(self, request: Request):
@@ -137,10 +138,16 @@ class AskQuestion(Main):
             }
 
         elif self.wrong_answer:
+            attempts = in_session(request, 'attempts')
+            if not attempts:
+                attempts = 1
             question_id = in_session(request, 'question_id')
             question = Question.objects.raw({'_id': question_id}).first()
             text = random.choice(list(Phrase.objects.raw({'phrase_type': 2}))).phrase
-            state = {'question_id': question.id}
+            state = {
+                'question_id': question.id,
+                'attempts': attempts+1,
+            }
 
         # Asking random question
         else:
@@ -151,6 +158,9 @@ class AskQuestion(Main):
             if self.give_confirmation:
                 confirmation = random.choice(list(Phrase.objects.raw({'phrase_type': 1}))).phrase
                 text = confirmation + '\n' + text
+            elif self.give_denial:
+                denial = random.choice(list(Phrase.objects.raw({'phrase_type': 2}))).phrase
+                text = denial + '\n' + text
             state = {'clue_given': False, 'question_id': question.id}
             clue_button = True
 
@@ -185,7 +195,13 @@ class AskQuestion(Main):
                 return SkipQuestion()
             return AskQuestion()
 
+        # Handle global intents !!!
+
         # Assume answer as wrong
+        attempts = in_session(request, 'attempts')
+        if attempts and attempts >= settings.MAX_ATTEMPTS:
+            return AskQuestion(give_denial=True)
+        logging.warning(f'ATTEMPTS: {attempts}')
         self.wrong_answer = True
         return self
 
@@ -218,7 +234,7 @@ class GiveFact(Main):
 
     def handle_local_intents(self, request: Request):
         if request.get('request', {}).get('command', None) == 'дальше':
-            return AskQuestion(give_confirmation=True)
+            return AskQuestion(give_confirmation=False)
 
 
 class Goodbye(Main):
