@@ -114,19 +114,17 @@ class StartQuiz(Main):
 class AskQuestion(Main):
     def reply(self, request: Request):
         # Asking random question
-        questions = Question.objects.all()
-        text = 'Да или нет?'
+        question = Question.objects.first()
+        text = question.question
         if in_session(request, 'give_confirmation'):
             text = 'Верно!\n' + text
+        buttons = [button('Подсказка', hide=True),
+                   button('Пропустить', hide=True)]
+        for answer in question.possible_answers:
+            buttons.append(button(answer.answer, hide=True))
         return self.make_response(text, state={
             'question_id': 999,
-            'questions': list(questions.only('question_type'))
-        }, buttons=[
-            button('Ответить правильно', hide=True),
-            button('Ответить неправильно', hide=True),
-            button('Подсказка', hide=True),
-            button('Пропустить', hide=True),
-        ])
+            }, buttons=buttons)
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
