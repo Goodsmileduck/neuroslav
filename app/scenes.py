@@ -119,9 +119,14 @@ def give_fact():
 
 class AskQuestion(Main):
     def reply(self, request: Request):
-        # Asking random question
-        questions = Question.objects.all()
-        question = random.choice(list(questions))
+        # If there's question_id in session, going on with same question
+        question_id = in_session(request, 'question_id')
+        if question_id:
+            question = Question.objects.raw({'_id': question_id}).first()
+        # Else asking random question
+        else:
+            questions = Question.objects.all()
+            question = random.choice(list(questions))
         text = question.question
 
         # Give random confirmation phrase last answer was right
@@ -236,9 +241,13 @@ class GiveFact(Main):
 
 class WrongAnswer(Main):
     def reply(self, request: Request):
+        question_id = in_session(request, 'question_id')
+        question = Question.objects.raw({'_id': question_id}).first()
         text = 'Не угадал, попробуешь ещё раз?'
         if in_session(request, 'clue_given'):
-            return self.make_response(text, buttons=[
+            return self.make_response(text, state={
+                'question_id': question_id,
+            }, buttons=[
                 button('Да', hide=True),
                 button('Нет', hide=True),
             ])

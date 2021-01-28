@@ -70,7 +70,7 @@ def seed_questions():
         confirmation_answer='Именно!',
         difficulty=3,
         right_answers=[
-            Answer('Да'),
+            Answer('нет'),
         ],
         interesting_fact='Батый не дошёл до города 200 км, и хоть Новгород платил дань Орде, но сохранил уникальные памятники древнерусской архитектуры и был единственным из древних русских городов, избежавшим упадка.',
         possible_answers=[
