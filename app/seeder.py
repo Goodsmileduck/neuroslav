@@ -84,7 +84,7 @@ def is_db_empty():
 
 
 def seed_all():
-    #drop db before migration
+    # drop db before migration
     CLIENT.drop_database(DB_NAME)
     if is_db_empty():
         print('db is empty')

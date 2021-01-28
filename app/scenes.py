@@ -226,7 +226,8 @@ class SkipQuestion(Main):
 
 class GiveFact(Main):
     def reply(self, request: Request):
-        question = Question.objects.raw({'_id': 1}).first()
+        question_id = in_session(request, 'question_id')
+        question = Question.objects.raw({'_id': question_id}).first()
         text = 'Верно!\n' + question.interesting_fact
         return self.make_response(text, state={
             'give_confirmation': False,
