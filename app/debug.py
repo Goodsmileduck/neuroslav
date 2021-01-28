@@ -12,3 +12,14 @@ def test():
     for question in questions_:
         print('id:', question.id)
     print('-')
+
+    print('Get RightAnswers by Question id=1')
+    currentQuestion = models.Question.objects.raw({'id': 1}).first()
+    rightAnswers = currentQuestion.right_answers
+    for answer in rightAnswers:
+        print(answer.answer)
+
+    print('Get RightAnswers (short) by Question id=1')
+    rightAnswers_ = models.Question.objects.raw({'id': 1}).first().right_answers
+    for answer in rightAnswers_:
+        print(answer.answer)
