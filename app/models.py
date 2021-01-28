@@ -29,7 +29,9 @@ class Question(MongoModel):
 	picture = fields.CharField(max_length=512)
 	clue = fields.CharField(max_length=2048)
 	confirmation_answer = fields.CharField(max_length=2048)
+	interesting_fact = fields.CharField(max_length=2048)
 	confirmation_picture = fields.CharField(max_length=512)
+
 	DIFFICULTIES = BASE_DIFFICULTIES + [(3, 'mixed')]
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)
 	right_answers = fields.EmbeddedDocumentListField('Answer')

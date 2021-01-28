@@ -141,7 +141,7 @@ class AskQuestion(Main):
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
         question_id = in_session(request, 'question_id')
-        question = Question.objects.raw({'_id': 1}).first()
+        question = Question.objects.raw({'_id': question_id}).first()
         right_answers = [answer.answer for answer in question.right_answers]
         if request.get('request', {}).get('command', None) in right_answers:
             if give_fact():
@@ -155,8 +155,7 @@ class AskQuestion(Main):
             return SkipQuestion()
 
         # Assume answer as wrong
-        if request.get('request', {}).get('command', None) == 'ответить неправильно':
-            return WrongAnswer()
+        return WrongAnswer()
 
 
 class GiveClue(Main):
@@ -212,7 +211,8 @@ class SkipQuestion(Main):
 
 class GiveFact(Main):
     def reply(self, request: Request):
-        text = 'Верно!\nИнтересный факт: ...'
+        question = Question.objects.raw({'_id': 1}).first()
+        text = 'Верно!\n' + question.interesting_fact
         return self.make_response(text, state={
             'give_confirmation': True,
         }, buttons=[

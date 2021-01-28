@@ -19,6 +19,7 @@ def seed_questions():
         confirmation_answer='Правильно!!',
         difficulty=3,
         right_answers=[Answer('859')],
+        interesting_fact='Интересный факт о Новгороде',
         possible_answers=[
             Answer('859'),
             Answer('1859'),
@@ -29,16 +30,15 @@ def seed_questions():
     Question(
         id=2,
         question_type=1,
-        question='___В каком году основан Новгород?',
-        clue='___Очень давно...',
-        confirmation_answer='___Правильно!!',
+        question='Зачем это всё?',
+        clue='Подсказка..',
+        confirmation_answer='Верно!!',
         difficulty=3,
-        right_answers=[Answer('859')],
+        right_answers=[Answer('да')],
+        interesting_fact='Просто интересный факт',
         possible_answers=[
-            Answer('859'),
-            Answer('1859'),
-            Answer('1059'),
-            Answer('857'),
+            Answer('Да'),
+            Answer('Нет'),
         ]).save()
 
 
