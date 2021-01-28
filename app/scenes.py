@@ -153,7 +153,7 @@ class GiveClue(Main):
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
-        if request.get('request', {}).get('command', None) == 'да':
+        if request.get('request', {}).get('command', None) == 'ответить правильно':
             return RightAnswer()
 
         # Handle local intents (skip question, clue)
@@ -161,7 +161,7 @@ class GiveClue(Main):
             return SkipQuestion()
 
         # Assume answer as wrong
-        if request.get('request', {}).get('command', None) == 'нет':
+        if request.get('request', {}).get('command', None) == 'ответить неправильно':
             return WrongAnswer()
 
 
