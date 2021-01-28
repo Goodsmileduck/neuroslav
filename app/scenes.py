@@ -120,12 +120,13 @@ def give_fact():
 class AskQuestion(Main):
     def reply(self, request: Request):
         # Asking random question
-        question = Question.objects.first()
+        questions = Question.objects.all()
+        question = random.choice(list(questions))
         text = question.question
 
         # Give random confirmation phrase last answer was right
         if in_session(request, 'give_confirmation'):
-            confirmation = Phrase.objects(phrase_type=1).order_by('?').first()
+            confirmation = random.choice(list(Phrase.objects.raw({'phrase_type': 1}))).phrase
             text = confirmation + '\n' + text
 
         # Add right answers to buttons
