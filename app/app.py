@@ -15,8 +15,8 @@ logging.basicConfig(level=logging.DEBUG)
 def main():
     # Функция получает тело запроса и возвращает ответ.
     logging.info('Request: %r', request.json)
-
-    response = handler(request.json)
+    request = Request(request.json)
+    response = handler(request)
 
     logging.info('Response: %r', response)
 

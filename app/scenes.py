@@ -51,7 +51,7 @@ class Scene(ABC):
         raise NotImplementedError()
 
     def fallback(self, request: Request):
-        return self.make_response('Извините, я вас не поняла. Пожалуйста, попробуйте переформулировать вопрос.')
+        return self.make_response('Извините, я вас не понимаю. Пожалуйста, попробуйте переформулировать вопрос.')
 
     def make_response(self, text, tts=None, card=None, state=None, buttons=None, directives=None):
         response = {
@@ -97,8 +97,12 @@ class Welcome(Main):
         return response
 
     def handle_local_intents(self, request: Request):
-        if request.get('request', {}).get('command', None) == 'давай играть':
-            return StartQuiz()
+        match_answer = {'давай играть', 'да', 'начнем', 'играем'}
+        user_request = request.get('request', {}).get('command', None)
+        user_intent = request.intents
+        print(user_intent)
+        if user_request in match_answer or user_intent == "YANDEX.CONFIRM":
+            return AskQuestion()
 
 
 class StartQuiz(Main):
