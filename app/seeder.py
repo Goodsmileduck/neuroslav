@@ -7,7 +7,6 @@ CLIENT = MongoClient(DB_HOST, DB_PORT)
 
 
 def load_csv():
-
     with open("questions.csv", "r", encoding="utf-8-sig") as csvfile:
         data = csv.DictReader(csvfile, delimiter=";", quotechar='"')
         for q in data:

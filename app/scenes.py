@@ -39,7 +39,7 @@ def give_random_question(request, user):
     }
     questions = Question.objects.raw(raw_query)
     for item in questions:
-        print(item.user_quetion)
+        print(item.user_question)
     question = random.choice(list(questions))
     return question
 
