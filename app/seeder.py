@@ -24,10 +24,10 @@ def seed_questions():
     Question(
         id=1,
         question_type=1,
-        question='В каком году основан Новгород?',
+        question='В каком году основан Новгород? (Сложный вопрос)',
         clue='Очень давно...',
         confirmation_answer='Правильно!!',
-        difficulty=3,
+        difficulty=2,
         right_answers=[Answer('859')],
         interesting_fact='Интересный факт о Новгороде',
         possible_answers=[
@@ -40,10 +40,10 @@ def seed_questions():
     Question(
         id=2,
         question_type=2,
-        question='Верно?',
+        question='Лёгкий вопрос',
         clue='Что тут думать?',
         confirmation_answer='Верно!!',
-        difficulty=2,
+        difficulty=1,
         right_answers=[Answer('верно')],
         interesting_fact='Просто интересный факт',
         possible_answers=[
@@ -54,7 +54,7 @@ def seed_questions():
     Question(
         id=3,
         question_type=1,
-        question='Как называется главный новгородский храм?',
+        question='Как называется главный новгородский храм? (Смешанный вопрос)',
         clue='Со...',
         confirmation_answer='Именно!',
         difficulty=3,
@@ -75,10 +75,10 @@ def seed_questions():
     Question(
         id=4,
         question_type=2,
-        question='Подвергался ли Новгород монгольскому нашествию?',
+        question='Подвергался ли Новгород монгольскому нашествию? (Лёгкий вопрос)',
         clue='Может быть',
         confirmation_answer='Именно!',
-        difficulty=3,
+        difficulty=1,
         right_answers=[
             Answer('нет'),
         ],
