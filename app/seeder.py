@@ -90,11 +90,12 @@ def seed_questions():
 
 
 def test_seed():
-    user = User(application_id='1230-412').save()
-    question = Question.objects.all().first()
-    user_question = UserQuestion(user=user, question=question, passed=True).save()
-    print(user_question, user_question.user)
-    print(UserQuestion.objects.all().first())
+    pass
+    # user = User(application_id='1230-412').save()
+    # question = Question.objects.all().first()
+    # user_question = UserQuestion(user=user, question=question, passed=True).save()
+    # print(user_question, user_question.user)
+    # print(UserQuestion.objects.all().first())
 
 
 def is_db_empty():
