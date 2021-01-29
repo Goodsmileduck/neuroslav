@@ -38,8 +38,8 @@ def give_random_question(request, user):
         'difficulty': {'$in': [user.difficulty, MIXED_DIFFICULTY]},
     }
     questions = Question.objects.raw(raw_query)
-    for item in questions:
-        print(item.user_question)
+    #for item in questions:
+    #    print(item.user_question)
     question = random.choice(list(questions))
     return question
 
