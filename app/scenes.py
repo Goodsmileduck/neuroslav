@@ -97,7 +97,7 @@ class Welcome(Main):
     def handle_local_intents(self, request: Request):
         match_answer = {'давай играть', 'да', 'начнем', 'играем'}
         user_request = request.get('request', {}).get('command', None)
-        user_intent = request.intents()
+        user_intent = request.intents
         print(user_intent)
         if user_request in match_answer or user_intent == "YANDEX.CONFIRM":
             return AskQuestion()
