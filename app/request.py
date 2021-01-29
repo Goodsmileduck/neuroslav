@@ -10,5 +10,9 @@ class Request:
         return self.request_body['request'].get('nlu', {}).get('intents', {})
 
     @property
+    def state(self):
+        return self.request_body.get('state', None)
+
+    @property
     def type(self):
         return self.request_body.get('request', {}).get('type')

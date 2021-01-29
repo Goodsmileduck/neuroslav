@@ -29,8 +29,8 @@ def main():
 
 def handler(request):
     logging.debug(request)
-    current_scene_id = request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('scene')
-    logging.info('CURRENT SCENE ID:', current_scene_id)
+    current_scene_id = request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('scene', None)
+    logging.info('CURRENT SCENE ID: %r', current_scene_id)
     request_obj = Request(request)
     if current_scene_id is None:
         return DEFAULT_SCENE().reply(request_obj)
