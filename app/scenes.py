@@ -244,7 +244,7 @@ class AskQuestion(Main):
         question = Question.objects.get({'_id': question_id})
         right_answers = [answer.answer for answer in question.right_answers]
         if request['request']['command'] in right_answers:
-            if give_fact_probability():
+            if give_fact_probability() and question.interesting_fact is not None:
                 return GiveFact()
             return AskQuestion(give_confirmation=True)
 
