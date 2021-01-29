@@ -21,7 +21,13 @@ import random, logging, settings
 
 
 def in_session(request: Request, parameter):
-    return request['state'][STATE_REQUEST_KEY][parameter]
+    if request.state:
+        param = request.state.get(STATE_REQUEST_KEY, {}).get(parameter, None)
+        return param
+    else:
+        return None
+
+    
 
 def random_phrase(phrase_type):
     return random.choice(list(Phrase.objects.raw({'phrase_type': phrase_type}))).phrase
@@ -118,19 +124,6 @@ class Welcome(Main):
         user_intent = request.intents
         print(user_intent)
         if user_request in match_answer or user_intent == "YANDEX.CONFIRM":
-            return AskQuestion()
-
-
-class StartQuiz(Main):
-    def reply(self, request: Request):
-        text = 'Мы начинаем викторину!'
-        return self.make_response(text, buttons=[
-            button('Да', hide=True),
-            button('Нет', hide=True),
-        ])
-
-    def handle_local_intents(self, request: Request):
-        if request['request']['command'] == 'да':
             return AskQuestion()
 
 
