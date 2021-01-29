@@ -95,7 +95,10 @@ class Welcome(Main):
         return response
 
     def handle_local_intents(self, request: Request):
-        if request.get('request', {}).get('command', None) == 'давай играть':
+        match_answer = {'давай играть', 'да', 'начнем', 'играем'}
+        user_request = request.get('request', {}).get('command', None)
+        user_intent = request.get('request', {}).get('nlu', {}).get('intent', {})
+        if user_request in answer or user_intent == "YANDEX.CONFIRM":
             return StartQuiz()
 
 
