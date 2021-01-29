@@ -20,7 +20,7 @@ from models import Phrase, Question
 import random, logging, settings
 
 def in_session(request: Request, parameter):
-    return request.get('state', {}).get(STATE_REQUEST_KEY, {}).get(parameter, None)
+    return request['state'][STATE_REQUEST_KEY][parameter]
 
 class Scene(ABC):
 
@@ -77,7 +77,7 @@ class Scene(ABC):
 
 class Main(Scene):
     def handle_global_intents(self, request):
-        if intents.START_QUIZ in request.get('request', {}).get('intents', {}):
+        if intents.START_QUIZ in request.intents:
             return StartQuiz()
 
 
@@ -96,7 +96,7 @@ class Welcome(Main):
 
     def handle_local_intents(self, request: Request):
         match_answer = {'давай играть', 'да', 'начнем', 'играем'}
-        user_request = request.get('request', {}).get('command', None)
+        user_request = request['request']['command']
         user_intent = request.intents
         print(user_intent)
         if user_request in match_answer or user_intent == "YANDEX.CONFIRM":
@@ -112,7 +112,7 @@ class StartQuiz(Main):
         ])
 
     def handle_local_intents(self, request: Request):
-        if request.get('request', {}).get('command', None) == 'да':
+        if request['request']['command'] == 'да':
             return AskQuestion()
 
 
@@ -184,17 +184,17 @@ class AskQuestion(Main):
         question_id = in_session(request, 'question_id')
         question = Question.objects.raw({'_id': question_id}).first()
         right_answers = [answer.answer for answer in question.right_answers]
-        if request.get('request', {}).get('command', None) in right_answers:
+        if request['request']['command'] in right_answers:
             if give_fact():
                 return GiveFact()
             return AskQuestion(give_confirmation=True)
 
         # Handle local intents (skip question, clue)
-        if request.get('request', {}).get('command', None) == 'подсказка':
+        if request['request']['command'] == 'подсказка':
             self.give_clue = True
             return self
 
-        elif request.get('request', {}).get('command', None) == 'пропустить':
+        elif request['request']['command'] == 'пропустить':
             if not in_session(request, 'clue_given'):
                 return SkipQuestion()
             return AskQuestion()
@@ -221,9 +221,9 @@ class SkipQuestion(Main):
         ])
 
     def handle_local_intents(self, request: Request):
-        if request.get('request', {}).get('command', None) == 'да':
+        if request['request']['command'] == 'да':
             return AskQuestion(give_clue=True)
-        elif request.get('request', {}).get('command', None) == 'нет':
+        elif request['request']['command'] == 'нет':
             return AskQuestion()
 
 
@@ -237,7 +237,7 @@ class GiveFact(Main):
         ])
 
     def handle_local_intents(self, request: Request):
-        if request.get('request', {}).get('command', None) == 'дальше':
+        if request['request']['command'] == 'дальше':
             return AskQuestion(give_confirmation=False)
 
 

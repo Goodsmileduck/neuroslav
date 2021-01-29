@@ -15,8 +15,8 @@ logging.basicConfig(level=logging.DEBUG)
 def main():
     # Функция получает тело запроса и возвращает ответ.
     logging.info('Request: %r', request.json)
-    request = Request(request.json)
-    response = handler(request)
+
+    response = handler(request.json)
 
     logging.info('Response: %r', response)
 
@@ -30,17 +30,18 @@ def main():
 def handler(request):
     logging.debug(request)
     current_scene_id = request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('scene')
-    print('CURRENT SCENE ID:', current_scene_id)
+    logging.info('CURRENT SCENE ID:', current_scene_id)
+    request_obj = Request(request)
     if current_scene_id is None:
-        return DEFAULT_SCENE().reply(request)
+        return DEFAULT_SCENE().reply(request_obj)
     current_scene = SCENES.get(current_scene_id, DEFAULT_SCENE)()
-    next_scene = current_scene.move(request)
+    next_scene = current_scene.move(request_obj)
     if next_scene is not None:
         logging.info(f'Moving from scene {current_scene.id()} to {next_scene.id()}')
-        return next_scene.reply(request)
+        return next_scene.reply(request_obj)
     else:
         logging.warning(f'Failed to parse user request at scene {current_scene.id()}')
-        return current_scene.fallback(request)
+        return current_scene.fallback(request_obj)
 
 
 if __name__ == '__main__':
