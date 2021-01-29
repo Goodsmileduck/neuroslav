@@ -257,7 +257,7 @@ class AskQuestion(Main):
         print(right_answers)
         if request['request']['command'] in right_answers:
             UserQuestion(user=user, question=question_id, passed=True).save()
-            if give_fact_probability():
+            if give_fact_probability() and question.interesting_fact is not None:
                 return GiveFact()
             return AskQuestion(give_confirmation=True)
 
