@@ -238,8 +238,9 @@ class AskQuestion(Main):
 
         # Add right answers to buttons
         buttons = []
-        for answer in question.possible_answers:
-            buttons.append(button(answer.answer, hide=True))
+        if user.difficulty == 1:
+            for answer in question.possible_answers:
+                buttons.append(button(answer.answer, hide=True))
         if clue_button or (not in_session(request, 'clue_given') and not self.give_clue):
             buttons.append(button('Подсказка', hide=True))
         buttons.append(button('Пропустить', hide=True))
