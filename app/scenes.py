@@ -33,7 +33,13 @@ def random_phrase(phrase_type):
 
 
 def give_random_question(request, user):
-    questions = Question.objects.all()
+    MIXED_DIFFICULTY = 3
+    raw_query = {
+        'difficulty': {'$in': [user.difficulty, MIXED_DIFFICULTY]},
+    }
+    questions = Question.objects.raw(raw_query)
+    for item in questions:
+        print(item.user_quetion)
     question = random.choice(list(questions))
     return question
 
@@ -41,9 +47,10 @@ def give_random_question(request, user):
 def current_user(request):
     try:
         application_id = request['session'].get('application').get('application_id')
-        user = User.objects.raw({'application_id': application_id}).first()
+        user = User.objects.get({'application_id': application_id})
         return user
-    except:
+    except Exception as ex:
+        print('\nEXCEPTION:', ex)
         return None
 
 
@@ -124,9 +131,6 @@ class Welcome(Main):
         else:
             text = random_phrase(4)
 
-        #for phrase in Phrase.objects.all():
-        #    text += phrase.phrase + ' '
-
         response = self.make_response(text, buttons=[
             button('Давай играть', hide=True)])
         return response
@@ -187,7 +191,7 @@ class AskQuestion(Main):
 
         if self.give_clue:
             question_id = in_session(request, 'question_id')
-            question = Question.objects.raw({'_id': question_id}).first()
+            question = Question.objects.get({'_id': question_id})
             text = question.clue
             state = {
                 'question_id': question.id,
@@ -200,7 +204,7 @@ class AskQuestion(Main):
             if not attempts:
                 attempts = 1
             question_id = in_session(request, 'question_id')
-            question = Question.objects.raw({'_id': question_id}).first()
+            question = Question.objects.get({'_id': question_id})
             text = random_phrase(2)
             state = {
                 'question_id': question.id,
@@ -237,7 +241,7 @@ class AskQuestion(Main):
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
         question_id = in_session(request, 'question_id')
-        question = Question.objects.raw({'_id': question_id}).first()
+        question = Question.objects.get({'_id': question_id})
         right_answers = [answer.answer for answer in question.right_answers]
         if request['request']['command'] in right_answers:
             if give_fact_probability():
@@ -285,7 +289,7 @@ class SkipQuestion(Main):
 class GiveFact(Main):
     def reply(self, request: Request):
         question_id = in_session(request, 'question_id')
-        question = Question.objects.raw({'_id': question_id}).first()
+        question = Question.objects.get({'_id': question_id})
         continue_phrase = random_phrase(5)
         text = 'Верно!\n' + question.interesting_fact + '\n' + continue_phrase
         return self.make_response(text, buttons=[

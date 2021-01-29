@@ -1,4 +1,4 @@
-from models import Phrase, Question, Answer
+from models import Phrase, Question, Answer, User, UserQuestion
 from pymongo import MongoClient
 from settings import DB_HOST, DB_PORT, DB_NAME
 import csv, os
@@ -47,68 +47,14 @@ def seed_phrases():
 
 
 def seed_questions():
-    Question(
-        id=1,
-        question_type=1,
-        question='В каком году основан Новгород?',
-        clue='Очень давно...',
-        difficulty=3,
-        right_answers=[Answer('859')],
-        interesting_fact='Интересный факт о Новгороде',
-        possible_answers=[
-            Answer('859'),
-            Answer('1859'),
-            Answer('1059'),
-            Answer('857'),
-        ]).save()
+    load_csv()
 
-    Question(
-        id=2,
-        question_type=2,
-        question='Верно?',
-        clue='Что тут думать?',
-        difficulty=2,
-        right_answers=[Answer('верно')],
-        interesting_fact='Просто интересный факт',
-        possible_answers=[
-            Answer('верно'),
-            Answer('не верно'),
-        ]).save()
-
-    Question(
-        id=3,
-        question_type=1,
-        question='Как называется главный новгородский храм?',
-        clue='Со...',
-        difficulty=3,
-        right_answers=[
-            Answer('софийский собор'),
-            Answer('собор софии'),
-            Answer('собор святой софии'),
-            Answer('святой софии'),
-        ],
-        interesting_fact='Интересный факт о Соборе Святой Софии',
-        possible_answers=[
-            Answer('Собор Святой Софии'),
-            Answer('Храм Христа Спасителя'),
-            Answer('Церковь Богородицы'),
-            Answer('Новгородский Собор'),
-        ]).save()
-
-    Question(
-        id=4,
-        question_type=2,
-        question='Подвергался ли Новгород монгольскому нашествию?',
-        clue='Может быть',
-        difficulty=3,
-        right_answers=[
-            Answer('нет'),
-        ],
-        interesting_fact='Батый не дошёл до города 200 км, и хоть Новгород платил дань Орде, но сохранил уникальные памятники древнерусской архитектуры и был единственным из древних русских городов, избежавшим упадка.',
-        possible_answers=[
-            Answer('Да'),
-            Answer('Нет'),
-        ]).save()
+def test_seed():
+    user = User(application_id='1230-412').save()
+    question = Question.objects.all().first()
+    user_question = UserQuestion(user=user, question=question, passed=True).save()
+    print(user_question, user_question.user)
+    print(UserQuestion.objects.all().first())
 
 
 def is_db_empty():
@@ -122,3 +68,4 @@ def seed_all():
         print('db is empty')
         seed_phrases()
         seed_questions()
+        test_seed()
