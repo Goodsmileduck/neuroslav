@@ -13,9 +13,9 @@ def load_csv():
             print(q['id'])
             right_answers = []
             possible_answers = []
-            for x in q["right_answers"]:
+            for x in q["right_answers"].split("|"):
                 right_answers.append(Answer(x))
-            for x in q["possible_answers"]:
+            for x in q["possible_answers"].split("|"):
                 possible_answers.append(Answer(x))
             Question(
                 id=q["id"],
