@@ -19,8 +19,10 @@ from settings import VERSION
 from models import Phrase, Question
 import random, logging, settings
 
+
 def in_session(request: Request, parameter):
     return request['state'][STATE_REQUEST_KEY][parameter]
+
 
 class Scene(ABC):
 
