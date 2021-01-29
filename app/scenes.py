@@ -27,10 +27,24 @@ def in_session(request: Request, parameter):
     else:
         return None
 
-    
 
 def random_phrase(phrase_type):
     return random.choice(list(Phrase.objects.raw({'phrase_type': phrase_type}))).phrase
+
+
+def give_random_question(request, user):
+    questions = Question.objects.all()
+    question = random.choice(list(questions))
+    return question
+
+
+def current_user(request):
+    try:
+        application_id = request['session'].get('application').get('application_id')
+        user = User.objects.raw({'application_id': application_id}).first()
+        return user
+    except:
+        return None
 
 
 class Scene(ABC):
@@ -95,12 +109,11 @@ class Main(Scene):
 class Welcome(Main):
     def reply(self, request: Request):
         # User identification
-        application_id = request['session'].get('application').get('application_id')
-        try:
-            user = User.objects.raw({'application_id': application_id}).first()
+        user = current_user(request)
+        if user:
             first_time = False
-        except Exception as ex:
-            user = User(application_id=application_id).save()
+        else:
+            user = User(application_id=request['session'].get('application').get('application_id')).save()
             first_time = True
         print('NEW USER'*first_time, user, user.application_id)
 
@@ -119,8 +132,7 @@ class Welcome(Main):
         return response
 
     def handle_local_intents(self, request: Request):
-        application_id = request['session'].get('application').get('application_id')
-        user = User.objects.raw({'application_id': application_id}).first()
+        user = current_user(request)
 
         match_answer = {'давай играть', 'да', 'начнем', 'играем'}
         user_request = request['request']['command']
@@ -144,8 +156,7 @@ class DifficultyChoice(Main):
         return response
 
     def handle_local_intents(self, request: Request):
-        application_id = request['session'].get('application').get('application_id')
-        user = User.objects.raw({'application_id': application_id}).first()
+        user = current_user(request)
         if request['request']['command'] == 'простой':
             user.difficulty = 1
             user.save()
@@ -171,6 +182,7 @@ class AskQuestion(Main):
 
     def reply(self, request: Request):
         clue_button = False
+        user = current_user(request)
 
         if self.give_clue:
             question_id = in_session(request, 'question_id')
@@ -197,8 +209,7 @@ class AskQuestion(Main):
 
         # Asking random question
         else:
-            questions = Question.objects.all()
-            question = random.choice(list(questions))
+            question = give_random_question(request=request, user=user)
             text = question.question
             # Give random confirmation phrase if last answer was right
             if self.give_confirmation:
