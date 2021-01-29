@@ -167,7 +167,8 @@ class DifficultyChoice(Main):
             return AskQuestion()
 
 
-def give_fact():
+def give_fact_probability():
+    # Returns if Interesting Fact should be given - True/False
     n = random.randint(0, 10)
     return n >= 7
 
@@ -239,7 +240,7 @@ class AskQuestion(Main):
         question = Question.objects.raw({'_id': question_id}).first()
         right_answers = [answer.answer for answer in question.right_answers]
         if request['request']['command'] in right_answers:
-            if give_fact():
+            if give_fact_probability():
                 return GiveFact()
             return AskQuestion(give_confirmation=True)
 
@@ -285,14 +286,18 @@ class GiveFact(Main):
     def reply(self, request: Request):
         question_id = in_session(request, 'question_id')
         question = Question.objects.raw({'_id': question_id}).first()
-        text = 'Верно!\n' + question.interesting_fact
+        continue_phrase = random_phrase(5)
+        text = 'Верно!\n' + question.interesting_fact + '\n' + continue_phrase
         return self.make_response(text, buttons=[
-            button('Дальше', hide=True),
+            button('Да', hide=True),
+            button('Нет', hide=True),
         ])
 
     def handle_local_intents(self, request: Request):
-        if request['request']['command'] == 'дальше':
+        if request['request']['command'] == 'да':
             return AskQuestion(give_confirmation=False)
+        elif request['request']['command'] == 'нет':
+            return Goodbye()
 
 
 class Goodbye(Main):

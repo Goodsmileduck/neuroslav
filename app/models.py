@@ -54,6 +54,7 @@ class Phrase(MongoModel):
 		(2, 'wrong_answer'),
 		(3, 'offer_clue'),
 		(4, 'greeting'),
+		(5, 'continue'),
 	]
 	phrase_type = fields.IntegerField(choices=PHRASE_TYPES)
 	phrase = fields.CharField(max_length=2048)
