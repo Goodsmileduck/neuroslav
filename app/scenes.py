@@ -119,11 +119,40 @@ class Welcome(Main):
         return response
 
     def handle_local_intents(self, request: Request):
+        application_id = request['session'].get('application').get('application_id')
+        user = User.objects.raw({'application_id': application_id}).first()
+
         match_answer = {'давай играть', 'да', 'начнем', 'играем'}
         user_request = request['request']['command']
         user_intent = request.intents
         print(user_intent)
         if user_request in match_answer or user_intent == "YANDEX.CONFIRM":
+            if user.difficulty:
+                return AskQuestion()
+            else:
+                return DifficultyChoice()
+
+
+class DifficultyChoice(Main):
+    def reply(self, request: Request):
+        text = 'Какой уровень сложности ты хочешь?'
+
+        response = self.make_response(text, buttons=[
+            button('Простой', hide=True),
+            button('Сложный', hide=True)]
+        )
+        return response
+
+    def handle_local_intents(self, request: Request):
+        application_id = request['session'].get('application').get('application_id')
+        user = User.objects.raw({'application_id': application_id}).first()
+        if request['request']['command'] == 'простой':
+            user.difficulty = 1
+            user.save()
+            return AskQuestion()
+        elif request['request']['command'] == 'сложный':
+            user.difficulty = 2
+            user.save()
             return AskQuestion()
 
 
