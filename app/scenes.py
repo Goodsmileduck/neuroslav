@@ -16,7 +16,7 @@ from response_helpers import (
 from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
 from settings import VERSION
 
-from models import Phrase, Question, User
+from models import Phrase, Question, User, UserQuestion
 import random, logging, settings
 
 
@@ -34,12 +34,18 @@ def random_phrase(phrase_type):
 
 def give_random_question(request, user):
     MIXED_DIFFICULTY = 3
+    all_user_questions = UserQuestion.objects.raw({'user': user._id})
+    passed_questions_id = []
+    for user_question in all_user_questions:
+        passed_questions_id.append(user_question.question.id)
+    print('PASSED QUESTIONS:', passed_questions_id)
     raw_query = {
         'difficulty': {'$in': [user.difficulty, MIXED_DIFFICULTY]},
+        '_id': {'$nin': passed_questions_id},
     }
     questions = Question.objects.raw(raw_query)
-    #for item in questions:
-    #    print(item.user_question)
+    if not questions or questions.count() == 0:
+        return None
     question = random.choice(list(questions))
     return question
 
@@ -120,7 +126,7 @@ class Welcome(Main):
         if user:
             first_time = False
         else:
-            user = User(application_id=request['session']['application']['application_id']).save()
+            user = User(application_id=request['session'].get('application').get('application_id')).save()
             first_time = True
         print('NEW USER'*first_time, user, user.application_id)
 
@@ -215,6 +221,9 @@ class AskQuestion(Main):
         # Asking random question
         else:
             question = give_random_question(request=request, user=user)
+            if not question:
+                return self.make_response('Вы прошли все вопросы')
+
             text = question.question
             # Give random confirmation phrase if last answer was right
             if self.give_confirmation:
@@ -240,10 +249,12 @@ class AskQuestion(Main):
 
     def handle_local_intents(self, request: Request):
         # Check if response contains right answer
+        user = current_user(request)
         question_id = in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
         right_answers = [answer.answer for answer in question.right_answers]
         if request['request']['command'] in right_answers:
+            UserQuestion(user=user, question=question_id, passed=True).save()
             if give_fact_probability() and question.interesting_fact is not None:
                 return GiveFact()
             return AskQuestion(give_confirmation=True)
