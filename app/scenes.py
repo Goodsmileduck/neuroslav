@@ -252,7 +252,9 @@ class AskQuestion(Main):
         user = current_user(request)
         question_id = in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
+        print(question_id, question)
         right_answers = [answer.answer for answer in question.right_answers]
+        print(right_answers)
         if request['request']['command'] in right_answers:
             UserQuestion(user=user, question=question_id, passed=True).save()
             if give_fact_probability():
