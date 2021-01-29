@@ -135,6 +135,7 @@ class AskQuestion(Main):
                 'question_id': question.id,
                 'clue_given': True,
             }
+            self.give_clue = False
 
         elif self.wrong_answer:
             attempts = in_session(request, 'attempts')
@@ -147,6 +148,7 @@ class AskQuestion(Main):
                 'question_id': question.id,
                 'attempts': attempts+1,
             }
+            self.wrong_answer = False
 
         # Asking random question
         else:
@@ -162,6 +164,7 @@ class AskQuestion(Main):
                 text = denial + '\n' + text
             state = {'clue_given': False, 'question_id': question.id}
             clue_button = True
+            self.give_denial = False
 
         # Add right answers to buttons
         buttons = []
