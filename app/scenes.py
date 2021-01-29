@@ -16,12 +16,15 @@ from response_helpers import (
 from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
 from settings import VERSION
 
-from models import Phrase, Question
+from models import Phrase, Question, User
 import random, logging, settings
 
 
 def in_session(request: Request, parameter):
     return request['state'][STATE_REQUEST_KEY][parameter]
+
+def random_phrase(phrase_type):
+    return random.choice(list(Phrase.objects.raw({'phrase_type': phrase_type}))).phrase
 
 
 class Scene(ABC):
@@ -85,9 +88,22 @@ class Main(Scene):
 
 class Welcome(Main):
     def reply(self, request: Request):
-        text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
-               'после пожара в царской серверной я мало что помню.. ' \
-               'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
+        # User identification
+        application_id = request['session'].get('application').get('application_id')
+        try:
+            user = User.objects.raw({'application_id': application_id}).first()
+            first_time = False
+        except Exception as ex:
+            user = User(application_id=application_id).save()
+            first_time = True
+        print('NEW USER'*first_time, user, user.application_id)
+
+        if first_time:
+            text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
+                   'после пожара в царской серверной я мало что помню.. ' \
+                   'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
+        else:
+            text = random_phrase(4)
 
         #for phrase in Phrase.objects.all():
         #    text += phrase.phrase + ' '
@@ -150,7 +166,7 @@ class AskQuestion(Main):
                 attempts = 1
             question_id = in_session(request, 'question_id')
             question = Question.objects.raw({'_id': question_id}).first()
-            text = random.choice(list(Phrase.objects.raw({'phrase_type': 2}))).phrase
+            text = random_phrase(2)
             state = {
                 'question_id': question.id,
                 'attempts': attempts+1,
@@ -164,10 +180,10 @@ class AskQuestion(Main):
             text = question.question
             # Give random confirmation phrase if last answer was right
             if self.give_confirmation:
-                confirmation = random.choice(list(Phrase.objects.raw({'phrase_type': 1}))).phrase
+                confirmation = random_phrase(1)
                 text = confirmation + '\n' + text
             elif self.give_denial:
-                denial = random.choice(list(Phrase.objects.raw({'phrase_type': 2}))).phrase
+                denial = random_phrase(2)
                 text = denial + '\n' + text
             state = {'clue_given': False, 'question_id': question.id}
             clue_button = True

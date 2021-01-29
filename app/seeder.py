@@ -13,6 +13,9 @@ def seed_phrases():
     Phrase(2, 'Не верно.').save()
     Phrase(2, 'Реакция нейронов не обнаружена.').save()
 
+    Phrase(4, 'Привет! Рад видеть тебя снова. Сыграем?').save()
+    Phrase(4, 'Здравствуй! Давно не виделись. Начнём игру?').save()
+
 
 def seed_questions():
     Question(

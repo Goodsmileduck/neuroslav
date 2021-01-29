@@ -52,7 +52,8 @@ class Phrase(MongoModel):
 	PHRASE_TYPES = [
 		(1, 'right_answer'),
 		(2, 'wrong_answer'),
-		(3, 'offer_clue')
+		(3, 'offer_clue'),
+		(4, 'greeting'),
 	]
 	phrase_type = fields.IntegerField(choices=PHRASE_TYPES)
 	phrase = fields.CharField(max_length=2048)
@@ -63,13 +64,13 @@ class Phrase(MongoModel):
 
 class User(MongoModel):
 	DIFFICULTIES = BASE_DIFFICULTIES
-	identity = fields.CharField(max_length=128)
+	application_id = fields.CharField(max_length=128)
 	state = fields.CharField(max_length=128)
-	last_question = fields.EmbeddedDocumentField(Question)
+	last_question = fields.ReferenceField(Question)
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)
 
 	def points(self):
-		points = self.user_question_set.raw({'passed': True}).count()  # ???
+		points = UserQuestion.objects.raw({'user': self, 'passed': True}).count()
 		return points
 
 	def level(self):
