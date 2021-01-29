@@ -15,8 +15,7 @@ def load_csv():
             possible_answers = []
             for x in q["right_answers"].split("|"):
                 if x is not None and x is not '':
-                    x = x.lower()
-                    right_answers.append(Answer(x))
+                    right_answers.append(Answer(x.lower()))
             for x in q["possible_answers"].split("|"):
                 if x is not None and x is not '':
                     possible_answers.append(Answer(x))
