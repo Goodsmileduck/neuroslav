@@ -113,7 +113,7 @@ class Welcome(Main):
         if user:
             first_time = False
         else:
-            user = User(application_id=request['session'].get('application').get('application_id')).save()
+            user = User(application_id=request['session']['application']['application_id']).save()
             first_time = True
         print('NEW USER'*first_time, user, user.application_id)
 

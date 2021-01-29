@@ -27,15 +27,14 @@ class Question(MongoModel):
 	question_type = fields.IntegerField(choices=QUESTION_TYPES)
 	question = fields.CharField(max_length=2048)
 	picture = fields.CharField(max_length=512)
-	clue = fields.CharField(max_length=2048)
-	confirmation_answer = fields.CharField(max_length=2048)
-	interesting_fact = fields.CharField(max_length=2048)
+	clue = fields.CharField(max_length=2048, blank=True)
+	interesting_fact = fields.CharField(max_length=2048, blank=True)
 	confirmation_picture = fields.CharField(max_length=512)
 
 	DIFFICULTIES = BASE_DIFFICULTIES + [(3, 'mixed')]
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)
 	right_answers = fields.EmbeddedDocumentListField('Answer')
-	possible_answers = fields.EmbeddedDocumentListField('Answer')
+	possible_answers = fields.EmbeddedDocumentListField('Answer', blank=True)
 
 	def __str__(self):
 		return self.question

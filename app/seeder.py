@@ -1,17 +1,43 @@
 from models import Phrase, Question, Answer
 from pymongo import MongoClient
 from settings import DB_HOST, DB_PORT, DB_NAME
+import csv, os
 
 CLIENT = MongoClient(DB_HOST, DB_PORT)
+
+
+def load_csv():
+
+    with open("questions.csv", "r", encoding="utf-8-sig") as csvfile:
+        data = csv.DictReader(csvfile, delimiter=";", quotechar='"')
+        for q in data:
+            print(q['id'])
+            right_answers = []
+            possible_answers = []
+            for x in q["right_answers"]:
+                right_answers.append(Answer(x))
+            for x in q["possible_answers"]:
+                possible_answers.append(Answer(x))
+            Question(
+                id=q["id"],
+                question_type=q["question_type"],
+                question=q["question"],
+                clue=q["clue"],
+                difficulty=q["difficulty"],
+                right_answers=right_answers,
+                interesting_fact=None,
+                possible_answers=possible_answers).save()
+
 
 def seed_phrases():
     Phrase(1, 'Угадал!').save()
     Phrase(1, 'Именно так.').save()
     Phrase(1, 'Определённо.').save()
+    Phrase(1, 'Тысяча нейронов! Это правильно.').save()
 
-    Phrase(2, 'Не угадал.').save()
-    Phrase(2, 'Не верно.').save()
-    Phrase(2, 'Реакция нейронов не обнаружена.').save()
+    Phrase(2, 'Не думаю что это верно.').save()
+    Phrase(2, 'Не верно. Я не помню такого.').save()
+    Phrase(2, 'Ответная реакция нейронов не обнаружена.').save()
 
     Phrase(4, 'Привет! Рад видеть тебя снова. Сыграем?').save()
     Phrase(4, 'Здравствуй! Давно не виделись. Начнём игру?').save()
@@ -26,7 +52,6 @@ def seed_questions():
         question_type=1,
         question='В каком году основан Новгород?',
         clue='Очень давно...',
-        confirmation_answer='Правильно!!',
         difficulty=3,
         right_answers=[Answer('859')],
         interesting_fact='Интересный факт о Новгороде',
@@ -42,7 +67,6 @@ def seed_questions():
         question_type=2,
         question='Верно?',
         clue='Что тут думать?',
-        confirmation_answer='Верно!!',
         difficulty=2,
         right_answers=[Answer('верно')],
         interesting_fact='Просто интересный факт',
@@ -56,7 +80,6 @@ def seed_questions():
         question_type=1,
         question='Как называется главный новгородский храм?',
         clue='Со...',
-        confirmation_answer='Именно!',
         difficulty=3,
         right_answers=[
             Answer('софийский собор'),
@@ -77,7 +100,6 @@ def seed_questions():
         question_type=2,
         question='Подвергался ли Новгород монгольскому нашествию?',
         clue='Может быть',
-        confirmation_answer='Именно!',
         difficulty=3,
         right_answers=[
             Answer('нет'),
