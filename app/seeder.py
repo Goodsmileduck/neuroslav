@@ -1,4 +1,4 @@
-from models import Phrase, Question, Answer
+from models import Phrase, Question, Answer, User, UserQuestion
 from pymongo import MongoClient
 from settings import DB_HOST, DB_PORT, DB_NAME
 
@@ -89,6 +89,14 @@ def seed_questions():
         ]).save()
 
 
+def test_seed():
+    user = User(application_id='1230-412').save()
+    question = Question.objects.all().first()
+    user_question = UserQuestion(user=user, question=question, passed=True).save()
+    print(user_question, user_question.user)
+    print(UserQuestion.objects.all().first())
+
+
 def is_db_empty():
     return Phrase.objects.all().count() == 0
 
@@ -100,3 +108,4 @@ def seed_all():
         print('db is empty')
         seed_phrases()
         seed_questions()
+        test_seed()
