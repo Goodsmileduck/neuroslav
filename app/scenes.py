@@ -190,6 +190,8 @@ class Main(Scene):
             return GetHelp()
         elif intents.YANDEX_WHAT_CAN_YOU_DO in request.intents:
             return WhatCanYouDo()
+        elif intents.EXIT in request.intents:
+            return Goodbye()
         else:
             return None
 
