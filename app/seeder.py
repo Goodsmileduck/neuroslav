@@ -46,6 +46,9 @@ def seed_phrases():
     Phrase(5, 'Продолжим?').save()
     Phrase(5, 'Идём дальше?').save()
 
+    Phrase(6, 'Попробуем другой вопрос.').save()
+    Phrase(6, 'Перейдём к следующему вопросу.').save()
+
 
 def seed_questions():
     load_csv()

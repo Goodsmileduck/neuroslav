@@ -197,15 +197,18 @@ class AskQuestion(Main):
         user = current_user(request)
 
         if self.give_clue:
+            attempts = in_session(request, 'attempts')
             question_id = in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
             text = question.clue
             state = {
                 'question_id': question.id,
                 'clue_given': True,
+                'attempts': attempts + 1,
             }
             self.give_clue = False
 
+        # Wrong answer, giving one more attempt
         elif self.wrong_answer:
             attempts = in_session(request, 'attempts')
             if not attempts:
@@ -230,9 +233,11 @@ class AskQuestion(Main):
             if self.give_confirmation:
                 confirmation = random_phrase(1)
                 text = confirmation + '\n' + text
+            # Give random denial phrase if last answer was wrong
             elif self.give_denial:
                 denial = random_phrase(2)
-                text = denial + '\n' + text
+                try_next_question = random_phrase(6)
+                text = denial + '\n' + try_next_question + '\n' + text
             state = {'clue_given': False, 'question_id': question.id}
             clue_button = True
             self.give_denial = False
