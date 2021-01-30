@@ -14,10 +14,10 @@ def load_csv():
             right_answers = []
             possible_answers = []
             for x in q["right_answers"].split("|"):
-                if x is not None and x is not '':
+                if x is not None and x != '':
                     right_answers.append(Answer(x.lower()))
             for x in q["possible_answers"].split("|"):
-                if x is not None and x is not '':
+                if x is not None and x != '':
                     possible_answers.append(Answer(x))
             Question(
                 id=q["id"],
