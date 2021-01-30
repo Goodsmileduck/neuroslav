@@ -67,18 +67,18 @@ class UserMeaning:
     def __init__(self, request):
         self.request = request
         self.user_request = self.request['request'].get('command', None)
-        self.user_intent = self.request.intents
+        self.user_intents = self.request.intents
 
     def is_answer_in_match_answers(self, match_answers):
         return self.user_request in match_answers
 
     def confirm(self):
-        match_answers = ['давай играть', 'начнем', 'играем']
-        return self.is_answer_in_match_answers(match_answers)
+        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'давай']
+        return intents.YANDEX_CONFIRM in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def deny(self):
         match_answers = ['нет', 'не хочу', 'не надо']
-        return self.is_answer_in_match_answers(match_answers)
+        return intents.YANDEX_REJECT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def dont_know(self):
         match_answers = ['не знаю', 'без понятия']
@@ -86,23 +86,27 @@ class UserMeaning:
 
     def lets_play(self):
         match_answers = ['давай играть', 'начнем', 'играем']
-        return self.is_answer_in_match_answers(match_answers)
+        return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def easy(self):
-        match_answers = ['простой']
+        match_answers = ['легкий', 'давай легкий', 'хочу легкий']
         return self.is_answer_in_match_answers(match_answers)
 
     def hard(self):
-        match_answers = ['сложный']
+        match_answers = ['трудный', 'давай трудный', 'хочу трудный']
         return self.is_answer_in_match_answers(match_answers)
 
     def give_clue(self):
         match_answers = ['подскажи', 'дай подсказку', 'подсказка', 'подскажи пожалуйста', ]
-        return self.is_answer_in_match_answers(match_answers)
+        return intents.HINT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def skip_question(self):
         match_answers = ['пропустить', 'пропусти вопрос', 'пропусти', 'следующий вопрос']
         return self.is_answer_in_match_answers(match_answers)
+
+    def repeat(self):
+        match_answers = ['повтори', 'повтори пожалуйста', 'ещё раз']
+        return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
 
 def answer_is_right(request, question):
@@ -196,10 +200,11 @@ class Welcome(Main):
         user = current_user(request)
         if user:
             first_time = False
+            logging.info(f'User come back. application_id: {user.application_id}')
         else:
             user = User(application_id=request['session'].get('application').get('application_id')).save()
             first_time = True
-        logging.info(f'User: {user}, First time: {first_time}, app_id: {user.application_id}')
+            logging.info(f'New user. application_id: {user.application_id}')
 
         sound_file_name = None
         if first_time:
@@ -230,11 +235,11 @@ class Welcome(Main):
 
 class DifficultyChoice(Main):
     def reply(self, request: Request):
-        text = 'Есть простой и сложный уровеь сложности. Какой ты хочешь?'
+        text = 'Есть легкий и трудный уровни сложности. Какой ты выберешь?'
 
         response = self.make_response(text, buttons=[
-            button('Простой', hide=True),
-            button('Сложный', hide=True)]
+            button('Легкий', hide=True),
+            button('Трудный', hide=True)]
         )
         return response
 
@@ -295,6 +300,7 @@ class AskQuestion(Main):
             state = {
                 'question_id': question.id,
                 'attempts': attempts+1,
+                'clue_given': in_session(request, 'clue_given'),
             }
             self.wrong_answer = False
 
@@ -350,7 +356,7 @@ class AskQuestion(Main):
             return AskQuestion(give_confirmation=True)
 
         # Handle local intents (skip question, clue)
-        if user_meant.give_clue():
+        elif user_meant.give_clue():
             self.give_clue = True
             return self
 
@@ -433,7 +439,7 @@ class GiveFact(Main):
 class GetHelp(Main):
     def reply(self, request: Request):
         text = 'Чтобы помочь мне восстановить данные для моих нейронов, ' \
-        'Тебе нужно отвечать на мои вопросы. Есть два режима сложности - простой и сложный. '\
+        'Тебе нужно отвечать на мои вопросы. Есть два режима сложности - легкий и трудный. '\
         'Я также могу поискать подсказку в фраментах памяти или '\
         'ты можешь пропустить вопрос если не знаешь ответа.'
 
