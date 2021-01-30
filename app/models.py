@@ -85,11 +85,9 @@ class User(MongoModel):
 		return None
 
 	def gained_new_level(self):
-		# Returns a pair: (BOOL: if user's just gained new level, STR: level of user)
-		if self.points() in LEVELS.keys():
-			return True, self.level()
-		else:
-			return False, self.level()
+		# Returns a tuple: (BOOL: if user's just gained new level, STR: level of user, INT: points)
+		points = self.points()
+		return points in LEVELS.keys(), self.level(), points
 
 
 class UserQuestion(MongoModel):
