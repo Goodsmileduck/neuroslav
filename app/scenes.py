@@ -89,7 +89,7 @@ class UserMeaning:
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def easy(self):
-        match_answers = ['легкий', 'давай легкий', 'хочу легкий']
+        match_answers = ['легкий', 'давай легкий', 'хочу легкий', 'простой', 'давай простой', 'хочу простой']
         return self.is_answer_in_match_answers(match_answers)
 
     def hard(self):
