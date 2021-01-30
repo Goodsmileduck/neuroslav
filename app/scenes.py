@@ -13,11 +13,12 @@ from response_helpers import (
     has_location,
     image_gallery,
 )
-from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
-from settings import VERSION
+from .state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
+from .settings import VERSION
 
-from models import Phrase, Question, User, UserQuestion
-import random, logging, settings
+from .models import Phrase, Question, User, UserQuestion, LEVELS
+import random
+import logging, settings
 
 
 def in_session(request: Request, parameter):
