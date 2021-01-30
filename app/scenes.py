@@ -143,10 +143,11 @@ class Welcome(Main):
         user = current_user(request)
         if user:
             first_time = False
+            logging.info(f'User come back. application_id: {user.application_id}')
         else:
             user = User(application_id=request['session'].get('application').get('application_id')).save()
             first_time = True
-        logging.info(f'User: {user}, First time: {first_time}, app_id: {user.application_id}')
+            logging.info(f'New user. application_id: {user.application_id}')
 
         if first_time:
             text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
@@ -175,7 +176,7 @@ class Welcome(Main):
 
 class DifficultyChoice(Main):
     def reply(self, request: Request):
-        text = 'Есть простой и сложный уровеь сложности. Какой ты хочешь?'
+        text = 'Есть простой и сложный уровень сложности. Какой ты хочешь?'
 
         response = self.make_response(text, buttons=[
             button('Простой', hide=True),
