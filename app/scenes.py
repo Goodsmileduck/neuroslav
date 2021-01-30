@@ -284,6 +284,7 @@ class AskQuestion(Main):
             state = {
                 'question_id': question.id,
                 'attempts': attempts+1,
+                'clue_given': in_session(request, 'clue_given'),
             }
             self.wrong_answer = False
 
@@ -339,7 +340,7 @@ class AskQuestion(Main):
             return AskQuestion(give_confirmation=True)
 
         # Handle local intents (skip question, clue)
-        if user_meant.give_clue():
+        elif user_meant.give_clue():
             self.give_clue = True
             return self
 
