@@ -76,7 +76,7 @@ class UserMeaning:
 
     def deny(self):
         match_answers = ['нет', 'не хочу', 'не надо']
-        return intents.YANDEX_REGECT in self.user_intents or self.is_answer_in_match_answers(match_answers)
+        return intents.YANDEX_REJECT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def dont_know(self):
         match_answers = ['не знаю', 'без понятия']
