@@ -215,6 +215,8 @@ class Welcome(Main):
         else:
             text = random_phrase(4)
 
+        text += ' Версия: ' + VERSION
+
         response = self.make_response(
             text,
             buttons=[button('Давай играть', hide=True)],
