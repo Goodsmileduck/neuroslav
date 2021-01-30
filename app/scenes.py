@@ -209,13 +209,15 @@ class AskQuestion(Main):
 
         if self.give_clue:
             attempts = in_session(request, 'attempts')
+            if not attempts:
+                attempts = 1
             question_id = in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
             text = question.clue
             state = {
                 'question_id': question.id,
                 'clue_given': True,
-                'attempts': attempts + 1,
+                'attempts': attempts,
             }
             self.give_clue = False
 
