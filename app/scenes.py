@@ -20,6 +20,8 @@ from models import Phrase, Question, User, UserQuestion, LEVELS
 import random
 import logging, settings
 
+from sounds import SoundFiles
+
 
 def in_session(request: Request, parameter):
     if request.state:
@@ -143,7 +145,16 @@ class Scene(ABC):
     def fallback(self, request: Request):
         return self.make_response('Извините, я вас не понимаю. Пожалуйста, попробуйте переформулировать вопрос.')
 
-    def make_response(self, text, tts=None, card=None, state=None, buttons=None, directives=None):
+    def make_audio_tts(self, audio_file_name, text = '', tts=None):
+        if tts is None:
+            tts = text
+        sound_tag = f'<speaker audio=\\"{audio_file_name}\\"> '
+        return tts + sound_tag
+
+    def make_response(self, text, tts=None, card=None, state=None, buttons=None, directives=None, audio_file_name = None):
+        if audio_file_name is not None:
+            tts = self.make_audio_tts(audio_file_name, text, tts)
+
         response = {
             'text': text,
             'tts': tts if tts is not None else text,
@@ -190,15 +201,20 @@ class Welcome(Main):
             first_time = True
         logging.info(f'User: {user}, First time: {first_time}, app_id: {user.application_id}')
 
+        sound_file_name = None
         if first_time:
             text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
                    'после пожара в царской серверной я мало что помню.. ' \
                    'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
+            sound_file_name = SoundFiles.WELCOME
         else:
             text = random_phrase(4)
 
-        response = self.make_response(text, buttons=[
-            button('Давай играть', hide=True)])
+        response = self.make_response(
+            text,
+            buttons=[button('Давай играть', hide=True)],
+            audio_file_name=sound_file_name
+        )
         return response
 
     def handle_local_intents(self, request: Request):
