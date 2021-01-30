@@ -8,7 +8,9 @@ import debug
 
 app = Flask(__name__)
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    format=u'[%(asctime)s] %(levelname)-8s  %(message)s',
+    level=logging.DEBUG)
 
 
 @app.route("/", methods=['POST'])
@@ -28,7 +30,6 @@ def main():
 
 
 def handler(request):
-    logging.debug(request)
     current_scene_id = request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('scene', None)
     logging.info('CURRENT SCENE ID: %r', current_scene_id)
     request_obj = Request(request)

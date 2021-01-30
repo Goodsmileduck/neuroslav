@@ -128,6 +128,10 @@ class Main(Scene):
     def handle_global_intents(self, request):
         if intents.START_QUIZ in request.intents:
             return StartQuiz()
+        if intents.HELP in request.intents:
+            return GetHelp()
+        if intents.WHAT_CAN_YOU_DO in request.intents:
+            return WhatCanYouDo()
 
 
 class Welcome(Main):
@@ -139,7 +143,7 @@ class Welcome(Main):
         else:
             user = User(application_id=request['session'].get('application').get('application_id')).save()
             first_time = True
-        print('NEW USER'*first_time, user, user.application_id)
+        logging.info(f'User: {user}, First time: {first_time}, app_id: {user.application_id}')
 
         if first_time:
             text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
@@ -155,11 +159,11 @@ class Welcome(Main):
     def handle_local_intents(self, request: Request):
         user = current_user(request)
 
-        match_answer = {'давай играть', 'да', 'начнем', 'играем'}
+        match_answer = {'давай играть', 'да', 'начнем', 'играем', 'начинаем', 'давай начнем'}
         user_request = request['request']['command']
         user_intent = request.intents
-        print(user_intent)
-        if user_request in match_answer or user_intent == "YANDEX.CONFIRM":
+        logging.info('User intent: ' + user_intent)
+        if user_request in match_answer or user_intent == intents.YANDEX_CONFIRM:
             if user.difficulty:
                 return AskQuestion()
             else:
@@ -168,7 +172,7 @@ class Welcome(Main):
 
 class DifficultyChoice(Main):
     def reply(self, request: Request):
-        text = 'Какой уровень сложности ты хочешь?'
+        text = 'Есть простой и сложный уровеь сложности. Какой ты хочешь?'
 
         response = self.make_response(text, buttons=[
             button('Простой', hide=True),
@@ -359,6 +363,68 @@ class GiveFact(Main):
             return AskQuestion(give_confirmation=False)
         elif request['request']['command'] == 'нет':
             return Goodbye()
+
+
+class GetHelp(Main):
+    def reply(self, request: Request):
+        text = 'Чтобы помочь мне восстановить данные для моих нейронов,' \
+        'Тебе нужно отвечать на мои вопросы. Есть два режима сложности - простой и сложный. '\
+        'Я также могу поискать подсказку в фраментах памяти или '\
+        'или ты можешь пропустить вопрос если не знаешь ответа.'
+
+        if state is not None:
+            attempts = in_session(request, 'attempts')
+            question_id = in_session(request, 'question_id')
+            clue_given = in_session(request, 'clue_given')
+            state = {
+                'question_id': question.id,
+                'clue_given': clue_given,
+                'attempts': attempts,
+            }
+            end_text = 'Продолжаем?'
+
+            return self.make_response(text+end_text, buttons=[
+            button('Да', hide=True)])
+        else:
+            end_text = 'Хочешь попробовать?'
+            return self.make_response(text+end_text, buttons=[
+            button('Да', hide=True)])
+
+    def handle_local_intents(self, request: Request):
+        user = current_user(request)
+
+        match_answer = {'давай играть', 'да', 'начнем', 'играем', 'начинаем', 'давай начнем'}
+        user_request = request['request']['command']
+        user_intent = request.intents
+        logging.info('User intent: ' + user_intent)
+        if user_request in match_answer or user_intent == intents.YANDEX_CONFIRM:
+            if user.difficulty:
+                return AskQuestion()
+            else:
+                return DifficultyChoice()
+
+
+
+class WhatCanYouDo(Main):
+    def reply(self, request: Request):
+        text = 'Я нейросеть-гид по Великому Новгороду. ' \
+        'Моя база данных повреждена и мне нужна помощь в восставновлении давнных. '\
+        'Готов ли ты помочь мне?'
+        return self.make_response(text, buttons=[
+            button('Я готов', hide=True)])
+    
+    def handle_local_intents(self, request: Request):
+        user = current_user(request)
+
+        match_answer = {'давай играть', 'да', 'начнем', 'играем', 'начинаем', 'давай начнем'}
+        user_request = request['request']['command']
+        user_intent = request.intents
+        logging.info('User intent: ' + user_intent)
+        if user_request in match_answer or user_intent == intents.YANDEX_CONFIRM:
+            if user.difficulty:
+                return AskQuestion()
+            else:
+                return DifficultyChoice()
 
 
 class Goodbye(Main):

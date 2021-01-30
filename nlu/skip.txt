@@ -2,8 +2,9 @@ root:
     $Skip $Question?
 
 $Skip:
+    $lemma
     пропусти
-    пропускаем
 
 $Question:
+    %lemma
     вопрос

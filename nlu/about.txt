@@ -2,9 +2,11 @@ root:
     $About $You
 
 $About:
+    %lemma
     расскажи о
     расскажи про
 
 $You:
+    %lemma
     себе
     тебя

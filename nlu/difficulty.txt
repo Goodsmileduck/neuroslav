@@ -2,10 +2,12 @@ root:
     $Change $Diff
 
 $Change:
+    %lemma
     поменяй
     измени
     измените
     другая
 
 $Diff:
+    %lemma
     сложность

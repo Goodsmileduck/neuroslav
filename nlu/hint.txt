@@ -2,9 +2,8 @@ root:
     $Give $Who? $Hint?
 
 $Give:
+    %lemma
     дай
-    дай
-    дашь
     подскажи 
 
 $Who:
