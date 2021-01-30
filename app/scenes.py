@@ -65,18 +65,18 @@ class UserMeaning:
     def __init__(self, request):
         self.request = request
         self.user_request = self.request['request'].get('command', None)
-        self.user_intent = self.request.intents
+        self.user_intents = self.request.intents
 
     def is_answer_in_match_answers(self, match_answers):
         return self.user_request in match_answers
 
     def confirm(self):
-        match_answers = ['давай играть', 'начнем', 'играем']
-        return self.is_answer_in_match_answers(match_answers)
+        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'давай']
+        return intents.YANDEX_CONFIRM in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def deny(self):
         match_answers = ['нет', 'не хочу', 'не надо']
-        return self.is_answer_in_match_answers(match_answers)
+        return intents.YANDEX_REGECT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def dont_know(self):
         match_answers = ['не знаю', 'без понятия']
@@ -84,10 +84,10 @@ class UserMeaning:
 
     def lets_play(self):
         match_answers = ['давай играть', 'начнем', 'играем']
-        return self.is_answer_in_match_answers(match_answers)
+        return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def easy(self):
-        match_answers = ['простой']
+        match_answers = ['простой', 'элементарный']
         return self.is_answer_in_match_answers(match_answers)
 
     def hard(self):
@@ -96,11 +96,15 @@ class UserMeaning:
 
     def give_clue(self):
         match_answers = ['подскажи', 'дай подсказку', 'подсказка', 'подскажи пожалуйста', ]
-        return self.is_answer_in_match_answers(match_answers)
+        return intents.HINT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def skip_question(self):
         match_answers = ['пропустить', 'пропусти вопрос', 'пропусти', 'следующий вопрос']
         return self.is_answer_in_match_answers(match_answers)
+
+    def repeat(self):
+        match_answers = ['повтори', 'повтори пожалуйста', 'ещё раз']
+        return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
 
 def answer_is_right(request, question):
