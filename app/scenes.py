@@ -186,7 +186,7 @@ class Main(Scene):
     def handle_global_intents(self, request):
         if intents.START_QUIZ in request.intents:
             return StartQuiz()
-        elif intents.YANDEX_HELP in request.intents:
+        elif intents.YANDEX_HELP in request.intents and request['request']['command'] not in ['подсказка', 'подсказку', 'давай подсказку', 'дай мне подсказку' , 'дай подсказку', 'хочу подсказку']:
             return GetHelp()
         elif intents.YANDEX_WHAT_CAN_YOU_DO in request.intents:
             return WhatCanYouDo()
