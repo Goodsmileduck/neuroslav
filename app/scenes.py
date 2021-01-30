@@ -61,6 +61,48 @@ def current_user(request):
         return None
 
 
+class UserMeaning:
+    def __init__(self, request):
+        self.request = request
+        self.user_request = self.request['request'].get('command', None)
+        self.user_intent = self.request.intents
+
+    def is_answer_in_match_answers(self, match_answers):
+        return self.user_request in match_answers
+
+    def confirm(self):
+        match_answers = ['давай играть', 'начнем', 'играем']
+        return self.is_answer_in_match_answers(match_answers)
+
+    def deny(self):
+        match_answers = ['нет', 'не хочу', 'не надо']
+        return self.is_answer_in_match_answers(match_answers)
+
+    def dont_know(self):
+        match_answers = ['не знаю', 'без понятия']
+        return self.is_answer_in_match_answers(match_answers)
+
+    def lets_play(self):
+        match_answers = ['давай играть', 'начнем', 'играем']
+        return self.is_answer_in_match_answers(match_answers)
+
+    def easy(self):
+        match_answers = ['простой']
+        return self.is_answer_in_match_answers(match_answers)
+
+    def hard(self):
+        match_answers = ['сложный']
+        return self.is_answer_in_match_answers(match_answers)
+
+    def give_clue(self):
+        match_answers = ['подскажи', 'дай подсказку', 'подсказка', 'подскажи пожалуйста', ]
+        return self.is_answer_in_match_answers(match_answers)
+
+    def skip_question(self):
+        match_answers = ['пропустить', 'пропусти вопрос', 'пропусти', 'следующий вопрос']
+        return self.is_answer_in_match_answers(match_answers)
+
+
 def answer_is_right(request, question):
     try:
         right_answers = [answer.answer for answer in question.right_answers]
@@ -162,13 +204,10 @@ class Welcome(Main):
 
     def handle_local_intents(self, request: Request):
         user = current_user(request)
+        user_meant = UserMeaning(request)
 
-        match_answer = {'давай играть', 'да', 'начнем', 'играем', 'начинаем', 'давай начнем'}
-        user_request = request['request']['command']
-        user_intent = request.intents
-        logging.info(f'User intent: {user_intent}')
-        if user_request in match_answer or user_intent == intents.YANDEX_CONFIRM:
-            if user.difficulty:
+        if user_meant.lets_play() or user_meant.confirm():
+            if user.difficulty is not None:
                 return AskQuestion()
             else:
                 return DifficultyChoice()
@@ -186,11 +225,12 @@ class DifficultyChoice(Main):
 
     def handle_local_intents(self, request: Request):
         user = current_user(request)
-        if request['request']['command'] == 'простой':
+        user_meant = UserMeaning(request)
+        if user_meant.easy():
             user.difficulty = 1
             user.save()
             return AskQuestion()
-        elif request['request']['command'] == 'сложный':
+        elif user_meant.hard():
             user.difficulty = 2
             user.save()
             return AskQuestion()
@@ -253,7 +293,8 @@ class AskQuestion(Main):
             # Give random confirmation phrase if last answer was right
             if self.give_confirmation:
                 confirmation = random_phrase(1)
-                text = confirmation + '\n' + text
+                next_question = random_phrase(6)
+                text = confirmation + '\n' + next_question + '\n' + text
             # Give random denial phrase if last answer was wrong
             elif self.give_denial:
                 denial = random_phrase(2)
@@ -277,6 +318,7 @@ class AskQuestion(Main):
 
     def handle_local_intents(self, request: Request):
         user = current_user(request)
+        user_meant = UserMeaning(request)
         question_id = in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
         print(question_id, question)
@@ -293,11 +335,11 @@ class AskQuestion(Main):
             return AskQuestion(give_confirmation=True)
 
         # Handle local intents (skip question, clue)
-        if request['request']['command'] == 'подсказка':
+        if user_meant.give_clue():
             self.give_clue = True
             return self
 
-        elif request['request']['command'] == 'пропустить':
+        elif user_meant.skip_question() or user_meant.dont_know():
             if not in_session(request, 'clue_given'):
                 return SkipQuestion()
             return AskQuestion()
@@ -343,9 +385,10 @@ class SkipQuestion(Main):
         ])
 
     def handle_local_intents(self, request: Request):
-        if request['request']['command'] == 'да':
+        user_meant = UserMeaning(request)
+        if user_meant.confirm() or user_meant.skip_question():
             return AskQuestion(give_clue=True)
-        elif request['request']['command'] == 'нет':
+        elif user_meant.deny():
             return AskQuestion()
 
 
@@ -362,12 +405,13 @@ class GiveFact(Main):
 
     def handle_local_intents(self, request: Request):
         user = current_user(request)
-        if request['request']['command'] == 'да':
+        user_meant = UserMeaning(request)
+        if user_meant.confirm():
             gained_level, level = user.gained_new_level()
             if gained_level:
                 LevelCongratulation(level=level)
             return AskQuestion(give_confirmation=False)
-        elif request['request']['command'] == 'нет':
+        elif user_meant.deny():
             return Goodbye()
 
 
