@@ -383,10 +383,14 @@ class LevelCongratulation(Main):
 
     def reply(self, request: Request):
         text = random_phrase(7) % self.level
-        return self.make_response(text, buttons=[
-            button('Да', hide=True),
-            button('нет', hide=True),
-        ])
+        return self.make_response(
+            text,
+            buttons=[
+                button('Да', hide=True),
+                button('нет', hide=True),
+            ],
+            audio_file_name=SoundFiles.GREETING
+        )
 
     def handle_local_intents(self, request: Request):
         if request['request']['command'] in ['да', 'продолжим', 'давай']:
