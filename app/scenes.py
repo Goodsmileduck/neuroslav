@@ -85,7 +85,7 @@ class UserMeaning:
         return self.is_answer_in_match_answers(match_answers)
 
     def lets_play(self):
-        match_answers = ['давай играть', 'начнем', 'играем']
+        match_answers = ['давай играть', 'начнем', 'играем', 'хорошо', 'поехали', 'могу']
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def easy(self):
@@ -97,7 +97,7 @@ class UserMeaning:
         return self.is_answer_in_match_answers(match_answers)
 
     def give_clue(self):
-        match_answers = ['подскажи', 'дай подсказку', 'подсказка', 'подскажи пожалуйста', ]
+        match_answers = ['подскажи', 'дай подсказку', 'подсказка', 'подскажи пожалуйста', 'помоги']
         return intents.HINT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def skip_question(self):
