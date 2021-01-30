@@ -87,11 +87,11 @@ class UserMeaning:
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def easy(self):
-        match_answers = ['простой', 'элементарный']
+        match_answers = ['легкий', 'давай легкий', 'хочу легкий']
         return self.is_answer_in_match_answers(match_answers)
 
     def hard(self):
-        match_answers = ['сложный']
+        match_answers = ['трудный', 'давай трудный', 'хочу трудный']
         return self.is_answer_in_match_answers(match_answers)
 
     def give_clue(self):
@@ -219,11 +219,11 @@ class Welcome(Main):
 
 class DifficultyChoice(Main):
     def reply(self, request: Request):
-        text = 'Есть простой и сложный уровень сложности. Какой ты хочешь?'
+        text = 'Есть легкий и трудный уровни сложности. Какой ты выберешь?'
 
         response = self.make_response(text, buttons=[
-            button('Простой', hide=True),
-            button('Сложный', hide=True)]
+            button('Легкий', hide=True),
+            button('Трудный', hide=True)]
         )
         return response
 
@@ -423,7 +423,7 @@ class GiveFact(Main):
 class GetHelp(Main):
     def reply(self, request: Request):
         text = 'Чтобы помочь мне восстановить данные для моих нейронов, ' \
-        'Тебе нужно отвечать на мои вопросы. Есть два режима сложности - простой и сложный. '\
+        'Тебе нужно отвечать на мои вопросы. Есть два режима сложности - легкий и трудный. '\
         'Я также могу поискать подсказку в фраментах памяти или '\
         'ты можешь пропустить вопрос если не знаешь ответа.'
 
