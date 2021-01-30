@@ -232,6 +232,8 @@ class Welcome(Main):
             else:
                 return DifficultyChoice()
 
+        return Goodbye()
+
 
 class DifficultyChoice(Main):
     def reply(self, request: Request):
@@ -336,7 +338,6 @@ class AskQuestion(Main):
 
         return self.make_response(text, state=state, buttons=buttons)
 
-
     def handle_local_intents(self, request: Request):
         user = current_user(request)
         user_meant = UserMeaning(request)
@@ -349,10 +350,10 @@ class AskQuestion(Main):
             UserQuestion(user=user, question=question_id, passed=True).save()
             if question.interesting_fact is not None and give_fact_probability():
                 return GiveFact()
-            gained_level, level = user.gained_new_level()
+            gained_level, level, points = user.gained_new_level()
             print('GAINED_NEW_LEVEL:', gained_level, level)
             if gained_level:
-                return LevelCongratulation(level=level)
+                return LevelCongratulation(level=level, points=points)
             return AskQuestion(give_confirmation=True)
 
         # Handle local intents (skip question, clue)
@@ -377,12 +378,13 @@ class AskQuestion(Main):
 
 
 class LevelCongratulation(Main):
-    def __init__(self, level=LEVELS[0]):
+    def __init__(self, level=LEVELS[0], points=0):
         super(LevelCongratulation, self).__init__()
         self.level = level
+        self.points = points
 
     def reply(self, request: Request):
-        text = random_phrase(7) % self.level
+        text = random_phrase(7) % (self.level, self.points)
         return self.make_response(
             text,
             buttons=[
