@@ -232,6 +232,8 @@ class Welcome(Main):
             else:
                 return DifficultyChoice()
 
+        return Goodbye()
+
 
 class DifficultyChoice(Main):
     def reply(self, request: Request):
