@@ -162,7 +162,7 @@ class Welcome(Main):
         match_answer = {'давай играть', 'да', 'начнем', 'играем', 'начинаем', 'давай начнем'}
         user_request = request['request']['command']
         user_intent = request.intents
-        logging.info('User intent: ' + user_intent)
+        logging.info(f'User intent: {user_intent}')
         if user_request in match_answer or user_intent == intents.YANDEX_CONFIRM:
             if user.difficulty:
                 return AskQuestion()
@@ -398,7 +398,7 @@ class GetHelp(Main):
         match_answer = {'давай играть', 'да', 'начнем', 'играем', 'начинаем', 'давай начнем'}
         user_request = request['request']['command']
         user_intent = request.intents
-        logging.info('User intent: ' + user_intent)
+        logging.info(f'User intent: {user_intent}')
         if user_request in match_answer or user_intent == intents.YANDEX_CONFIRM:
             if user.difficulty:
                 return AskQuestion()
