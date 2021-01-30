@@ -153,7 +153,7 @@ class Scene(ABC):
         if tts is None:
             tts = text
         sound_tag = f'<speaker audio=\\"{audio_file_name}\\"> '
-        return tts + sound_tag
+        return sound_tag + tts
 
     def make_response(self, text, tts=None, card=None, state=None, buttons=None, directives=None, audio_file_name = None):
         if audio_file_name is not None:
