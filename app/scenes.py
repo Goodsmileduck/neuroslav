@@ -84,10 +84,11 @@ class Scene(ABC):
 
     """Проверка перехода к новой сцене"""
     def move(self, request: Request):
-        next_scene = self.handle_local_intents(request)
+        next_scene = self.handle_global_intents(request)
         if next_scene is None:
-            next_scene = self.handle_global_intents(request)
+            next_scene = self.handle_local_intents(request)
         return next_scene
+
 
     @abstractmethod
     def handle_global_intents(self, request):
@@ -128,10 +129,12 @@ class Main(Scene):
     def handle_global_intents(self, request):
         if intents.START_QUIZ in request.intents:
             return StartQuiz()
-        if intents.HELP in request.intents:
+        elif intents.YANDEX_HELP in request.intents:
             return GetHelp()
-        if intents.WHAT_CAN_YOU_DO in request.intents:
+        elif intents.YANDEX_WHAT_CAN_YOU_DO in request.intents:
             return WhatCanYouDo()
+        else:
+            return None
 
 
 class Welcome(Main):
@@ -369,23 +372,23 @@ class GiveFact(Main):
 
 class GetHelp(Main):
     def reply(self, request: Request):
-        text = 'Чтобы помочь мне восстановить данные для моих нейронов,' \
+        text = 'Чтобы помочь мне восстановить данные для моих нейронов, ' \
         'Тебе нужно отвечать на мои вопросы. Есть два режима сложности - простой и сложный. '\
         'Я также могу поискать подсказку в фраментах памяти или '\
-        'или ты можешь пропустить вопрос если не знаешь ответа.'
+        'ты можешь пропустить вопрос если не знаешь ответа.'
 
-        if state is not None:
+        if request.state is not None:
             attempts = in_session(request, 'attempts')
             question_id = in_session(request, 'question_id')
             clue_given = in_session(request, 'clue_given')
             state = {
-                'question_id': question.id,
+                'question_id': question_id,
                 'clue_given': clue_given,
                 'attempts': attempts,
             }
             end_text = 'Продолжаем?'
 
-            return self.make_response(text+end_text, buttons=[
+            return self.make_response(text+end_text, state=state, buttons=[
             button('Да', hide=True)])
         else:
             end_text = 'Хочешь попробовать?'
