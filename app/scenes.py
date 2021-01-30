@@ -384,7 +384,7 @@ class LevelCongratulation(Main):
         self.points = points
 
     def reply(self, request: Request):
-        text = random_phrase(7) % (self.level, self.points)
+        text = random_phrase(7) % (self.points, self.level)
         return self.make_response(
             text,
             buttons=[
