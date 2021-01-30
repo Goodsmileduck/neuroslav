@@ -89,16 +89,16 @@ class UserMeaning:
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def easy(self):
-        match_answers = ['легкий', 'давай легкий', 'хочу легкий', 'простой', 'давай простой', 'хочу простой']
+        match_answers = ['легкий', 'давай легкий', 'выбираю легкий', 'хочу легкий', 'простой', 'давай простой', 'хочу простой']
         return self.is_answer_in_match_answers(match_answers)
 
     def hard(self):
-        match_answers = ['трудный', 'давай трудный', 'хочу трудный']
+        match_answers = ['трудный', 'давай трудный', 'хочу трудный', 'выбираю трудный']
         return self.is_answer_in_match_answers(match_answers)
 
     def give_clue(self):
         match_answers = ['подскажи', 'дай подсказку', 'подсказка', 'подскажи пожалуйста', 'помоги']
-        return intents.HINT in self.user_intents or self.is_answer_in_match_answers(match_answers)
+        return intents.CLUE in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def skip_question(self):
         match_answers = ['пропустить', 'пропусти вопрос', 'пропусти', 'следующий вопрос']
@@ -184,9 +184,10 @@ class Scene(ABC):
 
 class Main(Scene):
     def handle_global_intents(self, request):
+        user_meant = UserMeaning(request)
         if intents.START_QUIZ in request.intents:
             return StartQuiz()
-        elif intents.YANDEX_HELP in request.intents and request['request']['command'] not in ['подсказка', 'подсказку', 'давай подсказку', 'дай мне подсказку' , 'дай подсказку', 'хочу подсказку']:
+        elif intents.YANDEX_HELP in request.intents and not user_meant.give_clue():
             return GetHelp()
         elif intents.YANDEX_WHAT_CAN_YOU_DO in request.intents:
             return WhatCanYouDo()

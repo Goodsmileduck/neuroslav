@@ -1,5 +1,5 @@
 START_QUIZ = 'start_quiz'
-HINT = 'hint'
+CLUE = 'clue'
 EXIT = 'exit'
 ABOUT = 'about'
 DIFFICULTY = 'difficulty'
