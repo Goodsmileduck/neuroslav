@@ -216,7 +216,7 @@ class Welcome(Main):
         else:
             text = random_phrase(4)
 
-        text += ' Версия: ' + VERSION
+        #text += ' Версия: ' + VERSION
 
         response = self.make_response(
             text,
