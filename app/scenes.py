@@ -61,6 +61,16 @@ def current_user(request):
         return None
 
 
+def answer_is_right(request, question):
+    try:
+        right_answers = [answer.answer for answer in question.right_answers]
+        # print(right_answers)
+        return request['request']['command'] in right_answers
+    except Exception as ex:
+        print('ERROR looking of right answer.\nEXCEPTION:', ex)
+        return None
+
+
 class Scene(ABC):
 
     @classmethod
@@ -180,8 +190,9 @@ class DifficultyChoice(Main):
 
 def give_fact_probability():
     # Returns if Interesting Fact should be given - True/False
-    n = random.randint(0, 10)
-    return n >= 7
+    # n = random.randint(0, 10)
+    # return n >= 7
+    return True
 
 
 class AskQuestion(Main):
@@ -255,17 +266,20 @@ class AskQuestion(Main):
 
 
     def handle_local_intents(self, request: Request):
-        # Check if response contains right answer
         user = current_user(request)
         question_id = in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
         print(question_id, question)
-        right_answers = [answer.answer for answer in question.right_answers]
-        print(right_answers)
-        if request['request']['command'] in right_answers:
+
+        # Check if response contains right answer
+        if answer_is_right(request, question):
             UserQuestion(user=user, question=question_id, passed=True).save()
-            if give_fact_probability() and question.interesting_fact is not None:
+            if question.interesting_fact is not None and give_fact_probability():
                 return GiveFact()
+            gained_level, level = user.gained_new_level()
+            print('GAINED_NEW_LEVEL:', gained_level, level)
+            if gained_level:
+                return LevelCongratulation(level=level)
             return AskQuestion(give_confirmation=True)
 
         # Handle local intents (skip question, clue)
@@ -287,6 +301,25 @@ class AskQuestion(Main):
         logging.warning(f'ATTEMPTS: {attempts}')
         self.wrong_answer = True
         return self
+
+
+class LevelCongratulation(Main):
+    def __init__(self, level=LEVELS[0]):
+        super(LevelCongratulation, self).__init__()
+        self.level = level
+
+    def reply(self, request: Request):
+        text = random_phrase(7) % self.level
+        return self.make_response(text, buttons=[
+            button('Да', hide=True),
+            button('нет', hide=True),
+        ])
+
+    def handle_local_intents(self, request: Request):
+        if request['request']['command'] in ['да', 'продолжим', 'давай']:
+            return AskQuestion()
+        elif request['request']['command'] == 'нет':
+            return Goodbye()
 
 
 class SkipQuestion(Main):
@@ -318,7 +351,11 @@ class GiveFact(Main):
         ])
 
     def handle_local_intents(self, request: Request):
+        user = current_user(request)
         if request['request']['command'] == 'да':
+            gained_level, level = user.gained_new_level()
+            if gained_level:
+                LevelCongratulation(level=level)
             return AskQuestion(give_confirmation=False)
         elif request['request']['command'] == 'нет':
             return Goodbye()

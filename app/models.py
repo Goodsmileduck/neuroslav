@@ -10,6 +10,7 @@ BASE_DIFFICULTIES = [
 	]
 
 LEVELS = {
+	0: 'Новичок',
 	5: 'Купец',
 	10: 'Дворянин',
 	15: 'Вельможа',
@@ -55,6 +56,7 @@ class Phrase(MongoModel):
 		(4, 'greeting_ask'),
 		(5, 'continue_ask'),
 		(6, 'try_another_question'),
+		(7, 'new_level_congratulation'),
 	]
 	phrase_type = fields.IntegerField(choices=PHRASE_TYPES)
 	phrase = fields.CharField(max_length=2048)
@@ -71,15 +73,22 @@ class User(MongoModel):
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)
 
 	def points(self):
-		points = UserQuestion.objects.raw({'user': self, 'passed': True}).count()
+		points = UserQuestion.objects.raw({'user': self._id, 'passed': True}).count()
 		return points
 
 	def level(self):
-		points = self.points
+		points = self.points()
 		for i in list(LEVELS.keys())[::-1]:
 			if points >= i:
 				return LEVELS[i]
 		return None
+
+	def gained_new_level(self):
+		# Returns a pair: (BOOL: if user's just gained new level, STR: level of user)
+		if self.points() in LEVELS.keys():
+			return True, self.level()
+		else:
+			return False, self.level()
 
 
 class UserQuestion(MongoModel):
