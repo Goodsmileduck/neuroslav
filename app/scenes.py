@@ -228,7 +228,7 @@ class AskQuestion(Main):
                 attempts = 1
             question_id = in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
-            text = random_phrase(2)
+            text = random_phrase(2) + '\n' + random_phrase(8)
             state = {
                 'question_id': question.id,
                 'attempts': attempts+1,
