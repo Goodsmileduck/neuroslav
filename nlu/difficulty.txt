@@ -16,6 +16,7 @@ $Change:
 $Diff:
     %lemma
     сложность
+    уровень сложности
 
 $Type:
     %lemma
