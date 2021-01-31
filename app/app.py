@@ -47,7 +47,7 @@ def handler(request):
 
 if __name__ == '__main__':
     seeder.seed_all()
-    debug.test()
+    #debug.test()
     app.run(host='0.0.0.0')
 
 
