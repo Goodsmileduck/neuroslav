@@ -42,7 +42,7 @@ def give_random_question(request, user):
     passed_questions_id = []
     for user_question in all_user_questions:
         passed_questions_id.append(user_question.question.id)
-    print('PASSED QUESTIONS:', passed_questions_id)
+    logging.info(f"{request['session']['session_id']}: PASSED QUESTIONS - {passed_questions_id}")
     raw_query = {
         'difficulty': {'$in': [user.difficulty, MIXED_DIFFICULTY]},
         '_id': {'$nin': passed_questions_id},
@@ -59,8 +59,8 @@ def current_user(request):
         application_id = request['session'].get('application').get('application_id')
         user = User.objects.get({'application_id': application_id})
         return user
-    except Exception as ex:
-        print('\nEXCEPTION:', ex)
+    except Exception as e:
+        logging.error(f"{request['session']['session_id']}: EXCEPTION: {e}")
         return None
 
 
@@ -76,6 +76,10 @@ class UserMeaning:
     def confirm(self):
         match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо']
         return intents.YANDEX_CONFIRM in self.user_intents or self.is_answer_in_match_answers(match_answers)
+
+    def do_continue(self):
+        match_answers = ['давай продолжим', 'продолжим', 'продолжаем', 'хочу продолжить', 'давай продолжать']
+        return self.is_answer_in_match_answers(match_answers)
 
     def deny(self):
         match_answers = ['нет', 'не хочу', 'не надо', 'не думаю', 'наверное нет', 'конечно нет']
@@ -115,8 +119,8 @@ def answer_is_right(request, question):
         right_answers = [answer.answer for answer in question.right_answers]
         # print(right_answers)
         return request['request']['command'] in right_answers
-    except Exception as ex:
-        print('ERROR looking of right answer.\nEXCEPTION:', ex)
+    except Exception as e:
+        logging.error(f"{request['session']['session_id']}: ERROR looking of right answer. EXCEPTION:{e}" )
         return None
 
 
@@ -203,11 +207,11 @@ class Welcome(Main):
         user = current_user(request)
         if user:
             first_time = False
-            logging.info(f'User come back. application_id: {user.application_id}')
+            logging.info(f"User come back. application_id: {user.application_id} sessions: {request['session']['session_id']}")
         else:
             user = User(application_id=request['session'].get('application').get('application_id')).save()
             first_time = True
-            logging.info(f'New user. application_id: {user.application_id}')
+            logging.info(f"New user. application_id: {user.application_id} session: {request['session']['session_id']}")
 
         sound_file_name = None
         gained_new_level, level, points = user.gained_new_level()
@@ -271,12 +275,13 @@ def give_fact_probability():
 
 
 class AskQuestion(Main):
-    def __init__(self, give_clue=False, give_confirmation=False, give_denial=False):
+    def __init__(self, give_clue=False, give_confirmation=False, give_denial=False, repeat=False):
         super(AskQuestion, self).__init__()
         self.give_clue = give_clue
         self.give_confirmation = give_confirmation
         self.give_denial = give_denial
         self.wrong_answer = False
+        self.repeat = repeat
 
     def reply(self, request: Request):
         clue_button = False
@@ -310,7 +315,16 @@ class AskQuestion(Main):
                 'clue_given': in_session(request, 'clue_given'),
             }
             self.wrong_answer = False
-
+        # Asked for repeat question
+        elif self.repeat:
+            question_id = in_session(request, 'question_id')
+            question = Question.objects.get({'_id': question_id})
+            text = question.question
+            state = {
+                'question_id': question.id,
+                'attempts': in_session(request, 'attempts'),
+                'clue_given': in_session(request, 'clue_given'),
+            }
         # Asking random question
         else:
             question = give_random_question(request=request, user=user)
@@ -348,7 +362,7 @@ class AskQuestion(Main):
         user_meant = UserMeaning(request)
         question_id = in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
-        print(question_id, question)
+        logging.info(f"{request['session']['session_id']}: Question #{question_id} - {question}")
 
         # Check if response contains right answer
         if answer_is_right(request, question):
@@ -356,7 +370,7 @@ class AskQuestion(Main):
             if question.interesting_fact is not None and question.interesting_fact != '' and give_fact_probability():
                 return GiveFact()
             gained_level, level, points = user.gained_new_level()
-            print('GAINED_NEW_LEVEL:', gained_level, level)
+            logging.info(f"{request['session']['session_id']}: GAINED_NEW_LEVEL - {gained_level} {level}")
             if gained_level:
                 return LevelCongratulation(level=level, points=points)
             return AskQuestion(give_confirmation=True)
@@ -371,13 +385,15 @@ class AskQuestion(Main):
                 return SkipQuestion()
             return AskQuestion()
 
+        elif user_meant.repeat():
+            return AskQuestion(repeat=True)
         # Handle global intents !!!
 
         # Assume answer as wrong
         attempts = in_session(request, 'attempts')
         if attempts and attempts >= settings.MAX_ATTEMPTS:
             return AskQuestion(give_denial=True)
-        logging.warning(f'ATTEMPTS: {attempts}')
+        logging.warning(f"{request['session']['session_id']}: ATTEMPTS - {attempts}")
         self.wrong_answer = True
         return self
 
@@ -400,9 +416,10 @@ class LevelCongratulation(Main):
         )
 
     def handle_local_intents(self, request: Request):
-        if request['request']['command'] in ['да', 'продолжим', 'давай']:
+        user_meant = UserMeaning(request)
+        if user_meant.confirm() or user_meant.do_continue():
             return AskQuestion()
-        elif request['request']['command'] == 'нет':
+        else:
             return Goodbye()
 
 
@@ -444,7 +461,7 @@ class GiveFact(Main):
     def handle_local_intents(self, request: Request):
         user = current_user(request)
         user_meant = UserMeaning(request)
-        if user_meant.confirm():
+        if user_meant.confirm() or user_meant.do_continue():
             gained_level, level, points = user.gained_new_level()
             if gained_level:
                 LevelCongratulation(level=level, points=points)
@@ -480,7 +497,7 @@ class GetHelp(Main):
         user = current_user(request)
         user_meant = UserMeaning(request)
         user_intent = request.intents
-        logging.info(f'User intent: {user_intent}')
+        logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
         if user_meant.lets_play() or user_meant.confirm():
             if user.difficulty:
                 return AskQuestion()
@@ -500,7 +517,7 @@ class WhatCanYouDo(Main):
         user = current_user(request)
         user_meant = UserMeaning(request)
         user_intent = request.intents
-        logging.info('User intent: ' + user_intent)
+        logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
         if user_meant.lets_play() or user_meant.confirm():
             if user.difficulty:
                 return AskQuestion()

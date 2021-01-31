@@ -32,47 +32,61 @@ def load_csv():
 
 
 def seed_phrases():
-    Phrase(PhraseType.YOU_ARE_RIGHT.value, 'Угадал!').save()
-    Phrase(PhraseType.YOU_ARE_RIGHT.value, 'Именно так. Мои нейроны восстанавливаются!').save()
-    Phrase(PhraseType.YOU_ARE_RIGHT.value, 'Определённо верный ответ!').save()
-    Phrase(PhraseType.YOU_ARE_RIGHT.value, 'Тысяча нейронов. Это правильно!').save()
-    Phrase(PhraseType.YOU_ARE_RIGHT.value, 'Дефрагментировано! Спасибо за верный ответ!').save()
-    Phrase(PhraseType.YOU_ARE_RIGHT.value, 'Прекрасный ответ! Так и запишу!').save()
-    Phrase(PhraseType.YOU_ARE_RIGHT.value, 'Отлично! Моя база данных наполняется!').save()
+    Phrase(1, 'Угадал!').save()
+    Phrase(1, 'Именно так. Мои нейроны восстанавливаются!').save()
+    Phrase(1, 'Определённо верный ответ!').save()
+    Phrase(1, 'Тысяча нейронов. Это правильно!').save()
+    Phrase(1, 'Дефрагментировано! Спасибо за верный ответ!').save()
+    Phrase(1, 'Прекрасный ответ! Так и запишу!').save()
+    Phrase(1, 'Отлично! Моя база данных наполняется!').save()
+    Phrase(1, 'Верно, новая нейронная связь создана!').save()
+    Phrase(1, 'Святые транзисторы, это верно.').save()
 
-    Phrase(PhraseType.YOU_ARE_WRONG.value, 'Не думаю что это верно.').save()
-    Phrase(PhraseType.YOU_ARE_WRONG.value, 'Не верно. Я не помню такого.').save()
-    Phrase(PhraseType.YOU_ARE_WRONG.value, 'Ответная реакция нейронов не обнаружена. Это неверно.').save()
-    Phrase(PhraseType.YOU_ARE_WRONG.value, 'Не припомню такого.').save()
-    Phrase(PhraseType.YOU_ARE_WRONG.value, 'Память сильно фрагментирована, но это неверный ответ.').save()
-    Phrase(PhraseType.YOU_ARE_WRONG.value, 'Не верно. Плохо обученная нейросеть не будет полезной. Нужно обязательно найти ответ.').save()
+    Phrase(2, 'Не думаю что это верно.').save()
+    Phrase(2, 'Не верно. Я не помню такого.').save()
+    Phrase(2, 'Ответная реакция нейронов не обнаружена. Это неверно.').save()
+    Phrase(2, 'Не припомню такого.').save()
+    Phrase(2, 'Моя память сильно фрагментирована, но это неверный ответ.').save()
+    Phrase(2, 'Не верно. Плохо обученная нейросеть не будет полезной. Нужно обязательно найти ответ.').save()
+    Phrase(2, 'Вероятность этого предельно мала, ответ неверен.').save()
+    Phrase(2, 'Линейное преобразование невозножно, нужен другой ответ.').save()
+    Phrase(2, 'Отсутсвует взаимодействие с другими векторами, значит ответ неверный.').save()
+    Phrase(2, 'Хороший вариант, но не подходит.').save()
 
     # two %s are necessary! %points and %level :
-    Phrase(PhraseType.GREETING.value, 'Привет! Рад видеть тебя снова.\nТы правильно ответил на %s вопросов и достиг уровня %s!\nСыграем ещё?').save()
-    Phrase(PhraseType.GREETING.value, 'Здравствуй! Давно не виделись.\nУ тебя уже %s правильных ответа, твой уровень - %s!\nНачнём игру?').save()
-    Phrase(PhraseType.GREETING.value, 'Сколько зим! Давно не виделись.\nТы правильно ответил на %s вопросов и достиг уровня %s!\nИграем?').save()
-    Phrase(PhraseType.GREETING.value, 'Рад что снова тут.\nУ тебя уже %s правильных ответа, твой уровень - %s!\nИграем?').save()
+    Phrase(4, 'Привет! Рад видеть тебя снова.\nТы правильно ответил на %s вопросов и достиг уровня %s!\nСыграем ещё?').save()
+    Phrase(4, 'Здравствуй! Давно не виделись.\nУ тебя уже %s правильных ответа, твой уровень - %s!\nНачнём игру?').save()
+    Phrase(4, 'Сколько зим! Давно не виделись.\nТы правильно ответил на %s вопросов и достиг уровня %s!\nИграем?').save()
+    Phrase(4, 'Рад что снова тут.\nУ тебя уже %s правильных ответа, твой уровень - %s!\nИграем?').save()
 
-    Phrase(PhraseType.CONTINUE_ASK.value, 'Продолжим?').save()
-    Phrase(PhraseType.CONTINUE_ASK.value, 'Идём дальше?').save()
-    Phrase(PhraseType.CONTINUE_ASK.value, 'Продолжаем?').save()
+    Phrase(5, 'Продолжим?').save()
+    Phrase(5, 'Идём дальше?').save()
+    Phrase(5, 'Продолжаем?').save()
+    Phrase(5, 'Хочешь продолжить?').save()
+    Phrase(5, 'Теперь продолжим?').save()
 
-    Phrase(PhraseType.OFFER_CLUE.value, 'Дать подсказку?').save()
-    Phrase(PhraseType.OFFER_CLUE.value, 'Хочешь подсказку?').save()
-
-    Phrase(PhraseType.NEXT_QUESTION.value, 'Следующий вопрос.').save()
-    Phrase(PhraseType.NEXT_QUESTION.value, 'Перейдём к следующему вопросу.').save()
-    Phrase(PhraseType.NEXT_QUESTION.value, 'Я нашел еще фрагмент памяти.').save()
-    Phrase(PhraseType.NEXT_QUESTION.value, 'А вот и еще вопрос.').save()
-    Phrase(PhraseType.NEXT_QUESTION.value, 'Переходим в следующий слой нейросети. Нашел вопрос.').save()
-    Phrase(PhraseType.NEXT_QUESTION.value, 'Где-то тут потерялся нейрон. Значит вот тебе вопрос.').save()
+    Phrase(6, 'Следующий вопрос.').save()
+    Phrase(6, 'Перейдём к следующему вопросу.').save()
+    Phrase(6, 'Я нашел еще фрагмент памяти.').save()
+    Phrase(6, 'А вот и еще вопрос.').save()
+    Phrase(6, 'Переходим в следующий слой нейросети. Нашел вопрос.').save()
+    Phrase(6, 'Где-то тут потерялся нейрон. Значит вот тебе вопрос.').save()
+    Phrase(6, 'Итак, новый вопрос.').save()
+    Phrase(6, 'Новый вопрос звучит так: ').save()
+    
 
     # two %s are necessary! %points and %level :
     Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Поздравляю, ты правильно ответил на %s вопросов и достиг уровня %s! Продолжай в том же духе!\nСледующий вопрос?').save()
     Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Невероятно, у тебя уже %s правильных ответов! Твой новый уровень - %s!\nИдём дальше?').save()
 
-    Phrase(PhraseType.TRY_AGAIN.value, 'Попробуй ещё раз.').save()
-    Phrase(PhraseType.TRY_AGAIN.value, 'Попытайся снова.').save()
+    Phrase(7, 'Поздравляю, ты правильно ответил на %s вопросов и достиг уровня %s! Продолжай в том же духе!\nСледующий вопрос?').save()
+    Phrase(7, 'Невероятно, у тебя уже %s правильных ответов! Твой новый уровень - %s!\nИдём дальше?').save()
+
+    Phrase(8, 'Попробуй ещё раз.').save()
+    Phrase(8, 'Попытайся снова.').save()
+    Phrase(8, 'Нужно попробовать еще.').save()
+    Phrase(8, 'Давай еще попытку.').save()
+    Phrase(8, 'Надо попробовать еще.').save()
 
 
 def seed_questions():
