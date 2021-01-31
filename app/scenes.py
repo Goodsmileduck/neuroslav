@@ -195,9 +195,7 @@ class Scene(ABC):
 class Main(Scene):
     def handle_global_intents(self, request):
         user_meant = UserMeaning(request)
-        if intents.START_QUIZ in request.intents:
-            return StartQuiz()
-        elif intents.YANDEX_HELP in request.intents and not user_meant.give_clue():
+        if intents.YANDEX_HELP in request.intents and not user_meant.give_clue():
             return GetHelp()
         elif intents.YANDEX_WHAT_CAN_YOU_DO in request.intents:
             return WhatCanYouDo()
@@ -276,6 +274,10 @@ class DifficultyChoice(Main):
             user.difficulty = 2
             user.save()
             return AskQuestion()
+#        elif intents.CHANGE_DIFFICULTY in request.intents:
+#            user.difficulty = 2
+#            user.save()
+#            return AskQuestion()
 
 
 def give_fact_probability():
