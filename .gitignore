@@ -3,3 +3,4 @@
 /app/__pycache__/
 __init__.py
 .ngrok
+app/tests/__pycache__/
