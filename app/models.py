@@ -1,5 +1,6 @@
 from pymodm import MongoModel, fields, connect
 import settings
+from enum import Enum, unique
 
 # Establish a connection to the database.
 connect('mongodb://' + settings.DB_HOST + ':' + str(settings.DB_PORT) + '/' + settings.DB_NAME)
@@ -8,6 +9,7 @@ BASE_DIFFICULTIES = [
 		(1, 'easy'),
 		(2, 'hard'),
 	]
+MIXED_DIFFICULTY = 3
 
 LEVELS = {
 	0: 'Новичок',
@@ -35,7 +37,7 @@ class Question(MongoModel):
 	interesting_fact = fields.CharField(max_length=2048, blank=True)
 	confirmation_picture = fields.CharField(max_length=512)
 
-	DIFFICULTIES = BASE_DIFFICULTIES + [(3, 'mixed')]
+	DIFFICULTIES = BASE_DIFFICULTIES + [(MIXED_DIFFICULTY, 'mixed')]
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)
 	right_answers = fields.EmbeddedDocumentListField('Answer')
 	possible_answers = fields.EmbeddedDocumentListField('Answer', blank=True)
@@ -51,17 +53,20 @@ class Answer(MongoModel):
 		return self.answer
 
 
+@unique
+class PhraseType(Enum):
+	YOU_ARE_RIGHT = 1
+	YOU_ARE_WRONG = 2
+	OFFER_CLUE = 3
+	GREETING = 4
+	CONTINUE_ASK = 5
+	NEXT_QUESTION = 6
+	NEW_LEVEL_CONGRATULATION = 7
+	TRY_AGAIN = 8
+
+
 class Phrase(MongoModel):
-	PHRASE_TYPES = [
-		(1, 'right_answer'),
-		(2, 'wrong_answer'),
-		(3, 'offer_clue'),
-		(4, 'greeting_ask'),
-		(5, 'continue_ask'),
-		(6, 'next_question'),
-		(7, 'new_level_congratulation'),
-		(8, 'try_again'),
-	]
+	PHRASE_TYPES = [a.value for a in PhraseType]
 	phrase_type = fields.IntegerField(choices=PHRASE_TYPES)
 	phrase = fields.CharField(max_length=2048)
 
