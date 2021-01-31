@@ -3,15 +3,17 @@ from pymongo import MongoClient
 from settings import DB_HOST, DB_PORT, DB_NAME
 import csv, os
 from models import PhraseType
+import logging
 
 CLIENT = MongoClient(DB_HOST, DB_PORT)
 
 
-def load_csv():
+def seed_questions_from_csv():
+    # TODO get current file dir instead of current work dir
     with open("questions.csv", "r", encoding="utf-8-sig") as csvfile:
         data = csv.DictReader(csvfile, delimiter=";", quotechar='"')
         for q in data:
-            print(q['id'])
+            #print(q['id'])
             right_answers = []
             possible_answers = []
             for x in q["right_answers"].split("|"):
@@ -89,7 +91,7 @@ def seed_phrases():
 
 
 def seed_questions():
-    load_csv()
+    seed_questions_from_csv()
 
 
 def test_seed():
@@ -108,8 +110,10 @@ def is_db_empty():
 def seed_all():
     # drop db before migration
     CLIENT.drop_database(DB_NAME)
+    logging.info('Db was cleared')
     if is_db_empty():
-        print('db is empty')
+        logging.info('Db is empty. Seeder started')
         seed_phrases()
         seed_questions()
         test_seed()
+        logging.info('Seeder finished')
