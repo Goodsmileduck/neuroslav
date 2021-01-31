@@ -351,7 +351,7 @@ class AskQuestion(Main):
         # Check if response contains right answer
         if answer_is_right(request, question):
             UserQuestion(user=user, question=question_id, passed=True).save()
-            if question.interesting_fact is not None and give_fact_probability():
+            if question.interesting_fact is not None and question.interesting_fact != '' and give_fact_probability():
                 return GiveFact()
             gained_level, level, points = user.gained_new_level()
             print('GAINED_NEW_LEVEL:', gained_level, level)
@@ -431,8 +431,9 @@ class GiveFact(Main):
     def reply(self, request: Request):
         question_id = in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
+        confirmation_phrase = random_phrase(1)
         continue_phrase = random_phrase(5)
-        text = 'Верно!\n' + question.interesting_fact + '\n' + continue_phrase
+        text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + continue_phrase
         return self.make_response(text, buttons=[
             button('Да', hide=True),
             button('Нет', hide=True),
