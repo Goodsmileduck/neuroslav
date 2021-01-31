@@ -76,6 +76,10 @@ class UserMeaning:
         match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо']
         return intents.YANDEX_CONFIRM in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
+    def do_continue(self):
+        match_answers = ['давай продолжим', 'продолжим', 'продолжаем', 'хочу продолжить', 'давай продолжать']
+        return self.is_answer_in_match_answers(match_answers)
+
     def deny(self):
         match_answers = ['нет', 'не хочу', 'не надо', 'не думаю', 'наверное нет', 'конечно нет']
         return intents.YANDEX_REJECT in self.user_intents or self.is_answer_in_match_answers(match_answers)
@@ -411,8 +415,8 @@ class LevelCongratulation(Main):
         )
 
     def handle_local_intents(self, request: Request):
-        confirm = ['да', 'продолжим', 'давай', 'давай продолжим', 'давай продолжаем']
-        if request['request']['command'] in confirm or intents.YANDEX_CONFIRM in request.intents:
+        user_meant = UserMeaning(request)
+        if user_meant.confirm() or user_meant.do_continue():
             return AskQuestion()
         else:
             return Goodbye()
@@ -456,7 +460,7 @@ class GiveFact(Main):
     def handle_local_intents(self, request: Request):
         user = current_user(request)
         user_meant = UserMeaning(request)
-        if user_meant.confirm():
+        if user_meant.confirm() or user_meant.do_continue():
             gained_level, level, points = user.gained_new_level()
             if gained_level:
                 LevelCongratulation(level=level, points=points)
