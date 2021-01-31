@@ -146,6 +146,7 @@ class HandlerTest(unittest.TestCase):
         is_running = True
         max_iterations = 4
         i = 1
+        question = None
 
         while is_running:
             # Check fact
