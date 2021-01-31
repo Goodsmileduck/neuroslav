@@ -9,7 +9,7 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     env:
-      DB_HOST: mongo
+      DB_HOST: 127.0.0.1
     services:
       mongo:
         image: mongo:4.0
