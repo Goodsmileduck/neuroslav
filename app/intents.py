@@ -2,7 +2,7 @@ START_QUIZ = 'start_quiz'
 CLUE = 'clue'
 EXIT = 'exit'
 ABOUT = 'about'
-DIFFICULTY = 'difficulty'
+CHANGE_DIFFICULTY = 'difficulty'
 
 # Default intents
 YANDEX_CONFIRM = 'YANDEX.CONFIRM'

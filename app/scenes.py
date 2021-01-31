@@ -197,6 +197,8 @@ class Main(Scene):
             return WhatCanYouDo()
         elif intents.EXIT in request.intents:
             return Goodbye()
+        elif intents.CHANGE_DIFFICULTY in request.intents:
+            return DifficultyChoice()
         else:
             return None
 
