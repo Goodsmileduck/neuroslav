@@ -21,6 +21,7 @@ import random
 import logging, settings
 
 from sounds import SoundFiles
+import pymorphy2
 
 
 def in_session(request: Request, parameter):
@@ -61,6 +62,21 @@ def current_user(request):
         return user
     except Exception as e:
         logging.error(f"{request['session']['session_id']}: EXCEPTION: {e}")
+        return None
+
+
+def word_in_plural(word, number):
+    morph = pymorphy2.MorphAnalyzer()
+    return morph.parse(word)[0].make_agree_with_number(number).word
+
+
+def answer_is_right(request, question):
+    try:
+        right_answers = [answer.answer for answer in question.right_answers]
+        # print(right_answers)
+        return request['request']['command'] in right_answers
+    except Exception as e:
+        logging.error(f"{request['session']['session_id']}: ERROR looking of right answer. EXCEPTION:{e}" )
         return None
 
 
@@ -112,16 +128,6 @@ class UserMeaning:
     def repeat(self):
         match_answers = ['повтори', 'повтори пожалуйста', 'ещё раз', 'скажи ещё раз', 'давай ещё раз', 'повторить', 'можешь повторить']
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
-
-
-def answer_is_right(request, question):
-    try:
-        right_answers = [answer.answer for answer in question.right_answers]
-        # print(right_answers)
-        return request['request']['command'] in right_answers
-    except Exception as e:
-        logging.error(f"{request['session']['session_id']}: ERROR looking of right answer. EXCEPTION:{e}" )
-        return None
 
 
 class Scene(ABC):
@@ -220,7 +226,10 @@ class Welcome(Main):
                    'после пожара в царской серверной я мало что помню.. ' \
                    'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
         else:
-            text = random_phrase(PhraseType.GREETING) % (points, level)
+            word = word_in_plural('вопрос', points)
+            text = random_phrase(PhraseType.GREETING) % {'number': points,
+                                                         'question': word,
+                                                         'level': level}
 
         # text += ' Версия: ' + VERSION
 
@@ -405,7 +414,10 @@ class LevelCongratulation(Main):
         self.points = points
 
     def reply(self, request: Request):
-        text = random_phrase(PhraseType.NEW_LEVEL_CONGRATULATION) % (self.points, self.level)
+        word = word_in_plural('вопрос', self.points)
+        text = random_phrase(PhraseType.NEW_LEVEL_CONGRATULATION) % {'number': self.points,
+                                                                     'question': word,
+                                                                     'level': self.level}
         return self.make_response(
             text,
             buttons=[
