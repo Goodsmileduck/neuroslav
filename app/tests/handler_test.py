@@ -3,6 +3,7 @@ import json
 import uuid
 
 import json_const
+from alice_emulator import AliceEmulator
 # Import modules from parent dir
 import sys
 sys.path.append('..')
@@ -30,6 +31,16 @@ class HandlerTest(unittest.TestCase):
         second_response = app.handler(request)
         self.assertTrue(second_response['response']['text'] != '')
         self.assertTrue(second_response['response']['text'] != first_response['response']['text'])
+
+    def test_welcome_alice(self):
+        emul = AliceEmulator()
+        first_response_text = emul.make_request()
+        # self.assertTrue(first_response_text != '')
+        second_response_text = emul.make_request()
+        # self.assertTrue(second_response_text != '')
+        print(first_response_text)
+        print(second_response_text)
+        self.assertTrue(second_response_text != first_response_text)
 
 
 if __name__ == "__main__":
