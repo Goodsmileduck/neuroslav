@@ -73,19 +73,19 @@ class UserMeaning:
         return self.user_request in match_answers
 
     def confirm(self):
-        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'давай']
+        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо']
         return intents.YANDEX_CONFIRM in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def deny(self):
-        match_answers = ['нет', 'не хочу', 'не надо']
+        match_answers = ['нет', 'не хочу', 'не надо', 'не думаю', 'наверное нет', 'конечно нет']
         return intents.YANDEX_REJECT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def dont_know(self):
-        match_answers = ['не знаю', 'без понятия']
+        match_answers = ['не знаю', 'я не знаю', 'не уверен', 'я не уверен', 'без понятия']
         return self.is_answer_in_match_answers(match_answers)
 
     def lets_play(self):
-        match_answers = ['давай играть', 'начнем', 'играем', 'хорошо', 'поехали', 'могу']
+        match_answers = ['давай играть', 'начнем', 'играем', 'сыграем', 'поехали', 'могу']
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def easy(self):
@@ -93,19 +93,19 @@ class UserMeaning:
         return self.is_answer_in_match_answers(match_answers)
 
     def hard(self):
-        match_answers = ['трудный', 'давай трудный', 'хочу трудный', 'выбираю трудный']
+        match_answers = ['трудный', 'давай трудный', 'хочу трудный', 'выбираю трудный', 'сложный']
         return self.is_answer_in_match_answers(match_answers)
 
     def give_clue(self):
-        match_answers = ['подскажи', 'дай подсказку', 'подсказка', 'подскажи пожалуйста', 'помоги']
+        match_answers = ['подскажи', 'дай подсказку', 'хочу подсказку', 'прошу подсказку', 'подсказка', 'подскажи пожалуйста', 'помоги']
         return intents.CLUE in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def skip_question(self):
-        match_answers = ['пропустить', 'пропусти вопрос', 'пропусти', 'следующий вопрос']
+        match_answers = ['пропустить', 'пропусти вопрос', 'пропусти', 'следующий вопрос', 'следующий', 'давай следующий']
         return self.is_answer_in_match_answers(match_answers)
 
     def repeat(self):
-        match_answers = ['повтори', 'повтори пожалуйста', 'ещё раз']
+        match_answers = ['повтори', 'повтори пожалуйста', 'ещё раз', 'скажи ещё раз', 'давай ещё раз', 'повторить', 'можешь повторить']
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
 
@@ -137,7 +137,6 @@ class Scene(ABC):
             next_scene = self.handle_local_intents(request)
         return next_scene
 
-
     @abstractmethod
     def handle_global_intents(self, request):
         raise NotImplementedError()
@@ -149,7 +148,7 @@ class Scene(ABC):
     def fallback(self, request: Request):
         return self.make_response('Извините, я вас не понимаю. Пожалуйста, попробуйте переформулировать вопрос.')
 
-    def make_audio_tts(self, audio_file_name, text = '', tts=None):
+    def make_audio_tts(self, audio_file_name, text='', tts=None):
         if tts is None:
             tts = text
         sound_tag = f"<speaker audio='{audio_file_name.value}'> "
@@ -217,7 +216,7 @@ class Welcome(Main):
         else:
             text = random_phrase(4)
 
-        #text += ' Версия: ' + VERSION
+        # text += ' Версия: ' + VERSION
 
         response = self.make_response(
             text,
@@ -408,9 +407,14 @@ class LevelCongratulation(Main):
 class SkipQuestion(Main):
     def reply(self, request: Request):
         text = 'Дать подсказку?'
-        return self.make_response(text, state={
+        attempts = in_session(request, 'attempts')
+        if not attempts:
+            attempts = 1
+        state = {
             'question_id': in_session(request, 'question_id'),
-        }, buttons=[
+            'attempts': attempts,
+        }
+        return self.make_response(text, state=state, buttons=[
             button('Да', hide=True),
             button('нет', hide=True),
         ])
@@ -464,26 +468,21 @@ class GetHelp(Main):
             }
             end_text = 'Продолжаем?'
 
-            return self.make_response(text+end_text, state=state, buttons=[
-            button('Да', hide=True)])
+            return self.make_response(text+end_text, state=state, buttons=[button('Да', hide=True)])
         else:
             end_text = 'Хочешь попробовать?'
-            return self.make_response(text+end_text, buttons=[
-            button('Да', hide=True)])
+            return self.make_response(text+end_text, buttons=[button('Да', hide=True)])
 
     def handle_local_intents(self, request: Request):
         user = current_user(request)
-
-        match_answer = {'давай играть', 'да', 'начнем', 'играем', 'начинаем', 'давай начнем'}
-        user_request = request['request']['command']
+        user_meant = UserMeaning(request)
         user_intent = request.intents
         logging.info(f'User intent: {user_intent}')
-        if user_request in match_answer or user_intent == intents.YANDEX_CONFIRM:
+        if user_meant.lets_play() or user_meant.confirm():
             if user.difficulty:
                 return AskQuestion()
             else:
                 return DifficultyChoice()
-
 
 
 class WhatCanYouDo(Main):
@@ -496,12 +495,10 @@ class WhatCanYouDo(Main):
     
     def handle_local_intents(self, request: Request):
         user = current_user(request)
-
-        match_answer = {'давай играть', 'да', 'начнем', 'играем', 'начинаем', 'давай начнем'}
-        user_request = request['request']['command']
+        user_meant = UserMeaning(request)
         user_intent = request.intents
         logging.info('User intent: ' + user_intent)
-        if user_request in match_answer or user_intent == intents.YANDEX_CONFIRM:
+        if user_meant.lets_play() or user_meant.confirm():
             if user.difficulty:
                 return AskQuestion()
             else:
@@ -510,7 +507,7 @@ class WhatCanYouDo(Main):
 
 class Goodbye(Main):
     def reply(self, request: Request):
-        text = 'Буду рад видеть тебя снова! Скажи Хватит чтобы выйти из навыка.'
+        text = 'Буду рад видеть тебя снова! Скажи ПОКА чтобы выйти из навыка.'
         response = self.make_response(text)
         response['end_session'] = True
         return response
