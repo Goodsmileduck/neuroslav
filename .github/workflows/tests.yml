@@ -8,6 +8,8 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    env:
+      DB_HOST: mongo
     services:
       mongo:
         image: mongo:4.0
