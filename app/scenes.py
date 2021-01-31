@@ -209,12 +209,13 @@ class Welcome(Main):
             logging.info(f'New user. application_id: {user.application_id}')
 
         sound_file_name = None
-        if first_time:
+        gained_new_level, level, points = user.gained_new_level()
+        if first_time or points <= 1:
             text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
                    'после пожара в царской серверной я мало что помню.. ' \
                    'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
         else:
-            text = random_phrase(4)
+            text = random_phrase(4) % (points, level)
 
         # text += ' Версия: ' + VERSION
 
