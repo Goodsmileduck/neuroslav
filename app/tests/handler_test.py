@@ -8,6 +8,8 @@ from alice_emulator import AliceEmulator
 import sys
 sys.path.append('..')
 import app
+import scenes
+import models
 
 class HandlerTest(unittest.TestCase):
     # Init
@@ -32,7 +34,12 @@ class HandlerTest(unittest.TestCase):
     #     self.assertTrue(second_response['response']['text'] != '')
     #     self.assertTrue(second_response['response']['text'] != first_response['response']['text'])
 
-    def test_welcome_alice(self):
+    def test_emulator(self):
+        alice = AliceEmulator()
+        alice.make_request()
+        self.assertEqual(alice.response_state['scene'], alice.request_state['scene'], 'Scenes must be equal')
+
+    def test_welcome(self):
         alice = AliceEmulator()
 
         # Make first request
@@ -45,6 +52,39 @@ class HandlerTest(unittest.TestCase):
         self.assertTrue(second_response_text != 'Welcome message (second run) can not be empty')
         # TODO Uncomment line
         # self.assertTrue(second_response_text != first_response_text, 'Welcome message (first run) must be not equal to Welcome message (second run)')
+
+    def test_case02(self):
+        alice = AliceEmulator()
+
+        alice.make_request()
+        self.assertEqual(alice.response_state['scene'], 'Welcome', 'Scene must be Welcome')
+
+        alice.set_text('давай играть')
+        response_text = alice.make_request()
+        self.assertNotEqual(response_text, '', 'Response text must not be empty')
+        self.assertEqual(alice.response_state['scene'], 'DifficultyChoice', 'Scene must be DifficultyChoice')
+
+        alice.set_text('простой')
+        response_text = alice.make_request()
+        question_id_1 = alice.response_state['question_id']
+        question = models.Question.objects.get({'_id': question_id_1})
+        self.assertIn(question.question, response_text, 'Question text must be equal to stored question_id')
+        user = scenes.current_user(alice.request)
+        self.assertNotEqual(user, None, 'User must be stored in db')
+        self.assertEqual(user.points(), 0, 'New user must be without points')
+        self.assertEqual(user.difficulty, 1, 'User difficulty must be 1 (easy)')
+        self.assertEqual(alice.response_state['scene'], 'AskQuestion', 'Scene must be AskQuestion')
+        self.assertEqual(alice.response_state['clue_given'], False, 'clue_given must be False')
+
+        alice.set_text('помоги')
+        response_text = alice.make_request()
+        self.assertNotEqual(response_text, '', 'Response text must not be empty')
+        question_id_2 = alice.response_state['question_id']
+        question = models.Question.objects.get({'_id': question_id_2})
+        self.assertEqual(question_id_1, question_id_2, 'Question must not be changed')
+        self.assertIn(question.clue, response_text, 'Question clue must be equal to stored question_id')
+        self.assertEqual(alice.response_state['scene'], 'AskQuestion', 'Scene must be AskQuestion')
+        self.assertEqual(alice.response_state['clue_given'], True, 'clue_given must be False')
 
 
 if __name__ == "__main__":
