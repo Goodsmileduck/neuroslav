@@ -26,7 +26,7 @@ def load_csv():
                 clue=q["clue"],
                 difficulty=q["difficulty"],
                 right_answers=right_answers,
-                interesting_fact=None,
+                interesting_fact=q.get('interesting_fact', ''),
                 possible_answers=possible_answers).save()
 
 

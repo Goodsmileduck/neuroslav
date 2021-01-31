@@ -442,9 +442,9 @@ class GiveFact(Main):
         user = current_user(request)
         user_meant = UserMeaning(request)
         if user_meant.confirm():
-            gained_level, level = user.gained_new_level()
+            gained_level, level, points = user.gained_new_level()
             if gained_level:
-                LevelCongratulation(level=level)
+                LevelCongratulation(level=level, points=points)
             return AskQuestion(give_confirmation=False)
         elif user_meant.deny():
             return Goodbye()
