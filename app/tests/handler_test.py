@@ -86,6 +86,57 @@ class HandlerTest(unittest.TestCase):
         self.assertEqual(alice.response_state['scene'], 'AskQuestion', 'Scene must be AskQuestion')
         self.assertEqual(alice.response_state['clue_given'], True, 'clue_given must be False')
 
+    def test_difficulties(self):
+        difficulties = [
+            {'text': 'легкий', 'value': 1},
+            {'text': 'давай легкий', 'value': 1},
+            {'text': 'выбираю легкий', 'value': 1},
+            {'text': 'хочу легкий', 'value': 1},
+            {'text': 'простой', 'value': 1},
+            {'text': 'давай простой', 'value': 1},
+            {'text': 'хочу простой', 'value': 1},
+            {'text': 'трудный', 'value': 2},
+            {'text': 'давай трудный', 'value': 2},
+            {'text': 'хочу трудный', 'value': 2},
+            {'text': 'выбираю трудный', 'value': 2},
+            {'text': 'сложный', 'value': 2},
+        ]
+
+        for difficulty in difficulties:
+            alice = AliceEmulator()
+            alice.make_request()
+            self.assertEqual(alice.response_state['scene'], 'Welcome', 'Scene must be Welcome')
+            alice.set_text('давай играть')
+            alice.make_request()
+            self.assertEqual(alice.response_state['scene'], 'DifficultyChoice', 'Scene must be DifficultyChoice')
+            alice.set_text(difficulty['text'])
+            alice.make_request()
+            user = scenes.current_user(alice.request)
+            self.assertNotEqual(user, None, 'User must be stored in db')
+            self.assertEqual(user.difficulty, difficulty['value'], 'User difficulty is wrong')
+
+        # TODO Add negative tests
+
+    def test_lets_play(self):
+        phrases = [
+            {'text': 'давай играть'},
+            {'text': 'начнем'},
+            {'text': 'играем'},
+            {'text': 'сыграем'},
+            {'text': 'поехали'},
+            {'text': 'могу'},
+        ]
+
+        for phrase in phrases:
+            alice = AliceEmulator()
+            alice.make_request()
+            self.assertEqual(alice.response_state['scene'], 'Welcome', 'Scene must be Welcome')
+            alice.set_text(phrase['text'])
+            alice.make_request()
+            self.assertEqual(alice.response_state['scene'], 'DifficultyChoice', 'Scene must be DifficultyChoice')
+
+        # TODO Add negative tests
+
 
 if __name__ == "__main__":
     unittest.main()
