@@ -354,7 +354,8 @@ class AskQuestion(Main):
         else:
             question = give_random_question(request=request, user=user)
             if not question:
-                return self.make_response('Поздравляю, ты прошёл все вопросы!!')
+                return self.make_response('Святые транзисторы, это просто невероятно, ты прошёл все вопросы! Поздравляю! \n'
+                                          'Я чувствую, что моя нейросеть полностью восстановилась! \nСПАСИБО!!!')
 
             text = question.question
             if question.tts and question.tts != '':
