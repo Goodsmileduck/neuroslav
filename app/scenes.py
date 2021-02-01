@@ -383,12 +383,13 @@ class AskQuestion(Main):
         # Check if response contains right answer
         if answer_is_right(request, question):
             UserQuestion(user=user, question=question_id, passed=True).save()
-            if question.interesting_fact is not None and question.interesting_fact != '' and give_fact_probability():
-                return GiveFact()
+            give_fact = question.interesting_fact is not None and question.interesting_fact != '' and give_fact_probability()
             gained_level, level, points = user.gained_new_level()
             logging.info(f"{request['session']['session_id']}: GAINED_NEW_LEVEL - {gained_level} {level}")
             if gained_level:
-                return LevelCongratulation(level=level, points=points)
+                return LevelCongratulation(level=level, points=points, interesting_fact=give_fact)
+            if give_fact:
+                return GiveFact()
             return AskQuestion(give_confirmation=True)
 
         # Handle local intents (skip question, clue)
@@ -444,16 +445,22 @@ class YouHadClue(Main):
 
 
 class LevelCongratulation(Main):
-    def __init__(self, level=LEVELS[0], points=0):
+    def __init__(self, level=LEVELS[0], points=0, interesting_fact=False):
         super(LevelCongratulation, self).__init__()
         self.level = level
         self.points = points
+        self.interesting_fact = interesting_fact
 
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
         text = random_phrase(PhraseType.NEW_LEVEL_CONGRATULATION) % {'number': self.points,
                                                                      'question': word,
                                                                      'level': self.level}
+        if self.interesting_fact:
+            question_id = search_in_session(request, 'question_id')
+            question = Question.objects.get({'_id': question_id})
+            confirmation_phrase = random_phrase(PhraseType.YOU_ARE_RIGHT)
+            text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + text
         return self.make_response(
             text,
             buttons=[
