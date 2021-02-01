@@ -362,13 +362,13 @@ class AskQuestion(Main):
                 confirmation = random_phrase(PhraseType.YOU_ARE_RIGHT)
                 next_question = random_phrase(6)
                 text = confirmation + '\n' + next_question + '\n' + text
-                tts = confirmation + '\n' + next_question + '\n' + tts
+                tts = confirmation + ' - ' + next_question + ' - ' + tts
             # Give random denial phrase if last answer was wrong
             elif self.give_denial:
                 denial = random_phrase(PhraseType.YOU_ARE_WRONG)
                 try_next_question = random_phrase(6)
                 text = denial + '\n' + try_next_question + '\n' + text
-                tts = denial + '\n' + try_next_question + '\n' + tts
+                tts = denial + ' - ' + try_next_question + ' - ' + tts
             state = {'clue_given': False, 'question_id': question.id}
             clue_button = True
             self.give_denial = False
@@ -382,9 +382,9 @@ class AskQuestion(Main):
             for i, answer in enumerate(question.possible_answers):
                 buttons.append(button(answer.answer, hide=True))
                 if i != number_of_answers - 1:
-                    tts += '\n' + answer.answer + ','
+                    tts += ' - ' + answer.answer + ','
                 else:
-                    tts += '\n или ' + answer.answer + '?'
+                    tts += ' - или ' + answer.answer + '?'
         if clue_button or (not search_in_session(request, 'clue_given') and not self.give_clue):
             buttons.append(button('Подсказка', hide=True))
         buttons.append(button('Пропустить', hide=True))
