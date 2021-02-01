@@ -81,7 +81,7 @@ def seed_phrases():
 
     # two %s are necessary! %points and %level :
     Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Поздравляю, ты правильно ответил на %(number)i %(question)s и достиг уровня %(level)s! Продолжай в том же духе!\nСледующий вопрос?').save()
-    Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Невероятно, у тебя пройдено %(number)i %(question)! Твой новый уровень - %(level)s!\nИдём дальше?').save()
+    Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Невероятно, ты прошёл уже %(number)i %(question)s! Твой новый уровень - %(level)s!\nИдём дальше?').save()
 
     Phrase(PhraseType.TRY_AGAIN.value, 'Попробуй ещё раз.').save()
     Phrase(PhraseType.TRY_AGAIN.value, 'Попытайся снова.').save()
