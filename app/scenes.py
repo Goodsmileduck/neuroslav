@@ -303,6 +303,7 @@ class AskQuestion(Main):
     def reply(self, request: Request):
         clue_button = False
         user = current_user(request)
+        tts = ''
 
         if self.give_clue:
             attempts = search_in_session(request, 'attempts')
@@ -362,16 +363,23 @@ class AskQuestion(Main):
             clue_button = True
             self.give_denial = False
 
+        if tts == '':
+            tts = text
         # Add right answers to buttons
         buttons = []
         if user.difficulty == 1:
-            for answer in question.possible_answers:
+            number_of_answers = len(question.possible_answers)
+            for i, answer in enumerate(question.possible_answers):
                 buttons.append(button(answer.answer, hide=True))
+                if i != number_of_answers - 1:
+                    tts += '\n' + answer.answer + ','
+                else:
+                    tts += '\n или ' + answer.answer + '?'
         if clue_button or (not search_in_session(request, 'clue_given') and not self.give_clue):
             buttons.append(button('Подсказка', hide=True))
         buttons.append(button('Пропустить', hide=True))
 
-        return self.make_response(text, state=state, buttons=buttons)
+        return self.make_response(text, state=state, buttons=buttons, tts=tts)
 
     def handle_local_intents(self, request: Request):
         user = current_user(request)
