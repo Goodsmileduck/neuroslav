@@ -110,7 +110,8 @@ class UserMeaning:
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def easy(self):
-        match_answers = ['легкий', 'давай легкий', 'выбираю легкий', 'хочу легкий', 'простой', 'давай простой', 'хочу простой']
+        match_answers = ['легкий', 'давай легкий', 'выбираю легкий', 'хочу легкий', 'простой', 'давай простой',
+                         'хочу простой']
         return self.is_answer_in_match_answers(match_answers)
 
     def hard(self):
@@ -118,15 +119,18 @@ class UserMeaning:
         return self.is_answer_in_match_answers(match_answers)
 
     def give_clue(self):
-        match_answers = ['подскажи', 'дай подсказку', 'хочу подсказку', 'прошу подсказку', 'подсказка', 'подскажи пожалуйста', 'помоги']
+        match_answers = ['подскажи', 'дай подсказку', 'хочу подсказку', 'прошу подсказку', 'подсказка',
+                         'подскажи пожалуйста', 'помоги', 'повтори подсказку']
         return intents.CLUE in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def skip_question(self):
-        match_answers = ['пропустить', 'пропусти вопрос', 'пропусти', 'следующий вопрос', 'следующий', 'давай следующий']
+        match_answers = ['пропустить', 'пропусти вопрос', 'пропусти', 'следующий вопрос', 'следующий',
+                         'давай следующий', 'дальше', 'далее', 'давай дальше']
         return self.is_answer_in_match_answers(match_answers)
 
     def repeat(self):
-        match_answers = ['повтори', 'повтори пожалуйста', 'ещё раз', 'скажи ещё раз', 'давай ещё раз', 'повторить', 'можешь повторить']
+        match_answers = ['повтори', 'повтори пожалуйста', 'ещё раз', 'скажи ещё раз', 'давай ещё раз', 'повторить',
+                         'можешь повторить']
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
 
@@ -479,8 +483,10 @@ class GiveFact(Main):
         user_meant = UserMeaning(request)
         if user_meant.confirm() or user_meant.do_continue():
             gained_level, level, points = user.gained_new_level()
+            logging.info(f"Gained level: {gained_level}, LEVEL: {level}, points: {points}")
+            print(f"Gained level: {gained_level}, LEVEL: {level}, points: {points}")
             if gained_level:
-                LevelCongratulation(level=level, points=points)
+                return LevelCongratulation(level=level, points=points)
             return AskQuestion(give_confirmation=False)
         elif user_meant.deny():
             return Goodbye()
