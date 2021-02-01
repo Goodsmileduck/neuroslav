@@ -32,12 +32,6 @@ def search_in_session(request: Request, parameter):
         return None
 
 
-def random_phrase(phrase_type):
-    if isinstance(phrase_type, PhraseType):
-        phrase_type = phrase_type.value
-    return random.choice(list(Phrase.objects.raw({'phrase_type': phrase_type}))).phrase
-
-
 def give_random_question(request, user):
     all_user_questions = UserQuestion.objects.raw({'user': user._id})
     passed_questions_id = []
@@ -241,7 +235,7 @@ class Welcome(Main):
                    'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
         else:
             word = word_in_plural('вопрос', points)
-            text = random_phrase(PhraseType.GREETING) % {'number': points,
+            text = Phrase.give_greeting() % {'number': points,
                                                          'question': word,
                                                          'level': level}
 
@@ -335,7 +329,7 @@ class AskQuestion(Main):
                 attempts = 1
             question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
-            text = random_phrase(PhraseType.YOU_ARE_WRONG) + '\n' + random_phrase(PhraseType.TRY_AGAIN)
+            text = Phrase.give_you_are_wrong() + '\n' + Phrase.give_try_again()
             state = {
                 'question_id': question.id,
                 'attempts': attempts+1,
@@ -369,14 +363,14 @@ class AskQuestion(Main):
                 tts = text
             # Give random confirmation phrase if last answer was right
             if self.give_confirmation:
-                confirmation = random_phrase(PhraseType.YOU_ARE_RIGHT)
-                next_question = random_phrase(6)
+                confirmation = Phrase.give_you_are_right()
+                next_question = Phrase.give_next_question()
                 text = confirmation + '\n' + next_question + '\n' + text
                 tts = confirmation + ' - ' + next_question + ' - ' + tts
             # Give random denial phrase if last answer was wrong
             elif self.give_denial:
-                denial = random_phrase(PhraseType.YOU_ARE_WRONG)
-                try_next_question = random_phrase(6)
+                denial = Phrase.give_you_are_wrong()
+                try_next_question = Phrase.give_next_question()
                 text = denial + '\n' + try_next_question + '\n' + text
                 tts = denial + ' - ' + try_next_question + ' - ' + tts
             state = {'clue_given': False, 'question_id': question.id}
@@ -448,7 +442,7 @@ class AskQuestion(Main):
 
 class YouHadClue(Main):
     def reply(self, request: Request):
-        text = random_phrase(PhraseType.YOU_HAD_CLUE_ASK)
+        text = Phrase.give_you_had_clue_ask()
         attempts = search_in_session(request, 'attempts')
         if not attempts:
             attempts = 1
@@ -481,13 +475,13 @@ class LevelCongratulation(Main):
 
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
-        text = random_phrase(PhraseType.NEW_LEVEL_CONGRATULATION) % {'number': self.points,
+        text = Phrase.give_new_level_congratulation() % {'number': self.points,
                                                                      'question': word,
                                                                      'level': self.level}
         if self.interesting_fact:
             question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
-            confirmation_phrase = random_phrase(PhraseType.YOU_ARE_RIGHT)
+            confirmation_phrase = Phrase.give_you_are_right()
             text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + text
         return self.make_response(
             text,
@@ -508,7 +502,7 @@ class LevelCongratulation(Main):
 
 class SkipQuestion(Main):
     def reply(self, request: Request):
-        text = random_phrase(PhraseType.OFFER_CLUE)
+        text = Phrase.give_offer_clue()
         attempts = search_in_session(request, 'attempts')
         if not attempts:
             attempts = 1
@@ -536,8 +530,8 @@ class GiveFact(Main):
     def reply(self, request: Request):
         question_id = search_in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
-        confirmation_phrase = random_phrase(PhraseType.YOU_ARE_RIGHT)
-        continue_phrase = random_phrase(PhraseType.CONTINUE_ASK)
+        confirmation_phrase = Phrase.give_you_are_right()
+        continue_phrase = Phrase.give_continue_ask()
         text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + continue_phrase
         return self.make_response(text, buttons=[
             button('Да', hide=True),
