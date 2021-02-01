@@ -354,7 +354,7 @@ class AskQuestion(Main):
         else:
             question = give_random_question(request=request, user=user)
             if not question:
-                return self.make_response('Вы прошли все вопросы')
+                return self.make_response('Поздравляю, ты прошёл все вопросы!!')
 
             text = question.question
             if question.tts and question.tts != '':
@@ -460,9 +460,9 @@ class YouHadClue(Main):
         user = current_user(request)
         question_id = search_in_session(request, 'question_id')
         user_meant = UserMeaning(request)
-        if user_meant.confirm() or user_meant.skip_question():
+        if user_meant.confirm() or user_meant.give_clue():
             return AskQuestion(give_clue=True)
-        elif user_meant.deny():
+        elif user_meant.deny() or user_meant.skip_question():
             return AskQuestion(repeat=True)
 
 

@@ -46,9 +46,13 @@ def seed_phrases():
 
     Phrase(PhraseType.OFFER_CLUE.value, 'Дать подсказку?').save()
     Phrase(PhraseType.OFFER_CLUE.value, 'Хочешь подсказку?').save()
+    Phrase(PhraseType.OFFER_CLUE.value, 'Может подсказку?').save()
+    Phrase(PhraseType.OFFER_CLUE.value, 'Может помочь?').save()
 
-    Phrase(PhraseType.YOU_HAD_CLUE_ASK.value, 'Я уже давал подсказку, повторить?').save()
+    Phrase(PhraseType.YOU_HAD_CLUE_ASK.value, 'Кажется, я уже давал подсказку, повторить?').save()
+    Phrase(PhraseType.YOU_HAD_CLUE_ASK.value, 'Дай подумаю... - Нет, ничего больше не могу вспомнить. Повторить прошлую подсказку?').save()
     Phrase(PhraseType.YOU_HAD_CLUE_ASK.value, 'Я уже помог, чем мог. Хочешь, повторю?').save()
+    Phrase(PhraseType.YOU_HAD_CLUE_ASK.value, 'Моя память фрагментирована, но мне кажется, что подсказка уже была... Повторить?').save()
 
     # two %s are necessary! %points and %level :
     Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Поздравляю, ты правильно ответил на %(number)i %(question)s и достиг уровня %(level)s! Продолжай в том же духе!\nСледующий вопрос?').save()
