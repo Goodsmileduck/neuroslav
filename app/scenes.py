@@ -70,11 +70,21 @@ def word_in_plural(word, number):
     return morph.parse(word)[0].make_agree_with_number(number).word
 
 
+def clear_text(text):
+    punctuation = ',./\\!?<>'
+    for character in punctuation:
+        text = text.replace(character, '')
+    while '  ' in text:
+        text = text.replace('  ', ' ')
+    return text.lower().strip()
+
+
 def answer_is_right(request, question):
     try:
+        user_reply = clear_text(request['request']['command'])
         right_answers = [answer.answer for answer in question.right_answers]
         # print(right_answers)
-        return request['request']['command'] in right_answers
+        return user_reply in right_answers
     except Exception as e:
         logging.error(f"{request['session']['session_id']}: ERROR looking of right answer. EXCEPTION:{e}" )
         return None
