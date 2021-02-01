@@ -24,7 +24,7 @@ from sounds import SoundFiles
 import pymorphy2
 
 
-def in_session(request: Request, parameter):
+def search_in_session(request: Request, parameter):
     if request.state:
         param = request.state.get(STATE_REQUEST_KEY, {}).get(parameter, None)
         return param
@@ -305,10 +305,10 @@ class AskQuestion(Main):
         user = current_user(request)
 
         if self.give_clue:
-            attempts = in_session(request, 'attempts')
+            attempts = search_in_session(request, 'attempts')
             if not attempts:
                 attempts = 1
-            question_id = in_session(request, 'question_id')
+            question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
             text = question.clue
             state = {
@@ -320,27 +320,27 @@ class AskQuestion(Main):
 
         # Wrong answer, giving one more attempt
         elif self.wrong_answer:
-            attempts = in_session(request, 'attempts')
+            attempts = search_in_session(request, 'attempts')
             if not attempts:
                 attempts = 1
-            question_id = in_session(request, 'question_id')
+            question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
             text = random_phrase(PhraseType.YOU_ARE_WRONG) + '\n' + random_phrase(PhraseType.TRY_AGAIN)
             state = {
                 'question_id': question.id,
                 'attempts': attempts+1,
-                'clue_given': in_session(request, 'clue_given'),
+                'clue_given': search_in_session(request, 'clue_given'),
             }
             self.wrong_answer = False
         # Asked for repeat question
         elif self.repeat:
-            question_id = in_session(request, 'question_id')
+            question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
             text = question.question
             state = {
                 'question_id': question.id,
-                'attempts': in_session(request, 'attempts'),
-                'clue_given': in_session(request, 'clue_given'),
+                'attempts': search_in_session(request, 'attempts'),
+                'clue_given': search_in_session(request, 'clue_given'),
             }
         # Asking random question
         else:
@@ -368,7 +368,7 @@ class AskQuestion(Main):
         if user.difficulty == 1:
             for answer in question.possible_answers:
                 buttons.append(button(answer.answer, hide=True))
-        if clue_button or (not in_session(request, 'clue_given') and not self.give_clue):
+        if clue_button or (not search_in_session(request, 'clue_given') and not self.give_clue):
             buttons.append(button('Подсказка', hide=True))
         buttons.append(button('Пропустить', hide=True))
 
@@ -377,7 +377,7 @@ class AskQuestion(Main):
     def handle_local_intents(self, request: Request):
         user = current_user(request)
         user_meant = UserMeaning(request)
-        question_id = in_session(request, 'question_id')
+        question_id = search_in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
         logging.info(f"{request['session']['session_id']}: Question #{question_id} - {question}")
 
@@ -398,8 +398,9 @@ class AskQuestion(Main):
             return self
 
         elif user_meant.skip_question() or user_meant.dont_know():
-            if not in_session(request, 'clue_given'):
+            if not search_in_session(request, 'clue_given'):
                 return SkipQuestion()
+            UserQuestion(user=user, question=question_id, passed=False).save()
             return AskQuestion()
 
         elif user_meant.repeat():
@@ -407,7 +408,7 @@ class AskQuestion(Main):
         # Handle global intents !!!
 
         # Assume answer as wrong
-        attempts = in_session(request, 'attempts')
+        attempts = search_in_session(request, 'attempts')
         if attempts and attempts >= settings.MAX_ATTEMPTS:
             return AskQuestion(give_denial=True)
         logging.warning(f"{request['session']['session_id']}: ATTEMPTS - {attempts}")
@@ -446,11 +447,11 @@ class LevelCongratulation(Main):
 class SkipQuestion(Main):
     def reply(self, request: Request):
         text = random_phrase(PhraseType.OFFER_CLUE)
-        attempts = in_session(request, 'attempts')
+        attempts = search_in_session(request, 'attempts')
         if not attempts:
             attempts = 1
         state = {
-            'question_id': in_session(request, 'question_id'),
+            'question_id': search_in_session(request, 'question_id'),
             'attempts': attempts,
         }
         return self.make_response(text, state=state, buttons=[
@@ -459,16 +460,19 @@ class SkipQuestion(Main):
         ])
 
     def handle_local_intents(self, request: Request):
+        user = current_user(request)
+        question_id = search_in_session(request, 'question_id')
         user_meant = UserMeaning(request)
         if user_meant.confirm() or user_meant.skip_question():
             return AskQuestion(give_clue=True)
         elif user_meant.deny():
+            UserQuestion(user=user, question=question_id, passed=False).save()
             return AskQuestion()
 
 
 class GiveFact(Main):
     def reply(self, request: Request):
-        question_id = in_session(request, 'question_id')
+        question_id = search_in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
         confirmation_phrase = random_phrase(PhraseType.YOU_ARE_RIGHT)
         continue_phrase = random_phrase(PhraseType.CONTINUE_ASK)
@@ -500,9 +504,9 @@ class GetHelp(Main):
         'ты можешь пропустить вопрос если не знаешь ответа. '
 
         if request.state is not None:
-            attempts = in_session(request, 'attempts')
-            question_id = in_session(request, 'question_id')
-            clue_given = in_session(request, 'clue_given')
+            attempts = search_in_session(request, 'attempts')
+            question_id = search_in_session(request, 'question_id')
+            clue_given = search_in_session(request, 'clue_given')
             state = {
                 'question_id': question_id,
                 'clue_given': clue_given,
