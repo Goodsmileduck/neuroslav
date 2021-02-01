@@ -225,7 +225,7 @@ class Welcome(Main):
 
         sound_file_name = None
         gained_new_level, level, points = user.gained_new_level()
-        if first_time or points <= 1:
+        if first_time or points < 1:
             text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
                    'после пожара в царской серверной я мало что помню.. ' \
                    'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
@@ -316,7 +316,6 @@ class AskQuestion(Main):
                 'clue_given': True,
                 'attempts': attempts,
             }
-            self.give_clue = False
 
         # Wrong answer, giving one more attempt
         elif self.wrong_answer:
@@ -394,6 +393,8 @@ class AskQuestion(Main):
 
         # Handle local intents (skip question, clue)
         elif user_meant.give_clue():
+            if search_in_session(request, 'clue_given'):
+                return YouHadClue()
             self.give_clue = True
             return self
 
@@ -414,6 +415,32 @@ class AskQuestion(Main):
         logging.warning(f"{request['session']['session_id']}: ATTEMPTS - {attempts}")
         self.wrong_answer = True
         return self
+
+
+class YouHadClue(Main):
+    def reply(self, request: Request):
+        text = random_phrase(PhraseType.YOU_HAD_CLUE_ASK)
+        attempts = search_in_session(request, 'attempts')
+        if not attempts:
+            attempts = 1
+        state = {
+            'question_id': search_in_session(request, 'question_id'),
+            'attempts': attempts,
+            'clue_given': True,
+        }
+        return self.make_response(text, state=state, buttons=[
+            button('Да', hide=True),
+            button('нет', hide=True),
+        ])
+
+    def handle_local_intents(self, request: Request):
+        user = current_user(request)
+        question_id = search_in_session(request, 'question_id')
+        user_meant = UserMeaning(request)
+        if user_meant.confirm() or user_meant.skip_question():
+            return AskQuestion(give_clue=True)
+        elif user_meant.deny():
+            return AskQuestion(repeat=True)
 
 
 class LevelCongratulation(Main):

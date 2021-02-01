@@ -63,6 +63,7 @@ class PhraseType(Enum):
 	NEXT_QUESTION = 6
 	NEW_LEVEL_CONGRATULATION = 7
 	TRY_AGAIN = 8
+	YOU_HAD_CLUE_ASK = 9
 
 
 class Phrase(MongoModel):
