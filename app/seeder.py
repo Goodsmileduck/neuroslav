@@ -26,6 +26,7 @@ def seed_questions_from_csv():
                 id=q["id"],
                 question_type=q["question_type"],
                 question=q["question"],
+                tts=q.get('tts', ''),
                 clue=q["clue"],
                 difficulty=q["difficulty"],
                 right_answers=right_answers,

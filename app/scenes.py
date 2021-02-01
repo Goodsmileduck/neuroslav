@@ -337,6 +337,10 @@ class AskQuestion(Main):
             question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
             text = question.question
+            if question.tts and question.tts != '':
+                tts = question.tts
+            else:
+                tts = text
             state = {
                 'question_id': question.id,
                 'attempts': search_in_session(request, 'attempts'),
@@ -349,16 +353,22 @@ class AskQuestion(Main):
                 return self.make_response('Вы прошли все вопросы')
 
             text = question.question
+            if question.tts and question.tts != '':
+                tts = question.tts
+            else:
+                tts = text
             # Give random confirmation phrase if last answer was right
             if self.give_confirmation:
                 confirmation = random_phrase(PhraseType.YOU_ARE_RIGHT)
                 next_question = random_phrase(6)
                 text = confirmation + '\n' + next_question + '\n' + text
+                tts = confirmation + '\n' + next_question + '\n' + tts
             # Give random denial phrase if last answer was wrong
             elif self.give_denial:
                 denial = random_phrase(PhraseType.YOU_ARE_WRONG)
                 try_next_question = random_phrase(6)
                 text = denial + '\n' + try_next_question + '\n' + text
+                tts = denial + '\n' + try_next_question + '\n' + tts
             state = {'clue_given': False, 'question_id': question.id}
             clue_button = True
             self.give_denial = False

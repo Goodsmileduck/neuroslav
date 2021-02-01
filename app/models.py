@@ -32,6 +32,7 @@ class Question(MongoModel):
 	id = fields.IntegerField(primary_key=True)
 	question_type = fields.IntegerField(choices=QUESTION_TYPES)
 	question = fields.CharField(max_length=2048)
+	tts = fields.CharField(max_length=2048, blank=True)
 	picture = fields.CharField(max_length=512)
 	clue = fields.CharField(max_length=2048, blank=True)
 	interesting_fact = fields.CharField(max_length=2048, blank=True)
