@@ -543,7 +543,7 @@ class WhatCanYouDo(Main):
 
 class Goodbye(Main):
     def reply(self, request: Request):
-        text = 'Буду рад видеть тебя снова! Скажи ПОКА чтобы выйти из навыка.'
+        text = 'Буду рад видеть тебя снова! Скажи Хватит чтобы выйти из навыка.'
         response = self.make_response(text)
         response['end_session'] = True
         return response
