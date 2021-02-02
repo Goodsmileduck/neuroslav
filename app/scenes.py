@@ -24,7 +24,7 @@ from sounds import SoundFiles
 import pymorphy2
 
 
-def in_session(request: Request, parameter):
+def search_in_session(request: Request, parameter):
     if request.state:
         param = request.state.get(STATE_REQUEST_KEY, {}).get(parameter, None)
         return param
@@ -32,10 +32,9 @@ def in_session(request: Request, parameter):
         return None
 
 
-def random_phrase(phrase_type):
-    if isinstance(phrase_type, PhraseType):
-        phrase_type = phrase_type.value
-    return random.choice(list(Phrase.objects.raw({'phrase_type': phrase_type}))).phrase
+def clear_not_passed_questions(user):
+    not_passed_user_questions = UserQuestion.objects.raw({'user': user._id, 'passed': False})
+    not_passed_user_questions.delete()
 
 
 def give_random_question(request, user):
@@ -70,11 +69,24 @@ def word_in_plural(word, number):
     return morph.parse(word)[0].make_agree_with_number(number).word
 
 
+def clear_text(text):
+    punctuation = ',./\\!?<>'
+    for character in punctuation:
+        text = text.replace(character, '')
+    while '  ' in text:
+        text = text.replace('  ', ' ')
+    return text.lower().strip()
+
+
 def answer_is_right(request, question):
     try:
+        user_reply = clear_text(request['request']['command'])
+        AVOID_WORDS = ('я', 'думаю', 'наверное', 'кажется', 'это', 'был', 'была', 'были', 'мне')
+        text_list = user_reply.split()
+        user_reply = ' '.join([word for word in text_list if word not in AVOID_WORDS])
         right_answers = [answer.answer for answer in question.right_answers]
         # print(right_answers)
-        return request['request']['command'] in right_answers
+        return user_reply in right_answers
     except Exception as e:
         logging.error(f"{request['session']['session_id']}: ERROR looking of right answer. EXCEPTION:{e}" )
         return None
@@ -87,7 +99,9 @@ class UserMeaning:
         self.user_intents = self.request.intents
 
     def is_answer_in_match_answers(self, match_answers):
-        return self.user_request in match_answers
+        cleaned = self.user_request.replace('пожалуйста', '')
+        cleaned = clear_text(cleaned)
+        return cleaned in match_answers
 
     def confirm(self):
         match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо']
@@ -110,7 +124,8 @@ class UserMeaning:
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def easy(self):
-        match_answers = ['легкий', 'давай легкий', 'выбираю легкий', 'хочу легкий', 'простой', 'давай простой', 'хочу простой']
+        match_answers = ['легкий', 'давай легкий', 'выбираю легкий', 'хочу легкий', 'простой', 'давай простой',
+                         'хочу простой']
         return self.is_answer_in_match_answers(match_answers)
 
     def hard(self):
@@ -118,15 +133,23 @@ class UserMeaning:
         return self.is_answer_in_match_answers(match_answers)
 
     def give_clue(self):
-        match_answers = ['подскажи', 'дай подсказку', 'хочу подсказку', 'прошу подсказку', 'подсказка', 'подскажи пожалуйста', 'помоги']
+        match_answers = ['подскажи', 'дай подсказку', 'хочу подсказку', 'прошу подсказку', 'подсказка',
+                         'подскажи пожалуйста', 'помоги', 'повтори подсказку']
         return intents.CLUE in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def skip_question(self):
-        match_answers = ['пропустить', 'пропусти вопрос', 'пропусти', 'следующий вопрос', 'следующий', 'давай следующий']
+        match_answers = ['пропустить', 'пропусти вопрос', 'пропусти', 'следующий вопрос', 'следующий',
+                         'давай следующий', 'дальше', 'далее', 'давай дальше']
         return self.is_answer_in_match_answers(match_answers)
 
     def repeat(self):
-        match_answers = ['повтори', 'повтори пожалуйста', 'ещё раз', 'скажи ещё раз', 'давай ещё раз', 'повторить', 'можешь повторить']
+        match_answers = ['повтори', 'ещё раз', 'скажи ещё раз', 'давай ещё раз', 'повторить',
+                         'можешь повторить']
+        return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
+
+    def repeat_options(self):
+        match_answers = ['повтори варианты', 'пожалуйста повтори варианты', 'скажи варинаты отвеов',
+                         'повтори варианты ответов', 'повтори ответы']
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
 
@@ -221,13 +244,13 @@ class Welcome(Main):
 
         sound_file_name = None
         gained_new_level, level, points = user.gained_new_level()
-        if first_time or points <= 1:
+        if first_time or points < 1:
             text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
                    'после пожара в царской серверной я мало что помню.. ' \
                    'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
         else:
             word = word_in_plural('вопрос', points)
-            text = random_phrase(PhraseType.GREETING) % {'number': points,
+            text = Phrase.give_greeting() % {'number': points,
                                                          'question': word,
                                                          'level': level}
 
@@ -288,23 +311,25 @@ def give_fact_probability():
 
 
 class AskQuestion(Main):
-    def __init__(self, give_clue=False, give_confirmation=False, give_denial=False, repeat=False):
+    def __init__(self, give_clue=False, give_confirmation=False, give_denial=False, repeat=False, repeat_options=False):
         super(AskQuestion, self).__init__()
         self.give_clue = give_clue
         self.give_confirmation = give_confirmation
         self.give_denial = give_denial
         self.wrong_answer = False
         self.repeat = repeat
+        self.repeat_options = repeat_options
 
     def reply(self, request: Request):
         clue_button = False
         user = current_user(request)
+        tts = ''
 
         if self.give_clue:
-            attempts = in_session(request, 'attempts')
+            attempts = search_in_session(request, 'attempts')
             if not attempts:
                 attempts = 1
-            question_id = in_session(request, 'question_id')
+            question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
             text = question.clue
             state = {
@@ -312,98 +337,138 @@ class AskQuestion(Main):
                 'clue_given': True,
                 'attempts': attempts,
             }
-            self.give_clue = False
 
         # Wrong answer, giving one more attempt
         elif self.wrong_answer:
-            attempts = in_session(request, 'attempts')
+            attempts = search_in_session(request, 'attempts')
             if not attempts:
                 attempts = 1
-            question_id = in_session(request, 'question_id')
+            question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
-            text = random_phrase(PhraseType.YOU_ARE_WRONG) + '\n' + random_phrase(PhraseType.TRY_AGAIN)
+            text = Phrase.give_you_are_wrong() + '\n' + Phrase.give_try_again()
             state = {
                 'question_id': question.id,
                 'attempts': attempts+1,
-                'clue_given': in_session(request, 'clue_given'),
+                'clue_given': search_in_session(request, 'clue_given'),
             }
             self.wrong_answer = False
         # Asked for repeat question
         elif self.repeat:
-            question_id = in_session(request, 'question_id')
+            question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
             text = question.question
+            if question.tts and question.tts != '':
+                tts = question.tts
+            else:
+                tts = text
             state = {
                 'question_id': question.id,
-                'attempts': in_session(request, 'attempts'),
-                'clue_given': in_session(request, 'clue_given'),
+                'attempts': search_in_session(request, 'attempts'),
+                'clue_given': search_in_session(request, 'clue_given'),
             }
-        # Asking random question
+        # Asked to repeat options
+        elif self.repeat_options:
+            question_id = search_in_session(request, 'question_id')
+            question = Question.objects.get({'_id': question_id})
+            text = question.question
+            tts = '- '
+            state = {
+                'question_id': question.id,
+                'attempts': search_in_session(request, 'attempts'),
+                'clue_given': search_in_session(request, 'clue_given'),
+            }
+        # Give random question
         else:
             question = give_random_question(request=request, user=user)
             if not question:
-                return self.make_response('Вы прошли все вопросы')
+                clear_not_passed_questions(user)
+                question = give_random_question(request=request, user=user)
+                if not question:
+                    return self.make_response('Святые транзисторы, это просто невероятно, ты прошёл все вопросы! Поздравляю! \n'
+                                              'Я чувствую, что моя нейросеть полностью восстановилась! \nСПАСИБО!!!')
 
             text = question.question
+            if question.tts and question.tts != '':
+                tts = question.tts
+            else:
+                tts = text
             # Give random confirmation phrase if last answer was right
             if self.give_confirmation:
-                confirmation = random_phrase(PhraseType.YOU_ARE_RIGHT)
-                next_question = random_phrase(6)
+                confirmation = Phrase.give_you_are_right()
+                next_question = Phrase.give_next_question()
                 text = confirmation + '\n' + next_question + '\n' + text
+                tts = confirmation + ' - ' + next_question + ' - ' + tts
             # Give random denial phrase if last answer was wrong
             elif self.give_denial:
-                denial = random_phrase(PhraseType.YOU_ARE_WRONG)
-                try_next_question = random_phrase(6)
+                denial = Phrase.give_you_are_wrong()
+                try_next_question = Phrase.give_next_question()
                 text = denial + '\n' + try_next_question + '\n' + text
+                tts = denial + ' - ' + try_next_question + ' - ' + tts
             state = {'clue_given': False, 'question_id': question.id}
             clue_button = True
             self.give_denial = False
 
+        if tts == '':
+            tts = text
         # Add right answers to buttons
         buttons = []
         if user.difficulty == 1:
-            for answer in question.possible_answers:
+            number_of_answers = len(question.possible_answers)
+            for i, answer in enumerate(question.possible_answers):
                 buttons.append(button(answer.answer, hide=True))
-        if clue_button or (not in_session(request, 'clue_given') and not self.give_clue):
+                if not self.give_clue:
+                    if i != number_of_answers - 1:
+                        tts += ' - ' + answer.answer + ','
+                    else:
+                        tts += ' - или ' + answer.answer + '?'
+        if clue_button or (not search_in_session(request, 'clue_given') and not self.give_clue):
             buttons.append(button('Подсказка', hide=True))
         buttons.append(button('Пропустить', hide=True))
 
-        return self.make_response(text, state=state, buttons=buttons)
+        return self.make_response(text, state=state, buttons=buttons, tts=tts)
 
     def handle_local_intents(self, request: Request):
         user = current_user(request)
         user_meant = UserMeaning(request)
-        question_id = in_session(request, 'question_id')
+        question_id = search_in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
         logging.info(f"{request['session']['session_id']}: Question #{question_id} - {question}")
 
         # Check if response contains right answer
         if answer_is_right(request, question):
             UserQuestion(user=user, question=question_id, passed=True).save()
-            if question.interesting_fact is not None and question.interesting_fact != '' and give_fact_probability():
-                return GiveFact()
+            give_fact = question.interesting_fact is not None and question.interesting_fact != '' and give_fact_probability()
             gained_level, level, points = user.gained_new_level()
             logging.info(f"{request['session']['session_id']}: GAINED_NEW_LEVEL - {gained_level} {level}")
             if gained_level:
-                return LevelCongratulation(level=level, points=points)
+                return LevelCongratulation(level=level, points=points, interesting_fact=give_fact)
+            if give_fact:
+                return GiveFact()
             return AskQuestion(give_confirmation=True)
 
         # Handle local intents (skip question, clue)
         elif user_meant.give_clue():
+            if search_in_session(request, 'clue_given'):
+                return YouHadClue()
             self.give_clue = True
             return self
 
         elif user_meant.skip_question() or user_meant.dont_know():
-            if not in_session(request, 'clue_given'):
+            if not search_in_session(request, 'clue_given'):
                 return SkipQuestion()
+            UserQuestion(user=user, question=question_id, passed=False).save()
             return AskQuestion()
 
         elif user_meant.repeat():
             return AskQuestion(repeat=True)
+
+        elif user.difficulty == 1 and user_meant.repeat_options():
+            return AskQuestion(repeat_options=True)
+
         # Handle global intents !!!
 
         # Assume answer as wrong
-        attempts = in_session(request, 'attempts')
+        attempts = search_in_session(request, 'attempts')
         if attempts and attempts >= settings.MAX_ATTEMPTS:
             return AskQuestion(give_denial=True)
         logging.warning(f"{request['session']['session_id']}: ATTEMPTS - {attempts}")
@@ -411,17 +476,49 @@ class AskQuestion(Main):
         return self
 
 
+class YouHadClue(Main):
+    def reply(self, request: Request):
+        text = Phrase.give_you_had_clue_ask()
+        attempts = search_in_session(request, 'attempts')
+        if not attempts:
+            attempts = 1
+        state = {
+            'question_id': search_in_session(request, 'question_id'),
+            'attempts': attempts,
+            'clue_given': True,
+        }
+        return self.make_response(text, state=state, buttons=[
+            button('Да', hide=True),
+            button('нет', hide=True),
+        ])
+
+    def handle_local_intents(self, request: Request):
+        user = current_user(request)
+        question_id = search_in_session(request, 'question_id')
+        user_meant = UserMeaning(request)
+        if user_meant.confirm() or user_meant.give_clue():
+            return AskQuestion(give_clue=True)
+        elif user_meant.deny() or user_meant.skip_question():
+            return AskQuestion(repeat=True)
+
+
 class LevelCongratulation(Main):
-    def __init__(self, level=LEVELS[0], points=0):
+    def __init__(self, level=LEVELS[0], points=0, interesting_fact=False):
         super(LevelCongratulation, self).__init__()
         self.level = level
         self.points = points
+        self.interesting_fact = interesting_fact
 
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
-        text = random_phrase(PhraseType.NEW_LEVEL_CONGRATULATION) % {'number': self.points,
+        text = Phrase.give_new_level_congratulation() % {'number': self.points,
                                                                      'question': word,
                                                                      'level': self.level}
+        if self.interesting_fact:
+            question_id = search_in_session(request, 'question_id')
+            question = Question.objects.get({'_id': question_id})
+            confirmation_phrase = Phrase.give_you_are_right()
+            text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + text
         return self.make_response(
             text,
             buttons=[
@@ -441,12 +538,12 @@ class LevelCongratulation(Main):
 
 class SkipQuestion(Main):
     def reply(self, request: Request):
-        text = random_phrase(PhraseType.OFFER_CLUE)
-        attempts = in_session(request, 'attempts')
+        text = Phrase.give_offer_clue()
+        attempts = search_in_session(request, 'attempts')
         if not attempts:
             attempts = 1
         state = {
-            'question_id': in_session(request, 'question_id'),
+            'question_id': search_in_session(request, 'question_id'),
             'attempts': attempts,
         }
         return self.make_response(text, state=state, buttons=[
@@ -455,19 +552,22 @@ class SkipQuestion(Main):
         ])
 
     def handle_local_intents(self, request: Request):
+        user = current_user(request)
+        question_id = search_in_session(request, 'question_id')
         user_meant = UserMeaning(request)
         if user_meant.confirm() or user_meant.skip_question():
             return AskQuestion(give_clue=True)
         elif user_meant.deny():
+            UserQuestion(user=user, question=question_id, passed=False).save()
             return AskQuestion()
 
 
 class GiveFact(Main):
     def reply(self, request: Request):
-        question_id = in_session(request, 'question_id')
+        question_id = search_in_session(request, 'question_id')
         question = Question.objects.get({'_id': question_id})
-        confirmation_phrase = random_phrase(PhraseType.YOU_ARE_RIGHT)
-        continue_phrase = random_phrase(PhraseType.CONTINUE_ASK)
+        confirmation_phrase = Phrase.give_you_are_right()
+        continue_phrase = Phrase.give_continue_ask()
         text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + continue_phrase
         return self.make_response(text, buttons=[
             button('Да', hide=True),
@@ -479,8 +579,10 @@ class GiveFact(Main):
         user_meant = UserMeaning(request)
         if user_meant.confirm() or user_meant.do_continue():
             gained_level, level, points = user.gained_new_level()
+            logging.info(f"Gained level: {gained_level}, LEVEL: {level}, points: {points}")
+            print(f"Gained level: {gained_level}, LEVEL: {level}, points: {points}")
             if gained_level:
-                LevelCongratulation(level=level, points=points)
+                return LevelCongratulation(level=level, points=points)
             return AskQuestion(give_confirmation=False)
         elif user_meant.deny():
             return Goodbye()
@@ -494,9 +596,9 @@ class GetHelp(Main):
         'ты можешь пропустить вопрос если не знаешь ответа. '
 
         if request.state is not None:
-            attempts = in_session(request, 'attempts')
-            question_id = in_session(request, 'question_id')
-            clue_given = in_session(request, 'clue_given')
+            attempts = search_in_session(request, 'attempts')
+            question_id = search_in_session(request, 'question_id')
+            clue_given = search_in_session(request, 'clue_given')
             state = {
                 'question_id': question_id,
                 'clue_given': clue_given,
@@ -524,8 +626,8 @@ class GetHelp(Main):
 class WhatCanYouDo(Main):
     def reply(self, request: Request):
         text = 'Я нейросеть-гид по Великому Новгороду. ' \
-        'Моя база данных повреждена и мне нужна помощь в восставновлении давнных. '\
-        'Готов ли ты помочь мне?'
+            'Моя база данных повреждена и мне нужна помощь в восстановлении данных. '\
+            'Готов ли ты помочь мне?'
         return self.make_response(text, buttons=[
             button('Я готов', hide=True)])
     

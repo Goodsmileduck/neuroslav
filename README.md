@@ -1,5 +1,6 @@
 # neuroslav
 
+![Run tests](https://github.com/Goodsmileduck/neuroslav/workflows/Run%20tests/badge.svg)
 
 
 # Start mongo

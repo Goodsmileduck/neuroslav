@@ -1,6 +1,7 @@
 from pymodm import MongoModel, fields, connect
-import settings
+import settings, random
 from enum import Enum, unique
+
 
 # Establish a connection to the database.
 connect('mongodb://' + settings.DB_HOST + ':' + str(settings.DB_PORT) + '/' + settings.DB_NAME)
@@ -32,6 +33,7 @@ class Question(MongoModel):
 	id = fields.IntegerField(primary_key=True)
 	question_type = fields.IntegerField(choices=QUESTION_TYPES)
 	question = fields.CharField(max_length=2048)
+	tts = fields.CharField(max_length=2048, blank=True)
 	picture = fields.CharField(max_length=512)
 	clue = fields.CharField(max_length=2048, blank=True)
 	interesting_fact = fields.CharField(max_length=2048, blank=True)
@@ -63,6 +65,8 @@ class PhraseType(Enum):
 	NEXT_QUESTION = 6
 	NEW_LEVEL_CONGRATULATION = 7
 	TRY_AGAIN = 8
+	YOU_HAD_CLUE_ASK = 9
+	FALLBACK_1 = 10
 
 
 class Phrase(MongoModel):
@@ -72,6 +76,56 @@ class Phrase(MongoModel):
 
 	def __str__(self):
 		return self.phrase_type + ' - ' + self.phrase
+
+	@staticmethod
+	def random_phrase(phrase_type):
+		if isinstance(phrase_type, PhraseType):
+			phrase_type = phrase_type.value
+		return random.choice(list(Phrase.objects.raw({'phrase_type': phrase_type}))).phrase
+
+	@staticmethod
+	def give_you_are_right():
+		return Phrase.random_phrase(PhraseType.YOU_ARE_RIGHT)
+
+	@staticmethod
+	def give_you_are_wrong():
+		return Phrase.random_phrase(PhraseType.YOU_ARE_WRONG)
+
+	@staticmethod
+	def give_offer_clue():
+		return Phrase.random_phrase(PhraseType.OFFER_CLUE)
+
+	@staticmethod
+	def give_greeting():
+		return Phrase.random_phrase(PhraseType.GREETING)
+
+	@staticmethod
+	def give_continue_ask():
+		return Phrase.random_phrase(PhraseType.CONTINUE_ASK)
+
+	@staticmethod
+	def give_next_question():
+		return Phrase.random_phrase(PhraseType.NEXT_QUESTION)
+
+	@staticmethod
+	def give_next_question():
+		return Phrase.random_phrase(PhraseType.NEXT_QUESTION)
+
+	@staticmethod
+	def give_new_level_congratulation():
+		return Phrase.random_phrase(PhraseType.NEW_LEVEL_CONGRATULATION)
+
+	@staticmethod
+	def give_try_again():
+		return Phrase.random_phrase(PhraseType.TRY_AGAIN)
+
+	@staticmethod
+	def give_you_had_clue_ask():
+		return Phrase.random_phrase(PhraseType.YOU_HAD_CLUE_ASK)
+
+	@staticmethod
+	def give_fallback_1():
+		return Phrase.random_phrase(PhraseType.FALLBACK_1)
 
 
 class User(MongoModel):

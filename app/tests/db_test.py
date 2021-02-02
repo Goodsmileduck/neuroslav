@@ -13,8 +13,6 @@ class TestModels(unittest.TestCase):
     def tearDown(self):
         pass
     # Each test method starts with the keyword test_
-    def test_sample(self):
-        self.assertEqual(0, 0)
     def test_questions_exists(self):
         self.assertGreater(models.Question.objects.all().count(), 0)
     def test_phrases_exists(self):
