@@ -76,7 +76,7 @@ def clear_text(text):
 def answer_is_right(request, question):
     try:
         user_reply = clear_text(request['request']['command'])
-        AVOID_WORDS = ('думаю', 'наверное', 'кажется', 'это', 'был')
+        AVOID_WORDS = ('думаю', 'наверное', 'кажется', 'это', 'был', 'была', 'были')
         text_list = user_reply.split()
         user_reply = ' '.join([word for word in text_list if word not in AVOID_WORDS])
         right_answers = [answer.answer for answer in question.right_answers]
