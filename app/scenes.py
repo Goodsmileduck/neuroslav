@@ -32,6 +32,11 @@ def search_in_session(request: Request, parameter):
         return None
 
 
+def clear_not_passed_questions(user):
+    not_passed_user_questions = UserQuestion.objects.raw({'user': user._id, 'passed': False})
+    not_passed_user_questions.delete()
+
+
 def give_random_question(request, user):
     all_user_questions = UserQuestion.objects.raw({'user': user._id})
     passed_questions_id = []
@@ -76,7 +81,7 @@ def clear_text(text):
 def answer_is_right(request, question):
     try:
         user_reply = clear_text(request['request']['command'])
-        AVOID_WORDS = ('думаю', 'наверное', 'кажется', 'это', 'был', 'была', 'были')
+        AVOID_WORDS = ('я', 'думаю', 'наверное', 'кажется', 'это', 'был', 'была', 'были', 'мне')
         text_list = user_reply.split()
         user_reply = ' '.join([word for word in text_list if word not in AVOID_WORDS])
         right_answers = [answer.answer for answer in question.right_answers]
@@ -376,8 +381,11 @@ class AskQuestion(Main):
         else:
             question = give_random_question(request=request, user=user)
             if not question:
-                return self.make_response('Святые транзисторы, это просто невероятно, ты прошёл все вопросы! Поздравляю! \n'
-                                          'Я чувствую, что моя нейросеть полностью восстановилась! \nСПАСИБО!!!')
+                clear_not_passed_questions(user)
+                question = give_random_question(request=request, user=user)
+                if not question:
+                    return self.make_response('Святые транзисторы, это просто невероятно, ты прошёл все вопросы! Поздравляю! \n'
+                                              'Я чувствую, что моя нейросеть полностью восстановилась! \nСПАСИБО!!!')
 
             text = question.question
             if question.tts and question.tts != '':
