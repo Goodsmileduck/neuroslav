@@ -76,6 +76,9 @@ def clear_text(text):
 def answer_is_right(request, question):
     try:
         user_reply = clear_text(request['request']['command'])
+        AVOID_WORDS = ('думаю', 'наверное', 'кажется', 'это', 'был')
+        text_list = user_reply.split()
+        user_reply = ' '.join([word for word in text_list if word not in AVOID_WORDS])
         right_answers = [answer.answer for answer in question.right_answers]
         # print(right_answers)
         return user_reply in right_answers
@@ -91,7 +94,9 @@ class UserMeaning:
         self.user_intents = self.request.intents
 
     def is_answer_in_match_answers(self, match_answers):
-        return self.user_request in match_answers
+        cleaned = self.user_request.replace('пожалуйста', '')
+        cleaned = clear_text(cleaned)
+        return cleaned in match_answers
 
     def confirm(self):
         match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо']
@@ -133,8 +138,13 @@ class UserMeaning:
         return self.is_answer_in_match_answers(match_answers)
 
     def repeat(self):
-        match_answers = ['повтори', 'повтори пожалуйста', 'ещё раз', 'скажи ещё раз', 'давай ещё раз', 'повторить',
+        match_answers = ['повтори', 'ещё раз', 'скажи ещё раз', 'давай ещё раз', 'повторить',
                          'можешь повторить']
+        return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
+
+    def repeat_options(self):
+        match_answers = ['повтори варианты', 'пожалуйста повтори варианты', 'скажи варинаты отвеов',
+                         'повтори варианты ответов', 'повтори ответы']
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
 
@@ -296,13 +306,14 @@ def give_fact_probability():
 
 
 class AskQuestion(Main):
-    def __init__(self, give_clue=False, give_confirmation=False, give_denial=False, repeat=False):
+    def __init__(self, give_clue=False, give_confirmation=False, give_denial=False, repeat=False, repeat_options=False):
         super(AskQuestion, self).__init__()
         self.give_clue = give_clue
         self.give_confirmation = give_confirmation
         self.give_denial = give_denial
         self.wrong_answer = False
         self.repeat = repeat
+        self.repeat_options = repeat_options
 
     def reply(self, request: Request):
         clue_button = False
@@ -350,7 +361,18 @@ class AskQuestion(Main):
                 'attempts': search_in_session(request, 'attempts'),
                 'clue_given': search_in_session(request, 'clue_given'),
             }
-        # Asking random question
+        # Asked to repeat options
+        elif self.repeat_options:
+            question_id = search_in_session(request, 'question_id')
+            question = Question.objects.get({'_id': question_id})
+            text = question.question
+            tts = '- '
+            state = {
+                'question_id': question.id,
+                'attempts': search_in_session(request, 'attempts'),
+                'clue_given': search_in_session(request, 'clue_given'),
+            }
+        # Give random question
         else:
             question = give_random_question(request=request, user=user)
             if not question:
@@ -386,10 +408,11 @@ class AskQuestion(Main):
             number_of_answers = len(question.possible_answers)
             for i, answer in enumerate(question.possible_answers):
                 buttons.append(button(answer.answer, hide=True))
-                if i != number_of_answers - 1:
-                    tts += ' - ' + answer.answer + ','
-                else:
-                    tts += ' - или ' + answer.answer + '?'
+                if not self.give_clue:
+                    if i != number_of_answers - 1:
+                        tts += ' - ' + answer.answer + ','
+                    else:
+                        tts += ' - или ' + answer.answer + '?'
         if clue_button or (not search_in_session(request, 'clue_given') and not self.give_clue):
             buttons.append(button('Подсказка', hide=True))
         buttons.append(button('Пропустить', hide=True))
@@ -430,6 +453,10 @@ class AskQuestion(Main):
 
         elif user_meant.repeat():
             return AskQuestion(repeat=True)
+
+        elif user.difficulty == 1 and user_meant.repeat_options():
+            return AskQuestion(repeat_options=True)
+
         # Handle global intents !!!
 
         # Assume answer as wrong
