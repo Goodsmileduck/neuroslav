@@ -626,7 +626,7 @@ class GetHelp(Main):
 class WhatCanYouDo(Main):
     def reply(self, request: Request):
         text = 'Я нейросеть-гид по Великому Новгороду. ' \
-            'Моя база данных повреждена и мне нужна помощь в восставновлении данных. '\
+            'Моя база данных повреждена и мне нужна помощь в восстановлении данных. '\
             'Готов ли ты помочь мне?'
         return self.make_response(text, buttons=[
             button('Я готов', hide=True)])
