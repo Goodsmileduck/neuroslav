@@ -13,7 +13,7 @@ def seed_questions_from_csv():
     with open("questions.csv", "r", encoding="utf-8-sig") as csvfile:
         data = csv.DictReader(csvfile, delimiter=";", quotechar='"')
         for q in data:
-            #print(q['id'])
+            # print(q['id'])
             right_answers = []
             possible_answers = []
             for x in q["right_answers"].split("|"):
@@ -28,6 +28,7 @@ def seed_questions_from_csv():
                 question=q["question"],
                 tts=q.get('tts', ''),
                 clue=q["clue"],
+                clue_tts=q["clue_tts"],
                 difficulty=q["difficulty"],
                 right_answers=right_answers,
                 interesting_fact=q.get('interesting_fact', ''),

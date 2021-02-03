@@ -36,6 +36,7 @@ class Question(MongoModel):
 	tts = fields.CharField(max_length=2048, blank=True)
 	picture = fields.CharField(max_length=512)
 	clue = fields.CharField(max_length=2048, blank=True)
+	clue_tts = fields.CharField(max_length=2048, blank=True)
 	interesting_fact = fields.CharField(max_length=2048, blank=True)
 	confirmation_picture = fields.CharField(max_length=512)
 

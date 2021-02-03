@@ -332,6 +332,7 @@ class AskQuestion(Main):
             question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
             text = question.clue
+            tts = question.clue_tts
             state = {
                 'question_id': question.id,
                 'clue_given': True,
@@ -496,7 +497,7 @@ class YouHadClue(Main):
         user = current_user(request)
         question_id = search_in_session(request, 'question_id')
         user_meant = UserMeaning(request)
-        if user_meant.confirm() or user_meant.give_clue():
+        if user_meant.confirm() or user_meant.give_clue() or user_meant.repeat():
             return AskQuestion(give_clue=True)
         elif user_meant.deny() or user_meant.skip_question():
             return AskQuestion(repeat=True)
