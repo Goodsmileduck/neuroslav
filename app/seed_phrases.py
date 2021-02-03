@@ -64,5 +64,7 @@ def seed_phrases():
     Phrase(PhraseType.TRY_AGAIN.value, 'Давай еще попытку.').save()
     Phrase(PhraseType.TRY_AGAIN.value, 'Надо попробовать еще.').save()
 
-    Phrase(PhraseType.FALLBACK_1.value, 'Прости, я, наверное, тебя не расслышал. Повтори, пожалуйста.').save()
-    Phrase(PhraseType.FALLBACK_1.value, 'Я не понял, можешь повторить?').save()
+    Phrase(PhraseType.FALLBACK_GENERAL.value, '<FALLBACK 1-lvl> Прости, я, наверное, тебя не расслышал. Повтори, пожалуйста.').save()
+    Phrase(PhraseType.FALLBACK_GENERAL.value, '<FALLBACK 1-lvl> Я не понял, можешь повторить?').save()
+
+    Phrase(PhraseType.FALLBACK_EXIT.value, '<FALLBACK 3-lvl> Наверное, я сегодня не в форме. Заходи в другой раз. Скажи Хватит чтобы выйти из навыка.').save()

@@ -92,6 +92,24 @@ def answer_is_right(request, question):
         return None
 
 
+def handle_fallbacks(request, ReturnScene):
+    # Catch fallbacks, needs a ReturnScene class, which has 'fallback' parameter
+    fallback = search_in_session(request, 'fallback')
+    if fallback:
+        if fallback < 2:
+            return ReturnScene(fallback=fallback+1)
+        else:
+            return Goodbye(fallback=True)
+    return ReturnScene(fallback=1)
+
+
+def give_fact_probability():
+    # Returns if Interesting Fact should be given - True/False
+    # n = random.randint(0, 10)
+    # return n >= 7
+    return True
+
+
 class UserMeaning:
     def __init__(self, request):
         self.request = request
@@ -216,6 +234,10 @@ class Scene(ABC):
 
 
 class Main(Scene):
+    def __init__(self, fallback=0):
+        super(Main, self).__init__()
+        self.fallback = fallback
+
     def handle_global_intents(self, request):
         user_meant = UserMeaning(request)
         if intents.YANDEX_HELP in request.intents and not user_meant.give_clue():
@@ -232,33 +254,39 @@ class Main(Scene):
 
 class Welcome(Main):
     def reply(self, request: Request):
-        # User identification
-        user = current_user(request)
-        if user:
-            first_time = False
-            logging.info(f"User come back. application_id: {user.application_id} sessions: {request['session']['session_id']}")
-        else:
-            user = User(application_id=request['session'].get('application').get('application_id')).save()
-            first_time = True
-            logging.info(f"New user. application_id: {user.application_id} session: {request['session']['session_id']}")
-
         sound_file_name = None
-        gained_new_level, level, points = user.gained_new_level()
-        if first_time or points < 1:
-            text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
-                   'после пожара в царской серверной я мало что помню.. ' \
-                   'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
+
+        if self.fallback == 1:
+            text = Phrase.give_fallback_general()
+        elif self.fallback > 1:
+            text = '<FALLBACK 2-lvl> Играем или нет?'
         else:
-            word = word_in_plural('вопрос', points)
-            text = Phrase.give_greeting() % {'number': points,
-                                                         'question': word,
-                                                         'level': level}
+            # User identification
+            user = current_user(request)
+            if user:
+                first_time = False
+                logging.info(f"User come back. application_id: {user.application_id} sessions: {request['session']['session_id']}")
+            else:
+                user = User(application_id=request['session'].get('application').get('application_id')).save()
+                first_time = True
+                logging.info(f"New user. application_id: {user.application_id} session: {request['session']['session_id']}")
 
+            sound_file_name = None
+            gained_new_level, level, points = user.gained_new_level()
+            if first_time or points < 1:
+                text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
+                       'после пожара в царской серверной я мало что помню.. ' \
+                       'Кажется, меня зовут Нейрослав. Можешь помочь мне восстановить некоторые факты?'
+            else:
+                word = word_in_plural('вопрос', points)
+                text = Phrase.give_greeting() % {'number': points,
+                                                 'question': word,
+                                                 'level': level}
         # text += ' Версия: ' + VERSION
-
         response = self.make_response(
             text,
             buttons=[button('Давай играть', hide=True)],
+            state={'fallback': self.fallback},
             audio_file_name=sound_file_name
         )
         return response
@@ -273,16 +301,23 @@ class Welcome(Main):
             else:
                 return DifficultyChoice()
 
-        return Goodbye()
+        return handle_fallbacks(request, Welcome)
 
 
 class DifficultyChoice(Main):
     def reply(self, request: Request):
-        text = 'Есть легкий и трудный уровни сложности. Какой ты выберешь?'
+        if self.fallback == 1:
+            text = Phrase.give_fallback_general()
+        elif self.fallback > 1:
+            text = '<FALLBACK 2-lvl> Выбери, пожалуйста, уровень сложности: лёгкий или трудный.'
+        else:
+            text = 'Есть легкий и трудный уровни сложности. Какой ты выберешь?'
 
+        state = {'fallback': self.fallback}
         response = self.make_response(text, buttons=[
             button('Легкий', hide=True),
-            button('Трудный', hide=True)]
+            button('Трудный', hide=True)
+        ], state=state
         )
         return response
 
@@ -297,17 +332,7 @@ class DifficultyChoice(Main):
             user.difficulty = 2
             user.save()
             return AskQuestion()
-#        elif intents.CHANGE_DIFFICULTY in request.intents:
-#            user.difficulty = 2
-#            user.save()
-#            return AskQuestion()
-
-
-def give_fact_probability():
-    # Returns if Interesting Fact should be given - True/False
-    # n = random.randint(0, 10)
-    # return n >= 7
-    return True
+        return handle_fallbacks(request, DifficultyChoice)
 
 
 class AskQuestion(Main):
@@ -645,8 +670,15 @@ class WhatCanYouDo(Main):
 
 
 class Goodbye(Main):
+    def __init__(self, fallback):
+        super(Goodbye, self).__init__()
+        self.fallback = fallback
+
     def reply(self, request: Request):
-        text = 'Буду рад видеть тебя снова! Скажи Хватит чтобы выйти из навыка.'
+        if self.fallback:
+            text = Phrase.give_fallback_exit()
+        else:
+            text = 'Буду рад видеть тебя снова! Скажи Хватит чтобы выйти из навыка.'
         response = self.make_response(text)
         response['end_session'] = True
         return response

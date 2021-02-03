@@ -67,7 +67,8 @@ class PhraseType(Enum):
 	NEW_LEVEL_CONGRATULATION = 7
 	TRY_AGAIN = 8
 	YOU_HAD_CLUE_ASK = 9
-	FALLBACK_1 = 10
+	FALLBACK_GENERAL = 10
+	FALLBACK_EXIT = 11
 
 
 class Phrase(MongoModel):
@@ -125,8 +126,12 @@ class Phrase(MongoModel):
 		return Phrase.random_phrase(PhraseType.YOU_HAD_CLUE_ASK)
 
 	@staticmethod
-	def give_fallback_1():
-		return Phrase.random_phrase(PhraseType.FALLBACK_1)
+	def give_fallback_general():
+		return Phrase.random_phrase(PhraseType.FALLBACK_GENERAL)
+
+	@staticmethod
+	def give_fallback_exit():
+		return Phrase.random_phrase(PhraseType.FALLBACK_EXIT)
 
 
 class User(MongoModel):
