@@ -1,6 +1,8 @@
 root:
-    $Change $Type? $Diff
+    $Do? $Change $Type? $Diff
 
+$Do:
+    .+
 $Change:
     %lemma
     поменяй

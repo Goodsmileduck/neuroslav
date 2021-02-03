@@ -4,6 +4,7 @@ root:
 $Skip:
     $lemma
     пропусти
+    пропускаем
 
 $Question:
     %lemma
