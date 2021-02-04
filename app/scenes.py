@@ -257,8 +257,8 @@ class Welcome(Main):
         sound_file_name = None
         
         if request['request']['command'] == "ping":
-            response = self.make_response("pong")
-            return response
+            response_pong = self.make_response("pong")
+            return response_pong
 
         if self.fallback == 1:
             text = Phrase.give_fallback_general()

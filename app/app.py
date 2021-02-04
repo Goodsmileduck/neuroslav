@@ -30,7 +30,10 @@ def main():
 
 
 def handler(request):
-    current_scene_id = request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('scene', None)
+    if 'state' in request:
+      current_scene_id = request.get('state', {}).get(STATE_REQUEST_KEY, {}).get('scene', None)
+    else:
+      current_scene_id = None
     logging.info('CURRENT SCENE ID: %r', current_scene_id)
     request_obj = Request(request)
     if current_scene_id is None:
