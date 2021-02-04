@@ -130,7 +130,7 @@ class UserMeaning:
         return self.is_answer_in_match_answers(match_answers)
 
     def deny(self):
-        match_answers = ['нет', 'не хочу', 'не надо', 'не думаю', 'наверное нет', 'конечно нет']
+        match_answers = ['нет', 'не хочу', 'не надо', 'не думаю', 'наверное нет', 'конечно нет', 'не надо']
         return intents.YANDEX_REJECT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def dont_know(self):
@@ -544,6 +544,7 @@ class LevelCongratulation(Main):
         self.level = level
         self.points = points
         self.interesting_fact = interesting_fact
+        self.fallback = fallback
 
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
