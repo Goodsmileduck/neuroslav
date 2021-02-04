@@ -167,7 +167,7 @@ class UserMeaning:
 
     def repeat_options(self):
         match_answers = ['повтори варианты', 'пожалуйста повтори варианты', 'скажи варинаты отвеов',
-                         'повтори варианты ответов', 'повтори ответы']
+                         'повтори варианты ответов', 'повтори ответы', 'какие варианты', 'какие варианты ответов']
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
 
