@@ -740,9 +740,9 @@ class Goodbye(Main):
         if self.fallback == 1:
             text = Phrase.give_fallback_exit()
         elif self.fallback > 1:
-            text = Phrase.give_fallback_2_begin() + ' Скажи хватит, чтобы выйти из навыка'
+            text = Phrase.give_fallback_2_begin()
         else:
-            text = 'Буду рад видеть тебя снова! Скажи Хватит чтобы выйти из навыка.'
+            text = 'Буду рад видеть тебя снова!'
         response = self.make_response(text, state={'fallback': self.fallback})
         if 'response' in response.keys():
             response['response']['end_session'] = True

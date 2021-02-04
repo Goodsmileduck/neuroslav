@@ -69,7 +69,7 @@ def seed_phrases():
     Phrase(PhraseType.FALLBACK_GENERAL.value, 'Моя нейросеть не смогла идентифицировать твой ответ. Попробуй повторить').save()
     Phrase(PhraseType.FALLBACK_GENERAL.value, 'Не могу расшифровать твой ответ, можешь перефразировать?').save()
 
-    Phrase(PhraseType.FALLBACK_EXIT.value, 'Наверное, я сегодня не в форме. Заходи в другой раз.\nСкажи Хватит чтобы выйти из навыка.').save()
+    Phrase(PhraseType.FALLBACK_EXIT.value, 'Наверное, я сегодня не в форме. Заходи в другой раз.').save()
 
     Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Я потерял огромную часть словаря и иногда не понимаю простую человеческую речь.').save()
     Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Мои нейроны сильно повреждены и я забываю некоторые самые простые слова.').save()
