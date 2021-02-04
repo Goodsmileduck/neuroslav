@@ -7,3 +7,4 @@ Werkzeug==1.0.1
 pymodm==0.4.3
 envparse==0.1.4
 pymorphy2
+requests

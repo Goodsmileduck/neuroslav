@@ -7,14 +7,19 @@ import sys
 sys.path.append('..')
 import app
 from state import STATE_RESPONSE_KEY, STATE_REQUEST_KEY
+import handlers
 
 class AliceEmulator:
     request = None
     response = None
+    handler = None
 
-    def __init__(self):
+    def __init__(self, handler = None):
         self.load_empty_request()
         self.generate_new_user()
+        if not handler:
+            handler = handlers.HandleAppRequest()
+        self.handler = handler
         pass
 
     def load_empty_request(self):
@@ -39,7 +44,7 @@ class AliceEmulator:
         self.request['request']['original_utterance'] = original_utterance
 
     def make_request(self, auto_update_state = True):
-        self.response = app.handler(self.request)
+        self.response = self.handler.handle(self.request)
         if auto_update_state:
             self.update_state()
         return self.response_text

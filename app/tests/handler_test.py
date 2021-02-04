@@ -10,10 +10,17 @@ sys.path.append('..')
 import app
 import scenes
 import models
+import handlers
+
 
 class HandlerTest(unittest.TestCase):
+    handler = None
     # Init
     def setUp(self):
+        self.handler = handlers.HandleAppRequest()
+        # self.handler = handlers.HandleWebRequest('https://neuroslav.prod.kubeapp.ru') # production
+        # self.handler = handlers.HandleWebRequest('https://neuroslav-jx-staging.kubeapp.ru') #staging
+        # self.handler = handlers.HandleWebRequest('https://c6f5bb40e06f.ngrok.io')  # dev
         pass
     # Clean up
     def tearDown(self):
@@ -35,12 +42,12 @@ class HandlerTest(unittest.TestCase):
     #     self.assertTrue(second_response['response']['text'] != first_response['response']['text'])
 
     def test_emulator(self):
-        alice = AliceEmulator()
+        alice = AliceEmulator(self.handler)
         alice.make_request()
         self.assertEqual(alice.response_state['scene'], alice.request_state['scene'], 'Scenes must be equal')
 
     def test_welcome(self):
-        alice = AliceEmulator()
+        alice = AliceEmulator(self.handler)
 
         # Make first request
         first_response_text = alice.make_request()
@@ -54,7 +61,7 @@ class HandlerTest(unittest.TestCase):
         # self.assertTrue(second_response_text != first_response_text, 'Welcome message (first run) must be not equal to Welcome message (second run)')
 
     def test_case02(self):
-        alice = AliceEmulator()
+        alice = AliceEmulator(self.handler)
 
         alice.make_request()
         self.assertEqual(alice.response_state['scene'], 'Welcome', 'Scene must be Welcome')
@@ -87,7 +94,7 @@ class HandlerTest(unittest.TestCase):
         self.assertEqual(alice.response_state['clue_given'], True, 'clue_given must be True')
 
     def test_case07(self):
-        alice = AliceEmulator()
+        alice = AliceEmulator(self.handler)
 
         alice.make_request()
         self.assertEqual(alice.response_state['scene'], 'Welcome', 'Scene must be Welcome')
@@ -123,7 +130,7 @@ class HandlerTest(unittest.TestCase):
 
     def test_case09(self):
         # Init scene
-        alice = AliceEmulator()
+        alice = AliceEmulator(self.handler)
 
         alice.make_request()
         self.assertEqual(alice.response_state['scene'], 'Welcome', 'Scene must be Welcome')
@@ -196,7 +203,7 @@ class HandlerTest(unittest.TestCase):
         ]
 
         for difficulty in difficulties:
-            alice = AliceEmulator()
+            alice = AliceEmulator(self.handler)
             alice.make_request()
             self.assertEqual(alice.response_state['scene'], 'Welcome', 'Scene must be Welcome')
             alice.set_text('давай играть')
@@ -221,7 +228,7 @@ class HandlerTest(unittest.TestCase):
         ]
 
         for phrase in phrases:
-            alice = AliceEmulator()
+            alice = AliceEmulator(self.handler)
             alice.make_request()
             self.assertEqual(alice.response_state['scene'], 'Welcome', 'Scene must be Welcome')
             alice.set_text(phrase['text'])
