@@ -60,7 +60,7 @@ def current_user(request):
         user = User.objects.get({'application_id': application_id})
         return user
     except Exception as e:
-        logging.error(f"{request['session']['session_id']}: EXCEPTION: {e}")
+        logging.debug(f"{request['session']['session_id']}: User does not exist. {e}")
         return None
 
 
@@ -297,6 +297,7 @@ class Welcome(Main):
 
     def handle_local_intents(self, request: Request):
         user = current_user(request)
+
         user_meant = UserMeaning(request)
 
         if user_meant.lets_play() or user_meant.confirm():

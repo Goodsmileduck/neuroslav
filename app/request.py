@@ -16,3 +16,7 @@ class Request:
     @property
     def type(self):
         return self.request_body.get('request', {}).get('type')
+    
+    @property
+    def new_session(self):
+        return self.request_body.get('session', {}).get('new')
