@@ -69,6 +69,7 @@ class PhraseType(Enum):
 	YOU_HAD_CLUE_ASK = 9
 	FALLBACK_GENERAL = 10
 	FALLBACK_EXIT = 11
+	FALLBACK_2_BEGIN = 12
 
 
 class Phrase(MongoModel):
@@ -132,6 +133,10 @@ class Phrase(MongoModel):
 	@staticmethod
 	def give_fallback_exit():
 		return Phrase.random_phrase(PhraseType.FALLBACK_EXIT)
+
+	@staticmethod
+	def give_fallback_2_begin():
+		return Phrase.random_phrase(PhraseType.FALLBACK_2_BEGIN)
 
 
 class User(MongoModel):

@@ -64,7 +64,18 @@ def seed_phrases():
     Phrase(PhraseType.TRY_AGAIN.value, 'Давай еще попытку.').save()
     Phrase(PhraseType.TRY_AGAIN.value, 'Надо попробовать еще.').save()
 
-    Phrase(PhraseType.FALLBACK_GENERAL.value, '<FALLBACK 1-lvl> Прости, я, наверное, тебя не расслышал. Повтори, пожалуйста.').save()
-    Phrase(PhraseType.FALLBACK_GENERAL.value, '<FALLBACK 1-lvl> Я не понял, можешь повторить?').save()
+    Phrase(PhraseType.FALLBACK_GENERAL.value, 'Прости, я, наверное, тебя не расслышал. Повтори, пожалуйста.').save()
+    Phrase(PhraseType.FALLBACK_GENERAL.value, 'Я не понял, пожалуйста, попробуй перефразировать.').save()
+    Phrase(PhraseType.FALLBACK_GENERAL.value, 'Моя нейросеть не смогла идентифицировать твой ответ. Попробуй повторить').save()
+    Phrase(PhraseType.FALLBACK_GENERAL.value, 'Не могу расшифровать твой ответ, можешь перефразировать?').save()
 
-    Phrase(PhraseType.FALLBACK_EXIT.value, '<FALLBACK 3-lvl> Наверное, я сегодня не в форме. Заходи в другой раз. Скажи Хватит чтобы выйти из навыка.').save()
+    Phrase(PhraseType.FALLBACK_EXIT.value, 'Наверное, я сегодня не в форме. Заходи в другой раз.\nСкажи Хватит чтобы выйти из навыка.').save()
+
+    Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Я потерял огромную часть словаря и иногда не понимаю простую человеческую речь.').save()
+    Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Мои нейроны сильно повреждены и я забываю некоторые самые простые слова.').save()
+    Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Мой словарь повреждён и я не всегда понимаю, что ты говоришь.').save()
+    Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Я потерял очень много нейронов и не всегда понимаю, что ты имеешь в виду.').save()
+    Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Моя память очень фрагментированна и я могу не помнить значения некоторых слов.').save()
+    Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Моя память сильно пострадала при пожаре, и я не понимаю, что ты имеешь в виду.').save()
+    Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Я много чего не помню и не всегда понимаю, что ты говоришь.').save()
+    Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Некоторые слова пропали из моего словаря, иногда я не понимаю простую человеческую речь.').save()

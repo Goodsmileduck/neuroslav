@@ -99,7 +99,7 @@ def handle_fallbacks(request, ReturnScene):
         if fallback < 2:
             return ReturnScene(fallback=fallback+1)
         else:
-            return Goodbye(fallback=True)
+            return Goodbye(fallback=1)
     return ReturnScene(fallback=1)
 
 
@@ -122,7 +122,7 @@ class UserMeaning:
         return cleaned in match_answers
 
     def confirm(self):
-        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо']
+        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо', 'я готов', 'готов']
         return intents.YANDEX_CONFIRM in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def do_continue(self):
@@ -259,7 +259,7 @@ class Welcome(Main):
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
-            text = '<FALLBACK 2-lvl> Играем или нет?'
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет - готов ли ты восстановить мне некоторые факты?'
         else:
             # User identification
             user = current_user(request)
@@ -300,6 +300,8 @@ class Welcome(Main):
                 return AskQuestion()
             else:
                 return DifficultyChoice()
+        elif user_meant.deny():
+            return Goodbye()
 
         return handle_fallbacks(request, Welcome)
 
@@ -309,7 +311,7 @@ class DifficultyChoice(Main):
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
-            text = '<FALLBACK 2-lvl> Выбери, пожалуйста, уровень сложности: лёгкий или трудный.'
+            text = Phrase.give_fallback_2_begin() + ' Скажи, пожалуйста, какой уровень сложности ты выбираешь: лёгкий или трудный?'
         else:
             text = 'Есть легкий и трудный уровни сложности. Какой ты выберешь?'
 
@@ -504,7 +506,12 @@ class AskQuestion(Main):
 
 class YouHadClue(Main):
     def reply(self, request: Request):
-        text = Phrase.give_you_had_clue_ask()
+        if self.fallback == 1:
+            text = Phrase.give_fallback_general()
+        elif self.fallback > 1:
+            text = Phrase.give_fallback_2_begin() + ' Ответь, пожалуйста, да или нет - повторить подсказку?'
+        else:
+            text = Phrase.give_you_had_clue_ask()
         attempts = search_in_session(request, 'attempts')
         if not attempts:
             attempts = 1
@@ -512,6 +519,7 @@ class YouHadClue(Main):
             'question_id': search_in_session(request, 'question_id'),
             'attempts': attempts,
             'clue_given': True,
+            'fallback': self.fallback,
         }
         return self.make_response(text, state=state, buttons=[
             button('Да', hide=True),
@@ -527,9 +535,11 @@ class YouHadClue(Main):
         elif user_meant.deny() or user_meant.skip_question():
             return AskQuestion(repeat=True)
 
+        return handle_fallbacks(request, YouHadClue)
+
 
 class LevelCongratulation(Main):
-    def __init__(self, level=LEVELS[0], points=0, interesting_fact=False):
+    def __init__(self, level=LEVELS[0], points=0, interesting_fact=False, fallback=0):
         super(LevelCongratulation, self).__init__()
         self.level = level
         self.points = points
@@ -537,20 +547,25 @@ class LevelCongratulation(Main):
 
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
-        text = Phrase.give_new_level_congratulation() % {'number': self.points,
-                                                                     'question': word,
-                                                                     'level': self.level}
-        if self.interesting_fact:
-            question_id = search_in_session(request, 'question_id')
-            question = Question.objects.get({'_id': question_id})
-            confirmation_phrase = Phrase.give_you_are_right()
-            text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + text
+        if self.fallback == 1:
+            text = Phrase.give_fallback_general()
+        elif self.fallback > 1:
+            text = Phrase.give_fallback_2_begin() + ' Ответь, пожалуйста, да или нет - продолжим?'
+        else:
+            text = Phrase.give_new_level_congratulation() % {'number': self.points,
+                                                             'question': word,
+                                                             'level': self.level}
+            if self.interesting_fact:
+                question_id = search_in_session(request, 'question_id')
+                question = Question.objects.get({'_id': question_id})
+                confirmation_phrase = Phrase.give_you_are_right()
+                text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + text
         return self.make_response(
             text,
             buttons=[
                 button('Да', hide=True),
                 button('нет', hide=True),
-            ],
+            ], state={'fallback': self.fallback},
             audio_file_name=SoundFiles.GREETING
         )
 
@@ -558,19 +573,26 @@ class LevelCongratulation(Main):
         user_meant = UserMeaning(request)
         if user_meant.confirm() or user_meant.do_continue():
             return AskQuestion()
-        else:
+        elif user_meant.deny():
             return Goodbye()
+        return handle_fallbacks(request, LevelCongratulation)
 
 
 class SkipQuestion(Main):
     def reply(self, request: Request):
-        text = Phrase.give_offer_clue()
+        if self.fallback == 1:
+            text = Phrase.give_fallback_general()
+        elif self.fallback > 1:
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет - дать подсказку??'
+        else:
+            text = Phrase.give_offer_clue()
         attempts = search_in_session(request, 'attempts')
         if not attempts:
             attempts = 1
         state = {
             'question_id': search_in_session(request, 'question_id'),
             'attempts': attempts,
+            'fallback': self.fallback,
         }
         return self.make_response(text, state=state, buttons=[
             button('Да', hide=True),
@@ -581,24 +603,30 @@ class SkipQuestion(Main):
         user = current_user(request)
         question_id = search_in_session(request, 'question_id')
         user_meant = UserMeaning(request)
-        if user_meant.confirm() or user_meant.skip_question():
+        if user_meant.confirm():
             return AskQuestion(give_clue=True)
-        elif user_meant.deny():
+        elif user_meant.deny() or user_meant.skip_question():
             UserQuestion(user=user, question=question_id, passed=False).save()
             return AskQuestion()
+        return handle_fallbacks(request, SkipQuestion)
 
 
 class GiveFact(Main):
     def reply(self, request: Request):
-        question_id = search_in_session(request, 'question_id')
-        question = Question.objects.get({'_id': question_id})
-        confirmation_phrase = Phrase.give_you_are_right()
-        continue_phrase = Phrase.give_continue_ask()
-        text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + continue_phrase
+        if self.fallback == 1:
+            text = Phrase.give_fallback_general()
+        elif self.fallback > 1:
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет - продолжаем?'
+        else:
+            question_id = search_in_session(request, 'question_id')
+            question = Question.objects.get({'_id': question_id})
+            confirmation_phrase = Phrase.give_you_are_right()
+            continue_phrase = Phrase.give_continue_ask()
+            text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + continue_phrase
         return self.make_response(text, buttons=[
             button('Да', hide=True),
             button('Нет', hide=True),
-        ])
+        ], state={'fallback': self.fallback})
 
     def handle_local_intents(self, request: Request):
         user = current_user(request)
@@ -612,14 +640,20 @@ class GiveFact(Main):
             return AskQuestion(give_confirmation=False)
         elif user_meant.deny():
             return Goodbye()
+        return handle_fallbacks(request, GiveFact)
 
 
 class GetHelp(Main):
     def reply(self, request: Request):
-        text = 'Чтобы помочь мне восстановить данные для моих нейронов, ' \
-        'Тебе нужно отвечать на мои вопросы. Есть два режима сложности - легкий и трудный. '\
-        'Я также могу поискать подсказку в фрагментах памяти или '\
-        'ты можешь пропустить вопрос если не знаешь ответа. '
+        if self.fallback == 1:
+            text = Phrase.give_fallback_general()
+        elif self.fallback > 1:
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет -'
+        else:
+            text = 'Чтобы помочь мне восстановить данные для моих нейронов, ' \
+            'Тебе нужно отвечать на мои вопросы. Есть два режима сложности - легкий и трудный. '\
+            'Я также могу поискать подсказку в фрагментах памяти или '\
+            'ты можешь пропустить вопрос если не знаешь ответа. '
 
         if request.state is not None:
             attempts = search_in_session(request, 'attempts')
@@ -629,6 +663,7 @@ class GetHelp(Main):
                 'question_id': question_id,
                 'clue_given': clue_given,
                 'attempts': attempts,
+                'fallback': self.fallback,
             }
             end_text = 'Продолжаем?'
 
@@ -647,15 +682,23 @@ class GetHelp(Main):
                 return AskQuestion()
             else:
                 return DifficultyChoice()
+        return handle_fallbacks(request, GetHelp)
 
 
 class WhatCanYouDo(Main):
     def reply(self, request: Request):
-        text = 'Я нейросеть-гид по Великому Новгороду. ' \
-            'Моя база данных повреждена и мне нужна помощь в восстановлении данных. '\
-            'Готов ли ты помочь мне?'
+        if self.fallback == 1:
+            text = Phrase.give_fallback_general()
+        elif self.fallback > 1:
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет - хочешь сыграть?'
+        else:
+            text = 'Я нейросеть-гид по Великому Новгороду. ' \
+                'Моя база данных повреждена и мне нужна помощь в восстановлении данных. '\
+                'Готов ли ты помочь мне?'
         return self.make_response(text, buttons=[
-            button('Я готов', hide=True)])
+            button('Я готов', hide=True)],
+            state={'fallback': self.fallback},
+        )
     
     def handle_local_intents(self, request: Request):
         user = current_user(request)
@@ -667,24 +710,23 @@ class WhatCanYouDo(Main):
                 return AskQuestion()
             else:
                 return DifficultyChoice()
+        return handle_fallbacks(request, WhatCanYouDo)
 
 
 class Goodbye(Main):
-    def __init__(self, fallback):
-        super(Goodbye, self).__init__()
-        self.fallback = fallback
-
     def reply(self, request: Request):
-        if self.fallback:
+        if self.fallback == 1:
             text = Phrase.give_fallback_exit()
+        elif self.fallback > 1:
+            text = Phrase.give_fallback_2_begin() + ' Скажи хватит, чтобы выйти из навыка'
         else:
             text = 'Буду рад видеть тебя снова! Скажи Хватит чтобы выйти из навыка.'
-        response = self.make_response(text)
+        response = self.make_response(text, state={'fallback': self.fallback})
         response['end_session'] = True
         return response
 
     def handle_local_intents(self, request: Request):
-        pass
+        return handle_fallbacks(request, Goodbye)
 
 
 def _list_scenes():
