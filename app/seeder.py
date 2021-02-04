@@ -5,7 +5,8 @@ import csv, os
 import logging
 from seed_phrases import seed_phrases
 
-CLIENT = MongoClient(DB_HOST, DB_PORT)
+mongo_client = MongoClient(DB_HOST, DB_PORT).DB_NAME
+db = mongo_client[DB_NAME]
 
 
 def seed_questions_from_csv():
@@ -56,7 +57,10 @@ def is_db_empty():
 
 def seed_all():
     # drop db before migration
-    CLIENT.drop_database(DB_NAME)
+    logging.info('Removing pharase collection')
+    db.drop_collection('phrase')
+    logging.info('Removing question collection')
+    db.drop_collection('question')
     logging.info('Db was cleared')
     if is_db_empty():
         logging.info('Db is empty. Seeder started')
