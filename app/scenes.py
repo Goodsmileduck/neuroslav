@@ -553,6 +553,7 @@ class LevelCongratulation(Main):
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
         card = None
+        audio_file_name = None
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
@@ -561,6 +562,7 @@ class LevelCongratulation(Main):
             text = Phrase.give_new_level_congratulation() % {'number': self.points,
                                                              'question': word,
                                                              'level': self.level}
+            audio_file_name = SoundFiles.GREETING
             if self.interesting_fact:
                 question_id = search_in_session(request, 'question_id')
                 question = Question.objects.get({'_id': question_id})
@@ -578,7 +580,7 @@ class LevelCongratulation(Main):
                 button('Да', hide=True),
                 button('нет', hide=True),
             ], state={'fallback': self.fallback},
-            audio_file_name=SoundFiles.GREETING,
+            audio_file_name=audio_file_name,
             card=card,
         )
 
@@ -657,8 +659,6 @@ class GiveFact(Main):
             gained_level, level, points = user.gained_new_level()
             logging.info(f"Gained level: {gained_level}, LEVEL: {level}, points: {points}")
             print(f"Gained level: {gained_level}, LEVEL: {level}, points: {points}")
-            if gained_level:
-                return LevelCongratulation(level=level, points=points)
             return AskQuestion(give_confirmation=False)
         elif user_meant.deny():
             return Goodbye()
