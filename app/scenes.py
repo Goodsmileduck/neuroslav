@@ -618,7 +618,7 @@ class SkipQuestion(Main):
         user = current_user(request)
         question_id = search_in_session(request, 'question_id')
         user_meant = UserMeaning(request)
-        if user_meant.confirm():
+        if user_meant.confirm() or user_meant.give_clue():
             return AskQuestion(give_clue=True)
         elif user_meant.deny() or user_meant.skip_question():
             UserQuestion(user=user, question=question_id, passed=False).save()
