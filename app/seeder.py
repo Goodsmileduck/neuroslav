@@ -57,10 +57,10 @@ def is_db_empty():
 
 def seed_all():
     # drop db before migration
-    logging.info('Removing pharase collection')
-    db.drop_collection('phrase')
+    logging.info('Removing phrase collection')
+    db.phrase.drop()
     logging.info('Removing question collection')
-    db.drop_collection('question')
+    db.question.drop()
     logging.info('Db was cleared')
     if is_db_empty():
         logging.info('Db is empty. Seeder started')
