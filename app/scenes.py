@@ -255,6 +255,10 @@ class Main(Scene):
 class Welcome(Main):
     def reply(self, request: Request):
         sound_file_name = None
+        
+        if request['request']['command'] == "ping":
+            response = self.make_response("pong")
+            return response
 
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
