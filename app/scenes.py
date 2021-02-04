@@ -723,7 +723,7 @@ class Goodbye(Main):
         else:
             text = 'Буду рад видеть тебя снова! Скажи Хватит чтобы выйти из навыка.'
         response = self.make_response(text, state={'fallback': self.fallback})
-        response['end_session'] = True
+        response['response']['end_session'] = True
         return response
 
     def handle_local_intents(self, request: Request):
