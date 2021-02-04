@@ -122,7 +122,7 @@ class UserMeaning:
         return cleaned in match_answers
 
     def confirm(self):
-        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо', 'я готов', 'готов']
+        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо', 'я готов', 'готов', 'да да', 'ага']
         return intents.YANDEX_CONFIRM in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def do_continue(self):
@@ -130,7 +130,7 @@ class UserMeaning:
         return self.is_answer_in_match_answers(match_answers)
 
     def deny(self):
-        match_answers = ['нет', 'не хочу', 'не надо', 'не думаю', 'наверное нет', 'конечно нет', 'не надо']
+        match_answers = ['нет', 'не хочу', 'не надо', 'не думаю', 'наверное нет', 'конечно нет', 'не надо', 'нет нет']
         return intents.YANDEX_REJECT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def dont_know(self):
