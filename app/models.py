@@ -34,11 +34,14 @@ class Question(MongoModel):
 	question_type = fields.IntegerField(choices=QUESTION_TYPES)
 	question = fields.CharField(max_length=2048)
 	tts = fields.CharField(max_length=2048, blank=True)
-	picture = fields.CharField(max_length=512)
+	picture = fields.CharField(max_length=512, blank=True)
+
 	clue = fields.CharField(max_length=2048, blank=True)
 	clue_tts = fields.CharField(max_length=2048, blank=True)
+
 	interesting_fact = fields.CharField(max_length=2048, blank=True)
-	confirmation_picture = fields.CharField(max_length=512)
+	interesting_fact_tts = fields.CharField(max_length=2048, blank=True)
+	interesting_fact_pic_id = fields.CharField(max_length=512, blank=True)
 
 	DIFFICULTIES = BASE_DIFFICULTIES + [(MIXED_DIFFICULTY, 'mixed')]
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)

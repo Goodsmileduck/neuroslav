@@ -32,6 +32,8 @@ def seed_questions_from_csv():
                 difficulty=q["difficulty"],
                 right_answers=right_answers,
                 interesting_fact=q.get('interesting_fact', ''),
+                interesting_fact_tts=q.get('interesting_fact_tts', ''),
+                interesting_fact_pic_id=q.get('interesting_fact_pic_id', ''),
                 possible_answers=possible_answers).save()
 
 

@@ -206,7 +206,7 @@ class Scene(ABC):
         sound_tag = f"<speaker audio='{audio_file_name.value}'> "
         return sound_tag + tts
 
-    def make_response(self, text, tts=None, card=None, state=None, buttons=None, directives=None, audio_file_name = None):
+    def make_response(self, text, tts=None, card=None, state=None, buttons=None, directives=None, audio_file_name=None):
         if audio_file_name is not None:
             tts = self.make_audio_tts(audio_file_name, text, tts)
 
@@ -548,6 +548,7 @@ class LevelCongratulation(Main):
 
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
+        card = None
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
@@ -561,13 +562,20 @@ class LevelCongratulation(Main):
                 question = Question.objects.get({'_id': question_id})
                 confirmation_phrase = Phrase.give_you_are_right()
                 text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + text
+                if question.interesting_fact_pic_id and question.interesting_fact_pic_id != '':
+                    card = {
+                        'type': 'BigImage',
+                        'image_id': question.interesting_fact_pic_id,
+                        'description': text,
+                    }
         return self.make_response(
             text,
             buttons=[
                 button('Да', hide=True),
                 button('нет', hide=True),
             ], state={'fallback': self.fallback},
-            audio_file_name=SoundFiles.GREETING
+            audio_file_name=SoundFiles.GREETING,
+            card=card,
         )
 
     def handle_local_intents(self, request: Request):
@@ -614,6 +622,7 @@ class SkipQuestion(Main):
 
 class GiveFact(Main):
     def reply(self, request: Request):
+        card = None
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
@@ -624,10 +633,18 @@ class GiveFact(Main):
             confirmation_phrase = Phrase.give_you_are_right()
             continue_phrase = Phrase.give_continue_ask()
             text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + continue_phrase
-        return self.make_response(text, buttons=[
-            button('Да', hide=True),
-            button('Нет', hide=True),
-        ], state={'fallback': self.fallback})
+            if question.interesting_fact_pic_id and question.interesting_fact_pic_id != '':
+                card = {
+                    'type': 'BigImage',
+                    'image_id': question.interesting_fact_pic_id,
+                    'description': text,
+                }
+        return self.make_response(
+            text,
+            buttons=[button('Да', hide=True), button('Нет', hide=True)],
+            state={'fallback': self.fallback},
+            card=card
+        )
 
     def handle_local_intents(self, request: Request):
         user = current_user(request)
