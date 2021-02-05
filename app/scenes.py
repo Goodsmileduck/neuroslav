@@ -263,7 +263,7 @@ class Welcome(Main):
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
-            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет - готов ли ты восстановить мне некоторые факты?'
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет, - готов ли ты восстановить мне некоторые факты?'
         else:
             # User identification
             user = current_user(request)
@@ -518,7 +518,7 @@ class YouHadClue(Main):
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
-            text = Phrase.give_fallback_2_begin() + ' Ответь, пожалуйста, да или нет - повторить подсказку?'
+            text = Phrase.give_fallback_2_begin() + ' Ответь, пожалуйста, да или нет, - хочешь, чтобы я повторил подсказку?'
         else:
             text = Phrase.give_you_had_clue_ask()
         attempts = search_in_session(request, 'attempts')
@@ -566,7 +566,7 @@ class LevelCongratulation(Main):
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
-            text = Phrase.give_fallback_2_begin() + ' Ответь, пожалуйста, да или нет - продолжим?'
+            text = Phrase.give_fallback_2_begin() + ' Ответь, пожалуйста, да или нет, - хочешь продолжить?'
         else:
             text = Phrase.give_new_level_congratulation() % {'number': self.points,
                                                              'question': word,
@@ -625,7 +625,7 @@ class SkipQuestion(Main):
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
-            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет - дать подсказку??'
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет, - дать подсказку??'
         else:
             text = Phrase.give_offer_clue()
         attempts = search_in_session(request, 'attempts')
@@ -667,7 +667,7 @@ class GiveFact(Main):
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
-            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет - продолжаем?'
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет, - хочешь продолжить?'
         else:
             question = Question.objects.get({'_id': question_id})
             continue_phrase = Phrase.give_continue_ask()
@@ -708,7 +708,7 @@ class GetHelp(Main):
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
-            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет -'
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет, -'
         else:
             text = 'Чтобы помочь мне восстановить данные для моих нейронов, ' \
             'Тебе нужно отвечать на мои вопросы. Есть два режима сложности - легкий и трудный. '\
@@ -752,7 +752,7 @@ class WhatCanYouDo(Main):
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
-            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет - хочешь сыграть?'
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет, - хочешь сыграть?'
         else:
             text = 'Я нейросеть-гид по Великому Новгороду. ' \
                 'Моя база данных повреждена и мне нужна помощь в восстановлении данных. '\
