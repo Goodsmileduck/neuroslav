@@ -126,7 +126,7 @@ class UserMeaning:
         return intents.YANDEX_CONFIRM in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def do_continue(self):
-        match_answers = ['давай продолжим', 'продолжим', 'продолжаем', 'хочу продолжить', 'давай продолжать']
+        match_answers = ['давай продолжим', 'продолжим', 'продолжаем', 'хочу продолжить', 'давай продолжать', 'продолжай', 'давай продолжай', 'продолжи', 'продолжить', 'продолжать']
         return self.is_answer_in_match_answers(match_answers)
 
     def deny(self):
@@ -161,7 +161,7 @@ class UserMeaning:
         return self.is_answer_in_match_answers(match_answers)
 
     def repeat(self):
-        match_answers = ['повтори', 'ещё раз', 'скажи ещё раз', 'давай ещё раз', 'повторить',
+        match_answers = ['повтори', 'ещё раз', 'еще раз', 'скажи ещё раз', 'давай ещё раз', 'повторить',
                          'можешь повторить', 'повтори вопрос']
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
