@@ -307,6 +307,8 @@ class Welcome(Main):
                 return DifficultyChoice()
         elif user_meant.deny():
             return Goodbye()
+        elif user_meant.repeat():
+            return Welcome()
 
         return handle_fallbacks(request, Welcome)
 
@@ -339,6 +341,8 @@ class DifficultyChoice(Main):
             user.difficulty = 2
             user.save()
             return AskQuestion()
+        elif user_meant.repeat():
+            return DifficultyChoice()
         return handle_fallbacks(request, DifficultyChoice)
 
 
@@ -539,33 +543,39 @@ class YouHadClue(Main):
             return AskQuestion(give_clue=True)
         elif user_meant.deny() or user_meant.skip_question():
             return AskQuestion(repeat=True)
+        elif user_meant.repeat():
+            return YouHadClue()
 
         return handle_fallbacks(request, YouHadClue)
 
 
 class LevelCongratulation(Main):
-    def __init__(self, level=LEVELS[0], points=0, interesting_fact=False, fallback=0):
+    def __init__(self, level=LEVELS[0], points=0, interesting_fact=False, fallback=0, repeat_text=None):
         super(LevelCongratulation, self).__init__()
         self.level = level
         self.points = points
         self.interesting_fact = interesting_fact
         self.fallback = fallback
+        self.repeat_text = repeat_text
 
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
         card = None
         audio_file_name = None
+        question_id = search_in_session(request, 'question_id')
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
             text = Phrase.give_fallback_2_begin() + ' Ответь, пожалуйста, да или нет - продолжим?'
         else:
-            text = Phrase.give_new_level_congratulation() % {'number': self.points,
-                                                             'question': word,
-                                                             'level': self.level}
+            if self.repeat_text:
+                text = self.repeat_text
+            else:
+                text = Phrase.give_new_level_congratulation() % {'number': self.points,
+                                                                 'question': word,
+                                                                 'level': self.level}
             audio_file_name = SoundFiles.GREETING
             if self.interesting_fact:
-                question_id = search_in_session(request, 'question_id')
                 question = Question.objects.get({'_id': question_id})
                 confirmation_phrase = Phrase.give_you_are_right()
                 text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + text
@@ -575,12 +585,16 @@ class LevelCongratulation(Main):
                         'image_id': question.interesting_fact_pic_id,
                         'description': text,
                     }
+        repeat_text = search_in_session(request, 'repeat_text')
+        if repeat_text is None:
+            repeat_text = text
         return self.make_response(
             text,
             buttons=[
                 button('Да', hide=True),
                 button('нет', hide=True),
-            ], state={'fallback': self.fallback},
+            ], state={'fallback': self.fallback, 'repeat_text': repeat_text,
+                      'interesting_fact': self.interesting_fact, 'question_id': question_id},
             audio_file_name=audio_file_name,
             card=card,
         )
@@ -591,6 +605,10 @@ class LevelCongratulation(Main):
             return AskQuestion()
         elif user_meant.deny():
             return Goodbye()
+        elif user_meant.repeat():
+            return LevelCongratulation(repeat_text=search_in_session(request, 'repeat_text'),
+                                       interesting_fact=search_in_session(request, 'interesting_fact'),
+                                       fallback=0)
         return handle_fallbacks(request, LevelCongratulation)
 
 
@@ -624,22 +642,31 @@ class SkipQuestion(Main):
         elif user_meant.deny() or user_meant.skip_question():
             UserQuestion(user=user, question=question_id, passed=False).save()
             return AskQuestion()
+        elif user_meant.repeat():
+            return SkipQuestion()
         return handle_fallbacks(request, SkipQuestion)
 
 
 class GiveFact(Main):
+    def __init__(self, fallback=0, give_confirmation=True):
+        super(GiveFact, self).__init__()
+        self.fallback = fallback
+        self.give_confirmation = give_confirmation
+
     def reply(self, request: Request):
         card = None
+        question_id = search_in_session(request, 'question_id')
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
             text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет - продолжаем?'
         else:
-            question_id = search_in_session(request, 'question_id')
             question = Question.objects.get({'_id': question_id})
-            confirmation_phrase = Phrase.give_you_are_right()
             continue_phrase = Phrase.give_continue_ask()
-            text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + continue_phrase
+            text = question.interesting_fact + '\n' + continue_phrase
+            if self.give_confirmation:
+                confirmation_phrase = Phrase.give_you_are_right()
+                text = confirmation_phrase + '\n' + text
             if question.interesting_fact_pic_id and question.interesting_fact_pic_id != '':
                 card = {
                     'type': 'BigImage',
@@ -649,7 +676,7 @@ class GiveFact(Main):
         return self.make_response(
             text,
             buttons=[button('Да', hide=True), button('Нет', hide=True)],
-            state={'fallback': self.fallback},
+            state={'fallback': self.fallback, 'question_id': question_id},
             card=card
         )
 
@@ -663,6 +690,8 @@ class GiveFact(Main):
             return AskQuestion(give_confirmation=False)
         elif user_meant.deny():
             return Goodbye()
+        elif user_meant.repeat():
+            return GiveFact(give_confirmation=False)
         return handle_fallbacks(request, GiveFact)
 
 
@@ -705,6 +734,8 @@ class GetHelp(Main):
                 return AskQuestion()
             else:
                 return DifficultyChoice()
+        elif user_meant.repeat():
+            return GetHelp()
         return handle_fallbacks(request, GetHelp)
 
 
@@ -733,6 +764,8 @@ class WhatCanYouDo(Main):
                 return AskQuestion()
             else:
                 return DifficultyChoice()
+        elif user_meant.repeat():
+            return WhatCanYouDo()
         return handle_fallbacks(request, WhatCanYouDo)
 
 
