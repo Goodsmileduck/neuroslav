@@ -162,7 +162,7 @@ class UserMeaning:
 
     def repeat(self):
         match_answers = ['повтори', 'ещё раз', 'скажи ещё раз', 'давай ещё раз', 'повторить',
-                         'можешь повторить']
+                         'можешь повторить', 'повтори вопрос']
         return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def repeat_options(self):
