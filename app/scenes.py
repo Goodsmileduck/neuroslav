@@ -92,15 +92,15 @@ def answer_is_right(request, question):
         return None
 
 
-def handle_fallbacks(request, ReturnScene):
+def handle_fallbacks(request, ReturnScene, **kwargs):
     # Catch fallbacks, needs a ReturnScene class, which has 'fallback' parameter
     fallback = search_in_session(request, 'fallback')
     if fallback:
         if fallback < 2:
-            return ReturnScene(fallback=fallback+1)
+            return ReturnScene(fallback=fallback+1, **kwargs)
         else:
             return Goodbye(fallback=1)
-    return ReturnScene(fallback=1)
+    return ReturnScene(fallback=1, **kwargs)
 
 
 def give_fact_probability():
@@ -550,13 +550,13 @@ class YouHadClue(Main):
 
 
 class LevelCongratulation(Main):
-    def __init__(self, level=LEVELS[0], points=0, interesting_fact=False, fallback=0, repeat_text=None):
+    def __init__(self, level=LEVELS[0], points=0, interesting_fact=False, fallback=0, give_confirmation=True):
         super(LevelCongratulation, self).__init__()
         self.level = level
         self.points = points
         self.interesting_fact = interesting_fact
         self.fallback = fallback
-        self.repeat_text = repeat_text
+        self.give_confirmation = give_confirmation
 
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
@@ -568,23 +568,22 @@ class LevelCongratulation(Main):
         elif self.fallback > 1:
             text = Phrase.give_fallback_2_begin() + ' Ответь, пожалуйста, да или нет - продолжим?'
         else:
-            if self.repeat_text:
-                text = self.repeat_text
-            else:
-                text = Phrase.give_new_level_congratulation() % {'number': self.points,
-                                                                 'question': word,
-                                                                 'level': self.level}
+            text = Phrase.give_new_level_congratulation() % {'number': self.points,
+                                                             'question': word,
+                                                             'level': self.level}
             audio_file_name = SoundFiles.GREETING
             if self.interesting_fact:
                 question = Question.objects.get({'_id': question_id})
+                text = question.interesting_fact + '\n' + text
+            if self.give_confirmation:
                 confirmation_phrase = Phrase.give_you_are_right()
-                text = confirmation_phrase + '\n' + question.interesting_fact + '\n' + text
-                if question.interesting_fact_pic_id and question.interesting_fact_pic_id != '':
-                    card = {
-                        'type': 'BigImage',
-                        'image_id': question.interesting_fact_pic_id,
-                        'description': text,
-                    }
+                text = confirmation_phrase + '\n' + text
+            if self.interesting_fact and question.interesting_fact_pic_id and question.interesting_fact_pic_id != '':
+                card = {
+                    'type': 'BigImage',
+                    'image_id': question.interesting_fact_pic_id,
+                    'description': text,
+                }
         repeat_text = search_in_session(request, 'repeat_text')
         if repeat_text is None:
             repeat_text = text
@@ -593,8 +592,11 @@ class LevelCongratulation(Main):
             buttons=[
                 button('Да', hide=True),
                 button('нет', hide=True),
-            ], state={'fallback': self.fallback, 'repeat_text': repeat_text,
-                      'interesting_fact': self.interesting_fact, 'question_id': question_id},
+            ], state={'fallback': self.fallback,
+                      'interesting_fact': self.interesting_fact,
+                      'question_id': question_id,
+                      'level': self.level,
+                      'points': self.points},
             audio_file_name=audio_file_name,
             card=card,
         )
@@ -606,10 +608,16 @@ class LevelCongratulation(Main):
         elif user_meant.deny():
             return Goodbye()
         elif user_meant.repeat():
-            return LevelCongratulation(repeat_text=search_in_session(request, 'repeat_text'),
-                                       interesting_fact=search_in_session(request, 'interesting_fact'),
-                                       fallback=0)
-        return handle_fallbacks(request, LevelCongratulation)
+            return LevelCongratulation(interesting_fact=search_in_session(request, 'interesting_fact'),
+                                       give_confirmation=False,
+                                       level=search_in_session(request, 'level'),
+                                       points=search_in_session(request, 'points'))
+        return handle_fallbacks(request, LevelCongratulation,
+                                interesting_fact=search_in_session(request, 'interesting_fact'),
+                                give_confirmation=False,
+                                level=search_in_session(request, 'level'),
+                                points=search_in_session(request, 'points')
+                                )
 
 
 class SkipQuestion(Main):

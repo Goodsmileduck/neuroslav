@@ -24,10 +24,10 @@ def seed_phrases():
     Phrase(PhraseType.YOU_ARE_WRONG.value, 'Хороший вариант, но не подходит.').save()
 
     # two %s are necessary! %points and %level :
-    Phrase(PhraseType.GREETING.value, 'Привет! Рад видеть тебя снова.\nТы правильно ответил на %(number)i %(question)s и достиг уровня %(level)s!\nСыграем ещё?').save()
-    Phrase(PhraseType.GREETING.value, 'Здравствуй! Давно не виделись.\nТы прошёл %(number)i %(question)s! Твой уровень - %(level)s!\nНачнём игру?').save()
-    Phrase(PhraseType.GREETING.value, 'Сколько зим! Давно не виделись.\nТы верно ответил на %(number)i %(question)s и достиг уровня %(level)s!\nИграем?').save()
-    Phrase(PhraseType.GREETING.value, 'Рад что снова тут.\nУ тебя пройдено %(number)i %(question)s! Твой уровень - %(level)s!\nИграем?').save()
+    Phrase(PhraseType.GREETING.value, 'Привет! Рад видеть тебя снова.\nТы правильно ответил на %(number)i %(question)s и достиг уровня "%(level)s"!\nСыграем ещё?').save()
+    Phrase(PhraseType.GREETING.value, 'Здравствуй! Давно не виделись.\nТы прошёл %(number)i %(question)s! Твой уровень - "%(level)s"!\nНачнём игру?').save()
+    Phrase(PhraseType.GREETING.value, 'Сколько зим! Давно не виделись.\nТы верно ответил на %(number)i %(question)s и достиг уровня "%(level)s"!\nИграем?').save()
+    Phrase(PhraseType.GREETING.value, 'Рад что снова тут.\nУ тебя пройдено %(number)i %(question)s! Твой уровень - "%(level)s"!\nИграем?').save()
 
     Phrase(PhraseType.CONTINUE_ASK.value, 'Продолжим?').save()
     Phrase(PhraseType.CONTINUE_ASK.value, 'Идём дальше?').save()
@@ -55,8 +55,8 @@ def seed_phrases():
     Phrase(PhraseType.YOU_HAD_CLUE_ASK.value, 'Моя память фрагментирована, но мне кажется, что подсказка уже была... Повторить?').save()
 
     # two %s are necessary! %points and %level :
-    Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Поздравляю, ты правильно ответил на %(number)i %(question)s и достиг уровня %(level)s! Продолжай в том же духе!\nСледующий вопрос?').save()
-    Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Невероятно, ты прошёл уже %(number)i %(question)s! Твой новый уровень - %(level)s!\nИдём дальше?').save()
+    Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Поздравляю, ты правильно ответил на %(number)i %(question)s и достиг уровня "%(level)s"! Продолжай в том же духе!\nСледующий вопрос?').save()
+    Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Невероятно, ты прошёл уже %(number)i %(question)s! Твой новый уровень - "%(level)s"!\nИдём дальше?').save()
 
     Phrase(PhraseType.TRY_AGAIN.value, 'Попробуй ещё раз.').save()
     Phrase(PhraseType.TRY_AGAIN.value, 'Попытайся снова.').save()
