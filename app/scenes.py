@@ -200,15 +200,7 @@ class Scene(ABC):
     def fallback(self, request: Request):
         return self.make_response('Извините, я вас не понимаю. Пожалуйста, попробуйте переформулировать вопрос.')
 
-    def make_audio_tts(self, audio_file_name, text='', tts=None):
-        if tts is None:
-            tts = text
-        sound_tag = f"<speaker audio='{audio_file_name.value}'> "
-        return sound_tag + tts
-
-    def make_response(self, text, tts=None, card=None, state=None, buttons=None, directives=None, audio_file_name=None):
-        if audio_file_name is not None:
-            tts = self.make_audio_tts(audio_file_name, text, tts)
+    def make_response(self, text, tts=None, card=None, state=None, buttons=None, directives=None):
 
         response = {
             'text': text,
@@ -248,6 +240,8 @@ class Main(Scene):
             return Goodbye()
         elif intents.CHANGE_DIFFICULTY in request.intents:
             return DifficultyChoice()
+        elif request['request']['command'] == "версия":
+             return self.make_response(VERSION)
         else:
             return None
 
@@ -294,12 +288,11 @@ class Welcome(Main):
                 'description': text,
             }
 
-        # text += ' Версия: ' + VERSION
         response = self.make_response(
             text,
+            tts=sound_file_name + text,
             buttons=[button('Давай играть', hide=True)],
             state={'fallback': self.fallback},
-            audio_file_name=sound_file_name,
             card=card
         )
         return response
@@ -570,7 +563,7 @@ class LevelCongratulation(Main):
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
         card = None
-        audio_file_name = None
+        audio_file_name = ''
         question_id = search_in_session(request, 'question_id')
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
@@ -599,16 +592,14 @@ class LevelCongratulation(Main):
             repeat_text = text
         return self.make_response(
             text,
-            buttons=[
-                button('Да', hide=True),
-                button('нет', hide=True),
-            ], state={'fallback': self.fallback,
-                      'interesting_fact': self.interesting_fact,
-                      'question_id': question_id,
-                      'level': self.level,
-                      'points': self.points},
-            audio_file_name=audio_file_name,
-            card=card,
+            tts=audio_file_name + text,
+            buttons=[button('Да', hide=True), button('Нет', hide=True)],
+            state={'fallback': self.fallback,
+                   'interesting_fact': self.interesting_fact,
+                   'question_id': question_id,
+                   'level': self.level,
+                   'points': self.points},
+            card=card
         )
 
     def handle_local_intents(self, request: Request):
