@@ -268,7 +268,7 @@ class Welcome(Main):
                 sound_file_name = SoundFiles.WELCOME_SECOND
             else:
                 user = User(application_id=request['session'].get('application').get('application_id')).save()
-                sound_file_name = SoundFiles.WELCOME_FIRST
+                sound_file_name = str(SoundFiles.WELCOME_FIRST)
                 first_time = True
                 logging.info(f"New user. application_id: {user.application_id} session: {request['session']['session_id']}")
 
@@ -574,7 +574,7 @@ class LevelCongratulation(Main):
                                                              'question': word,
                                                              'level': self.level}
             if not self.repeat:
-                audio_file_name = SoundFiles.GREETING
+                audio_file_name = str(SoundFiles.GREETING)
             if self.interesting_fact:
                 question = Question.objects.get({'_id': question_id})
                 text = question.interesting_fact + '\n' + text
