@@ -12,7 +12,7 @@ def sendUserMessage(message, user_id):
             "message": message,
             "platform": settings.CHATBASE_BOT_PLATFORM,
             "user_id": user_id,
-            "version": "1.0",
+            "version": settings.VERSION,
         }
         response = requests.post(
             CHATBASE_URL,
@@ -33,7 +33,7 @@ def sendBotResponse(message, user_id):
             "message": message,
             "platform": settings.CHATBASE_BOT_PLATFORM,
             "user_id": user_id,
-            "version": "1.0",
+            "version": settings.VERSION,
         }
         response = requests.post(
             CHATBASE_URL,
