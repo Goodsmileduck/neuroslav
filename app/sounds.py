@@ -1,5 +1,6 @@
 from enum import Enum
 
 class SoundFiles(Enum):
-    WELCOME = 'dialogs-upload/974ba786-f234-413b-a3c9-1e4010e22980/ca261c45-cf4a-4914-af5d-3d1b46f7c986.opus'
-    GREETING = 'alice-sounds-human-cheer-1.opus'
+    WELCOME_FIRST = 'dialogs-upload/b8fbb7ae-3100-4a8c-80ae-ad45d0295520/ede27864-e74d-48a0-8adf-9ccd32f6f462.opus'
+    WELCOME_SECOND = 'dialogs-upload/b8fbb7ae-3100-4a8c-80ae-ad45d0295520/d03f351d-34b8-4268-8e1e-293e4551e7d8.opus'
+    GREETING = 'dialogs-upload/b8fbb7ae-3100-4a8c-80ae-ad45d0295520/b0ba1662-5a7e-4cc5-b924-b386b53021a7.opus'

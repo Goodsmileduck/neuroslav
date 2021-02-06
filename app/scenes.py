@@ -271,12 +271,13 @@ class Welcome(Main):
             if user:
                 first_time = False
                 logging.info(f"User come back. application_id: {user.application_id} sessions: {request['session']['session_id']}")
+                sound_file_name = SoundFiles.WELCOME_SECOND
             else:
                 user = User(application_id=request['session'].get('application').get('application_id')).save()
+                sound_file_name = SoundFiles.WELCOME_FIRST
                 first_time = True
                 logging.info(f"New user. application_id: {user.application_id} session: {request['session']['session_id']}")
 
-            sound_file_name = None
             gained_new_level, level, points = user.gained_new_level()
             if first_time or points < 1:
                 text = 'Здравствуй! Я нейросеть-экскурсовод по Великому Новгороду. Но, честно говоря, ' \
