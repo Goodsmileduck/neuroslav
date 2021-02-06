@@ -79,3 +79,8 @@ def seed_phrases():
     Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Моя память сильно пострадала при пожаре, и я не понимаю, что ты имеешь в виду.').save()
     Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Я много чего не помню и не всегда понимаю, что ты говоришь.').save()
     Phrase(PhraseType.FALLBACK_2_BEGIN.value, 'Некоторые слова пропали из моего словаря, иногда я не понимаю простую человеческую речь.').save()
+
+    # two %s are necessary! %points and %level :
+    Phrase(PhraseType.GET_LEVEL.value, 'Ты правильно ответил на %(number)i %(question)s и достиг уровня "%(level)s"!\nСыграем ещё?').save()
+    Phrase(PhraseType.GET_LEVEL.value, 'Ты угадал уже %(number)i %(question)s! Твой уровень - "%(level)s"!\nГотов ли ты продолжить?').save()
+    Phrase(PhraseType.GET_LEVEL.value, 'Твой уровень - "%(level)s". Отвечено %(number)i %(question)s! !\nИграем?').save()

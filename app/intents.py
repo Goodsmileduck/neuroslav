@@ -3,6 +3,7 @@ CLUE = 'clue'
 EXIT = 'exit'
 ABOUT = 'about'
 CHANGE_DIFFICULTY = 'difficulty'
+GET_LEVEL = 'level'
 
 # Default intents
 YANDEX_CONFIRM = 'YANDEX.CONFIRM'

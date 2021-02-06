@@ -74,6 +74,7 @@ class PhraseType(Enum):
 	FALLBACK_GENERAL = 10
 	FALLBACK_EXIT = 11
 	FALLBACK_2_BEGIN = 12
+	GET_LEVEL = 13
 
 
 class Phrase(MongoModel):
@@ -105,6 +106,10 @@ class Phrase(MongoModel):
 	@staticmethod
 	def give_greeting():
 		return Phrase.random_phrase(PhraseType.GREETING)
+	
+	@staticmethod
+	def get_level():
+		return Phrase.random_phrase(PhraseType.GET_LEVEL)
 
 	@staticmethod
 	def give_continue_ask():

@@ -240,6 +240,8 @@ class Main(Scene):
             return Goodbye()
         elif intents.CHANGE_DIFFICULTY in request.intents:
             return DifficultyChoice()
+        elif intents.GET_LEVEL in request.intents:
+            return GetLevel()
         elif request['request']['command'] == "версия":
              return self.make_response(VERSION)
         else:
@@ -776,6 +778,40 @@ class WhatCanYouDo(Main):
         elif user_meant.repeat():
             return WhatCanYouDo()
         return handle_fallbacks(request, WhatCanYouDo)
+
+
+class GetLevel(Main):
+    def reply(self, request: Request):
+        if self.fallback == 1:
+            text = Phrase.give_fallback_general()
+        elif self.fallback > 1:
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет, - хочешь сыграть?'
+        else:
+            user = current_user(request)
+            gained_new_level, level, points = user.gained_new_level()
+            word = word_in_plural('вопрос', points)
+            text = Phrase.get_level() % {'number': points,
+                                                 'question': word,
+                                                 'level': level}
+
+        return self.make_response(text, buttons=[
+            button('Я готов', hide=True)],
+            state={'fallback': self.fallback},
+        )
+    
+    def handle_local_intents(self, request: Request):
+        user = current_user(request)
+        user_meant = UserMeaning(request)
+        user_intent = request.intents
+        logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
+        if user_meant.lets_play() or user_meant.confirm():
+            if user.difficulty:
+                return AskQuestion()
+            else:
+                return DifficultyChoice()
+        elif user_meant.repeat():
+            return GetLevel()
+        return handle_fallbacks(request, GetLevel)
 
 
 class Goodbye(Main):
