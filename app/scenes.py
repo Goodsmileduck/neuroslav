@@ -364,6 +364,7 @@ class AskQuestion(Main):
         clue_button = False
         user = current_user(request)
         tts = ''
+        text = ''
 
         if self.give_clue:
             attempts = search_in_session(request, 'attempts')
@@ -426,13 +427,15 @@ class AskQuestion(Main):
                 question = give_random_question(request=request, user=user)
                 if not question:
                     return self.make_response('Святые транзисторы, это просто невероятно, ты прошёл все вопросы! Поздравляю! \n'
-                                              'Я чувствую, что моя нейросеть полностью восстановилась! \nСПАСИБО!!!')
-
-            text = question.question
+                                              'Я чувствую, что моя нейросеть полностью восстановилась! Возвращайся чуть пойже для улучшения точности моей базы данных. \nСПАСИБО!!!')
+            gained_level, level, points = user.gained_new_level()
+            if points < 1:
+                text = tts = "Моя кратковременная память ограничена. Я смогу проверить только 2 ответа на каждый вопрос. Будь точен в своих ответах."
+            text += question.question
             if question.tts and question.tts != '':
-                tts = question.tts
+                tts += question.tts
             else:
-                tts = text
+                tts += text
             # Give random confirmation phrase if last answer was right
             if self.give_confirmation:
                 confirmation = Phrase.give_you_are_right()
