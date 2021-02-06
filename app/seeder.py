@@ -52,6 +52,8 @@ def test_seed():
 
 
 def is_db_empty():
+    ph = Phrase.objects.all().count()
+    print(ph)
     return Phrase.objects.all().count() == 0
 
 

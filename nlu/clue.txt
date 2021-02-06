@@ -1,13 +1,27 @@
 root:
-    $Give $Who? $Hint?
+    $Give_clue $Filler?
+    $Give $Who? $Hint
+    $Who? $Give $Hint
+
+$Filler:
+    .+
+
+$Give_clue:
+    %lemma
+    подскажи
 
 $Give:
     %lemma
     дай
-    подскажи 
+    подскажи
+    расскажи
+    хочу
+    нужна
 
 $Who:
+    %lemma
     мне
 
 $Hint:
+    %lemma
     подсказку
