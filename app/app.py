@@ -6,6 +6,9 @@ from request import Request
 import seeder
 import debug
 
+import chatbaselogger
+import settings
+
 app = Flask(__name__)
 
 logging.basicConfig(
@@ -19,11 +22,22 @@ def main():
     request_obj = request.json
     session_id = request_obj.get('session', {}).get('session_id', None)
     
-    logging.info(f'Session_id: {session_id} Request: {request.json}')
+    logging.info(f'Session_id: {session_id} Request: {request_obj}')
 
-    response = handler(request.json)
+    user_id = request_obj['session'].get('application').get('application_id')
+    if settings.SEND_TO_CHATBASE:
+        user_message = request_obj['request']['command']
+        #logging.info(f'User message: [{user_message}]')
+        chatbaselogger.sendUserMessage(user_id=user_id, message=user_message)
 
-    logging.info(f'Session_id: {session_id} Response: {request.json}')
+    response = handler(request_obj)
+
+    logging.info(f'Session_id: {session_id} Response: {response}')
+
+    if settings.SEND_TO_CHATBASE:
+        response_message = response['response']['text']
+        #logging.info(f'Response message: [{response_message}]')
+        chatbaselogger.sendBotResponse(user_id=user_id, message=response_message)
 
     return json.dumps(
         response,
@@ -39,6 +53,7 @@ def handler(request):
       current_scene_id = None
     logging.info('CURRENT SCENE ID: %r', current_scene_id)
     request_obj = Request(request)
+
     if current_scene_id is None:
         return DEFAULT_SCENE().reply(request_obj)
     current_scene = SCENES.get(current_scene_id, DEFAULT_SCENE)()
