@@ -1,0 +1,15 @@
+root:
+    $Do $LetsGame
+    $Do $Game
+
+$Do:
+    давай
+    хочу
+    начнем
+$LetsGame:
+    %lemma
+    играть
+    поиграем
+$Game:
+    %lemma
+    игра

@@ -1,9 +1,16 @@
 root: 
     $Which $Filler? $Level
+    $Which $Filler? $Question
+    $Which $Question
+    $Filler? $Stats
 
 $Which:
     %lemma
     какой
+    покажи
+    скажи
+    сколько
+    мой
 
 $Filler:
     .*
@@ -11,3 +18,15 @@ $Filler:
 $Level:
     %lemma
     уровень
+    очков
+    баллов
+    
+
+$Question:
+    %lemma
+    вопрос
+
+$Stats:
+    %lemma
+    результаты
+    статистика
