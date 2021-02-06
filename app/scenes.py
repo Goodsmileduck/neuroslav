@@ -265,7 +265,7 @@ class Welcome(Main):
             if user:
                 first_time = False
                 logging.info(f"User come back. application_id: {user.application_id} sessions: {request['session']['session_id']}")
-                sound_file_name = SoundFiles.WELCOME_SECOND
+                sound_file_name = str(SoundFiles.WELCOME_SECOND)
             else:
                 user = User(application_id=request['session'].get('application').get('application_id')).save()
                 sound_file_name = str(SoundFiles.WELCOME_FIRST)
