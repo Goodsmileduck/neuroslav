@@ -248,7 +248,7 @@ class Main(Scene):
 
 class Welcome(Main):
     def reply(self, request: Request):
-        sound_file_name = None
+        sound_file_name = ''
         card = None
 
         if request['request']['command'] == "ping":
