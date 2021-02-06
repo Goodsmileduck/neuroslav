@@ -52,9 +52,7 @@ def test_seed():
 
 
 def is_db_empty():
-    ph = db.phrase.count_documents()
-    print(ph)
-    return db.phrase.count_documents() == 0
+    return db.phrase.count_documents({}) == 0
 
 
 def seed_all():
