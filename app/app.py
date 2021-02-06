@@ -28,7 +28,7 @@ def main():
     if settings.SEND_TO_CHATBASE:
         user_message = request_obj['request']['command']
         #logging.info(f'User message: [{user_message}]')
-        chatbaselogger.sendUserMessage(user_id=user_id, message=user_message)
+        chatbaselogger.sendUserMessage(user_id=user_id, message=user_message, request_id=session_id)
 
     response = handler(request_obj)
 
@@ -37,7 +37,7 @@ def main():
     if settings.SEND_TO_CHATBASE:
         response_message = response['response']['text']
         #logging.info(f'Response message: [{response_message}]')
-        chatbaselogger.sendBotResponse(user_id=user_id, message=response_message)
+        chatbaselogger.sendBotResponse(user_id=user_id, message=response_message, request_id=session_id)
 
     return json.dumps(
         response,

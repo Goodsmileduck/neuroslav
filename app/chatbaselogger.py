@@ -4,8 +4,11 @@ import logging
 
 CHATBASE_URL = 'https://chatbase-area120.appspot.com/api/message'
 
-def sendUserMessage(message, user_id):
+def sendUserMessage(message, user_id, request_id):
     try:
+        if message == '':
+            message = '<empty>'
+        logging.info(f'CHATBASE user message: [{message}] Session_id: {request_id}')
         request = {
             "api_key": settings.CHATBASE_API_KEY,
             "type": "user",
@@ -21,12 +24,16 @@ def sendUserMessage(message, user_id):
             stream=False,
             timeout=1,
         )
+        logging.info(f'CHATBASE response: [{response.json()}] Session_id: {request_id}')
     except Exception as e:
         logging.error(f"CHATBASE sendBotResponse EXCEPTION:{e}" )
         return None
 
-def sendBotResponse(message, user_id):
+def sendBotResponse(message, user_id, request_id):
     try:
+        if message == '':
+            message = '<empty>'
+        logging.info(f'CHATBASE bot response: [{message}] Session_id: {request_id}')
         request = {
             "api_key": settings.CHATBASE_API_KEY,
             "type": "agent",
@@ -42,6 +49,7 @@ def sendBotResponse(message, user_id):
             stream=False,
             timeout=1,
         )
+        logging.info(f'CHATBASE response: [{response.json()}] Session_id: {request_id}')
     except Exception as e:
         logging.error(f"CHATBASE sendBotResponse EXCEPTION:{e}" )
         return None
