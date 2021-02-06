@@ -152,7 +152,7 @@ class UserMeaning:
 
     def give_clue(self):
         match_answers = ['подскажи', 'дай подсказку', 'хочу подсказку', 'прошу подсказку', 'подсказка',
-                         'подскажи пожалуйста', 'помоги', 'повтори подсказку']
+                         'подскажи пожалуйста', 'помоги', 'повтори подсказку', 'подсказку', 'подсказку бы']
         return intents.CLUE in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def skip_question(self):
