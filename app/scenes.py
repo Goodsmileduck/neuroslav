@@ -163,12 +163,12 @@ class UserMeaning:
     def repeat(self):
         match_answers = ['повтори', 'ещё раз', 'еще раз', 'скажи ещё раз', 'давай ещё раз', 'повторить',
                          'можешь повторить', 'повтори вопрос']
-        return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
+        return intents.YANDEX_REPEAT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def repeat_options(self):
         match_answers = ['повтори варианты', 'пожалуйста повтори варианты', 'скажи варинаты отвеов',
                          'повтори варианты ответов', 'повтори ответы', 'какие варианты', 'какие варианты ответов']
-        return intents.START_QUIZ in self.user_intents or self.is_answer_in_match_answers(match_answers)
+        return intents.YANDEX_REPEAT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
 
 class Scene(ABC):
