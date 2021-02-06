@@ -122,7 +122,7 @@ class UserMeaning:
         return cleaned in match_answers
 
     def confirm(self):
-        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо', 'я готов', 'готов', 'да да', 'ага']
+        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо', 'я готов', 'готов', 'да да', 'ага', 'идём', 'идем']
         return intents.YANDEX_CONFIRM in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def do_continue(self):
@@ -134,7 +134,7 @@ class UserMeaning:
         return intents.YANDEX_REJECT in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def dont_know(self):
-        match_answers = ['не знаю', 'я не знаю', 'не уверен', 'я не уверен', 'без понятия']
+        match_answers = ['не знаю', 'я не знаю', 'не уверен', 'я не уверен', 'без понятия', 'даже не знаю']
         return self.is_answer_in_match_answers(match_answers)
 
     def lets_play(self):
@@ -556,13 +556,14 @@ class YouHadClue(Main):
 
 
 class LevelCongratulation(Main):
-    def __init__(self, level=LEVELS[0], points=0, interesting_fact=False, fallback=0, give_confirmation=True):
+    def __init__(self, level=LEVELS[0], points=0, interesting_fact=False, fallback=0, give_confirmation=True, repeat=False):
         super(LevelCongratulation, self).__init__()
         self.level = level
         self.points = points
         self.interesting_fact = interesting_fact
         self.fallback = fallback
         self.give_confirmation = give_confirmation
+        self.repeat = repeat
 
     def reply(self, request: Request):
         word = word_in_plural('вопрос', self.points)
@@ -577,7 +578,8 @@ class LevelCongratulation(Main):
             text = Phrase.give_new_level_congratulation() % {'number': self.points,
                                                              'question': word,
                                                              'level': self.level}
-            audio_file_name = SoundFiles.GREETING
+            if not self.repeat:
+                audio_file_name = SoundFiles.GREETING
             if self.interesting_fact:
                 question = Question.objects.get({'_id': question_id})
                 text = question.interesting_fact + '\n' + text
@@ -617,7 +619,8 @@ class LevelCongratulation(Main):
             return LevelCongratulation(interesting_fact=search_in_session(request, 'interesting_fact'),
                                        give_confirmation=False,
                                        level=search_in_session(request, 'level'),
-                                       points=search_in_session(request, 'points'))
+                                       points=search_in_session(request, 'points'),
+                                       repeat=True)
         return handle_fallbacks(request, LevelCongratulation,
                                 interesting_fact=search_in_session(request, 'interesting_fact'),
                                 give_confirmation=False,
