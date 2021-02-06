@@ -287,11 +287,17 @@ class Welcome(Main):
                                                  'question': word,
                                                  'level': level}
         # text += ' Версия: ' + VERSION
+        card = {
+            'type': 'BigImage',
+            'image_id': '1652229/b5d3d7dcd5730225f922',
+            'description': text,
+        }
         response = self.make_response(
             text,
             buttons=[button('Давай играть', hide=True)],
             state={'fallback': self.fallback},
-            audio_file_name=sound_file_name
+            audio_file_name=sound_file_name,
+            card=card
         )
         return response
 
