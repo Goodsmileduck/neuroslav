@@ -243,7 +243,7 @@ class Main(Scene):
         elif intents.GET_LEVEL in request.intents:
             return GetLevel()
         elif request['request']['command'] == "версия":
-             return self.make_response(VERSION)
+             return self.make_response("Версия нейросети " + VERSION)
         else:
             return None
 
