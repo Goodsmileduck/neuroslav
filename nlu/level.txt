@@ -1,0 +1,13 @@
+root: 
+    $Which $Filler? $Level
+
+$Which:
+    %lemma
+    какой
+
+$Filler:
+    .*
+
+$Level:
+    %lemma
+    уровень
