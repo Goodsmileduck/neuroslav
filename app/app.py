@@ -16,11 +16,14 @@ logging.basicConfig(
 @app.route("/", methods=['POST'])
 def main():
     # Функция получает тело запроса и возвращает ответ.
-    logging.info('Request: %r', request.json)
+    request_obj = request.json
+    session_id = request_obj.get('session', {}).get('session_id', None)
+    
+    logging.info(f'Session_id: {session_id} Request: {request.json}')
 
     response = handler(request.json)
 
-    logging.info('Response: %r', response)
+    logging.info(f'Session_id: {session_id} Response: {request.json}')
 
     return json.dumps(
         response,
