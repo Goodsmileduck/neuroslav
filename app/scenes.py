@@ -255,7 +255,8 @@ class Main(Scene):
 class Welcome(Main):
     def reply(self, request: Request):
         sound_file_name = None
-        
+        card = None
+
         if request['request']['command'] == "ping":
             response_pong = self.make_response("pong")
             return response_pong
@@ -286,12 +287,13 @@ class Welcome(Main):
                 text = Phrase.give_greeting() % {'number': points,
                                                  'question': word,
                                                  'level': level}
+            card = {
+                'type': 'BigImage',
+                'image_id': settings.WELCOME_IMAGE,
+                'description': text,
+            }
+
         # text += ' Версия: ' + VERSION
-        card = {
-            'type': 'BigImage',
-            'image_id': '1652229/b5d3d7dcd5730225f922',
-            'description': text,
-        }
         response = self.make_response(
             text,
             buttons=[button('Давай играть', hide=True)],
@@ -557,11 +559,10 @@ class YouHadClue(Main):
 
 class LevelCongratulation(Main):
     def __init__(self, level=LEVELS[0], points=0, interesting_fact=False, fallback=0, give_confirmation=True, repeat=False):
-        super(LevelCongratulation, self).__init__()
+        super(LevelCongratulation, self).__init__(fallback)
         self.level = level
         self.points = points
         self.interesting_fact = interesting_fact
-        self.fallback = fallback
         self.give_confirmation = give_confirmation
         self.repeat = repeat
 
@@ -666,8 +667,7 @@ class SkipQuestion(Main):
 
 class GiveFact(Main):
     def __init__(self, fallback=0, give_confirmation=True):
-        super(GiveFact, self).__init__()
-        self.fallback = fallback
+        super(GiveFact, self).__init__(fallback)
         self.give_confirmation = give_confirmation
 
     def reply(self, request: Request):
