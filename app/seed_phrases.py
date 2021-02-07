@@ -55,8 +55,8 @@ def seed_phrases():
     Phrase(PhraseType.YOU_HAD_CLUE_ASK.value, 'Моя память фрагментирована, но мне кажется, что подсказка уже была... Повторить?').save()
 
     # two %s are necessary! %points and %level :
-    Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Поздравляю, ты правильно ответил на %(number)i %(question)s и достиг уровня "%(level)s"! Продолжай в том же духе!\nСледующий вопрос?').save()
-    Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Невероятно, ты прошёл уже %(number)i %(question)s! Твой новый уровень - "%(level)s"!\nИдём дальше?').save()
+    Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Поздравляю, даны ответы уже на %(number)i %(question)s и достигнут уровень "%(level)s"! Продолжай в том же духе!\nХочешь продолжить?').save()
+    Phrase(PhraseType.NEW_LEVEL_CONGRATULATION.value, 'Невероятно, восстановлены данные уже для %(number)i %(question)s! Твой новый уровень - "%(level)s"!\nИдём дальше?').save()
 
     Phrase(PhraseType.TRY_AGAIN.value, 'Попробуй ещё раз.').save()
     Phrase(PhraseType.TRY_AGAIN.value, 'Попытайся снова.').save()
