@@ -5,15 +5,20 @@ from scenes import SCENES, DEFAULT_SCENE
 from request import Request
 import seeder
 import debug
+import asyncio
+from threading import Thread
 
-import chatbaselogger
+from chatbase_async import sendUserMessage, sendBotResponse
 import settings
+
 
 app = Flask(__name__)
 
 logging.basicConfig(
     format=u'[%(asctime)s] %(levelname)-8s  %(message)s',
     level=logging.DEBUG)
+
+loop = asyncio.new_event_loop()
 
 
 @app.route("/", methods=['POST'])
@@ -25,19 +30,21 @@ def main():
     logging.info(f'Session_id: {session_id} Request: {request_obj}')
 
     user_id = request_obj['session'].get('application').get('application_id')
-    if settings.SEND_TO_CHATBASE:
+    if settings.SEND_TO_CHATBASE and request_obj['request']['command'] is not "ping":
         user_message = request_obj['request']['command']
         #logging.info(f'User message: [{user_message}]')
-        chatbaselogger.sendUserMessage(user_id=user_id, message=user_message, session_id=session_id)
+        asyncio.set_event_loop(loop)
+        asyncio.get_event_loop().run_until_complete(sendUserMessage(user_id=user_id, message=user_message, session_id=session_id))
 
     response = handler(request_obj)
 
     logging.info(f'Session_id: {session_id} Response: {response}')
 
-    if settings.SEND_TO_CHATBASE:
+    if settings.SEND_TO_CHATBASE and response['response']['text'] is not "pong":
         response_message = response['response']['text']
         #logging.info(f'Response message: [{response_message}]')
-        chatbaselogger.sendBotResponse(user_id=user_id, message=response_message, session_id=session_id)
+        asyncio.set_event_loop(loop)
+        asyncio.get_event_loop().run_until_complete(sendBotResponse(user_id=user_id, message=response_message, session_id=session_id))
 
     return json.dumps(
         response,
@@ -64,6 +71,10 @@ def handler(request):
     else:
         logging.warning(f'Failed to parse user request at scene {current_scene.id()}')
         return current_scene.fallback(request_obj)
+
+def start_background_loop(loop):
+    asyncio.set_event_loop(loop)
+    loop.run_forever()
 
 
 if __name__ == '__main__':

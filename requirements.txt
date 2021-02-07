@@ -8,3 +8,4 @@ pymodm==0.4.3
 envparse==0.1.4
 pymorphy2
 requests
+aiohttp
