@@ -26,8 +26,9 @@ def seed_phrases():
     # two %s are necessary! %points and %level :
     Phrase(PhraseType.GREETING.value, 'Привет! Рад видеть тебя снова.\nТы правильно ответил на %(number)i %(question)s и достиг уровня "%(level)s"!\nСыграем ещё?').save()
     Phrase(PhraseType.GREETING.value, 'Здравствуй! Давно не виделись.\nТы прошёл %(number)i %(question)s! Твой уровень - "%(level)s"!\nНачнём игру?').save()
-    Phrase(PhraseType.GREETING.value, 'Сколько зим! Давно не виделись.\nТы верно ответил на %(number)i %(question)s и достиг уровня "%(level)s"!\nИграем?').save()
-    Phrase(PhraseType.GREETING.value, 'Рад что снова тут.\nУ тебя пройдено %(number)i %(question)s! Твой уровень - "%(level)s"!\nИграем?').save()
+    Phrase(PhraseType.GREETING.value, 'Ох, сколько электронных эпох прошло! Давно не виделись.\nТы верно ответил на %(number)i %(question)s и достиг уровня "%(level)s"!\nИграем?').save()
+    Phrase(PhraseType.GREETING.value, 'Рад что ты снова тут.\nУ тебя пройдено %(number)i %(question)s! Твой уровень - "%(level)s"!\nИграем?').save()
+    Phrase(PhraseType.GREETING.value, 'Я рад что ты снова тут.\nУ тебя пройдено %(number)i %(question)s! Твой уровень - "%(level)s"!\nИграем?').save()
 
     Phrase(PhraseType.CONTINUE_ASK.value, 'Продолжим?').save()
     Phrase(PhraseType.CONTINUE_ASK.value, 'Идём дальше?').save()
