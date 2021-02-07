@@ -6,7 +6,7 @@ DB_NAME = env('DB_NAME', default='neuroslav')
 VERSION = env('VERSION', default='0.0.1')
 CHATBASE_API_KEY = env('CHATBASE_API_KEY', default='6f36ad77-b9d9-415c-bed7-6ee68943d64d')
 CHATBASE_BOT_PLATFORM = env('CHATBASE_BOT_PLATFORM', default='not set')
-SEND_TO_CHATBASE = env('SEND_TO_CHATBASE', default=True)
+SEND_TO_CHATBASE = env('SEND_TO_CHATBASE', default=False)
 MAX_ATTEMPTS = 2
 WELCOME_IMAGE = '965417/253f8b23ad1182b886c8'
 CHEATS = ['яндекс', 'алиса']
