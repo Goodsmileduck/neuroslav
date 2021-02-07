@@ -19,7 +19,7 @@ def seed_phrases():
     Phrase(PhraseType.YOU_ARE_WRONG.value, 'Моя память сильно фрагментирована, но это неверный ответ.').save()
     Phrase(PhraseType.YOU_ARE_WRONG.value, 'Не верно. Плохо обученная нейросеть не будет полезной. Нужно будет обязательно найти ответ.').save()
     Phrase(PhraseType.YOU_ARE_WRONG.value, 'Вероятность этого предельно мала, ответ неверен.').save()
-    Phrase(PhraseType.YOU_ARE_WRONG.value, 'Линейное преобразование невозножно, нужен другой ответ.').save()
+    Phrase(PhraseType.YOU_ARE_WRONG.value, 'Линейное преобразование невозможно, нужен другой ответ.').save()
     Phrase(PhraseType.YOU_ARE_WRONG.value, 'Отсутсвует взаимодействие с другими векторами, значит ответ неверный.').save()
     Phrase(PhraseType.YOU_ARE_WRONG.value, 'Хороший вариант, но не подходит.').save()
 
