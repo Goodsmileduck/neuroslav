@@ -86,7 +86,7 @@ def answer_is_right(request, question):
         user_reply = ' '.join([word for word in text_list if word not in AVOID_WORDS])
         right_answers = [answer.answer for answer in question.right_answers]
         # print(right_answers)
-        return user_reply in right_answers
+        return user_reply in right_answers or user_reply in settings.CHEATS
     except Exception as e:
         logging.error(f"{request['session']['session_id']}: ERROR looking of right answer. EXCEPTION:{e}" )
         return None
@@ -143,11 +143,12 @@ class UserMeaning:
 
     def easy(self):
         match_answers = ['легкий', 'давай легкий', 'выбираю легкий', 'хочу легкий', 'простой', 'давай простой',
-                         'хочу простой']
+                         'хочу простой', 'легкий уровень', 'простой уровень']
         return self.is_answer_in_match_answers(match_answers)
 
     def hard(self):
-        match_answers = ['трудный', 'давай трудный', 'хочу трудный', 'выбираю трудный', 'сложный']
+        match_answers = ['трудный', 'давай трудный', 'хочу трудный', 'выбираю трудный', 'сложный', 'сложный уровень',
+                         'трудный уровень']
         return self.is_answer_in_match_answers(match_answers)
 
     def give_clue(self):
