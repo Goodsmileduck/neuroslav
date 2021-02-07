@@ -23,6 +23,8 @@ import logging, settings
 from sounds import SoundFiles
 import pymorphy2
 
+morph = pymorphy2.MorphAnalyzer()
+
 
 def search_in_session(request: Request, parameter):
     if request.state:
@@ -65,7 +67,6 @@ def current_user(request):
 
 
 def word_in_plural(word, number):
-    morph = pymorphy2.MorphAnalyzer()
     return morph.parse(word)[0].make_agree_with_number(number).word
 
 
