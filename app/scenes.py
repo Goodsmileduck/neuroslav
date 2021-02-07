@@ -243,7 +243,7 @@ class Main(Scene):
         elif intents.GET_LEVEL in request.intents:
             return GetLevel()
         elif request['request']['command'] == "версия":
-             return self.make_response(f"Версия нейросети {VERSION}")
+             return GetVersion()
         else:
             return None
 
@@ -752,6 +752,46 @@ class GetHelp(Main):
             return GetHelp()
         return handle_fallbacks(request, GetHelp)
 
+
+class GetVersion(Main):
+    def reply(self, request: Request):
+        if self.fallback == 1:
+            text = Phrase.give_fallback_general()
+        elif self.fallback > 1:
+            text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет, -'
+        else:
+            text = f'Версия нейрости {VERSION}'
+
+        if request.state is not None:
+            attempts = search_in_session(request, 'attempts')
+            question_id = search_in_session(request, 'question_id')
+            clue_given = search_in_session(request, 'clue_given')
+            state = {
+                'question_id': question_id,
+                'clue_given': clue_given,
+                'attempts': attempts,
+                'fallback': self.fallback,
+            }
+            end_text = 'Продолжаем?'
+
+            return self.make_response(text+end_text, state=state, buttons=[button('Да', hide=True)])
+        else:
+            end_text = 'Хочешь попробовать?'
+            return self.make_response(text+end_text, buttons=[button('Да', hide=True)])
+
+    def handle_local_intents(self, request: Request):
+        user = current_user(request)
+        user_meant = UserMeaning(request)
+        user_intent = request.intents
+        logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
+        if user_meant.lets_play() or user_meant.confirm():
+            if user.difficulty:
+                return AskQuestion()
+            else:
+                return DifficultyChoice()
+        elif user_meant.repeat():
+            return GetVersion()
+        return handle_fallbacks(request, GetVersion)
 
 class WhatCanYouDo(Main):
     def reply(self, request: Request):
