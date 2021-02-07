@@ -443,6 +443,10 @@ class AskQuestion(Main):
                     text = tts = "Моя кратковременная память ограничена. Я смогу проверить только 2 ответа на каждый вопрос. У тебя всегда есть возможность взять подсказку, пропустить или повторить вопрос.\nНачнём!\n"
                 else:
                     text = tts = Phrase.give_lets_play() + '\n'
+            else:
+                next_question = Phrase.give_next_question()
+                text += next_question + '\n'
+                tts += next_question + ' - '
             text += question.question
             if question.tts and question.tts != '':
                 tts += question.tts
@@ -451,15 +455,13 @@ class AskQuestion(Main):
             # Give random confirmation phrase if last answer was right
             if self.give_confirmation:
                 confirmation = Phrase.give_you_are_right()
-                next_question = Phrase.give_next_question()
-                text = confirmation + '\n' + next_question + '\n' + text
-                tts = confirmation + ' - ' + next_question + ' - ' + tts
+                text = confirmation + '\n' + text
+                tts = confirmation + ' - ' + tts
             # Give random denial phrase if last answer was wrong
             elif self.give_denial:
                 denial = Phrase.give_you_are_wrong()
-                try_next_question = Phrase.give_next_question()
-                text = denial + '\n' + try_next_question + '\n' + text
-                tts = denial + ' - ' + try_next_question + ' - ' + tts
+                text = denial + '\n' + text
+                tts = denial + ' - ' + tts
             state = {'clue_given': False, 'question_id': question.id}
             clue_button = True
             self.give_denial = False
