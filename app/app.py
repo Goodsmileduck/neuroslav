@@ -1,24 +1,20 @@
-import logging, json
+import logging, json, debug, asyncio
 from flask import Flask, request
 from state import STATE_REQUEST_KEY, STATE_RESPONSE_KEY
 from scenes import SCENES, DEFAULT_SCENE
 from request import Request
-import seeder
-import debug
-import asyncio
-from threading import Thread
-
 from chatbase_async import sendUserMessage, sendBotResponse
+import seeder
 import settings
 
+
+loop = asyncio.new_event_loop()
 
 app = Flask(__name__)
 
 logging.basicConfig(
     format=u'[%(asctime)s] %(levelname)-8s  %(message)s',
     level=logging.DEBUG)
-
-loop = asyncio.new_event_loop()
 
 
 @app.route("/", methods=['POST'])
