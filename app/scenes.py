@@ -435,7 +435,7 @@ class AskQuestion(Main):
             if question.tts and question.tts != '':
                 tts += question.tts
             else:
-                tts += text
+                tts += question.question
             # Give random confirmation phrase if last answer was right
             if self.give_confirmation:
                 confirmation = Phrase.give_you_are_right()
