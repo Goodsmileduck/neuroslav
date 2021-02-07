@@ -242,7 +242,7 @@ class Main(Scene):
         user_meant = UserMeaning(request)
         if intents.YANDEX_HELP in request.intents and not user_meant.give_clue():
             return GetHelp()
-        elif intents.YANDEX_WHAT_CAN_YOU_DO in request.intents and intents.CONFIRM not in request.intents:
+        elif intents.YANDEX_WHAT_CAN_YOU_DO in request.intents and intents.YANDEX_CONFIRM not in request.intents:
             return WhatCanYouDo()
         elif intents.EXIT in request.intents:
             return Goodbye()
