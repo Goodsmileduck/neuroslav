@@ -614,7 +614,7 @@ class LevelCongratulation(Main):
     def handle_local_intents(self, request: Request):
         user_meant = UserMeaning(request)
         if user_meant.confirm() or user_meant.do_continue():
-            return AskQuestion()
+            return AskQuestion(give_confirmation=False)
         elif user_meant.deny():
             return Goodbye()
         elif user_meant.repeat():
