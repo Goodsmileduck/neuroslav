@@ -26,7 +26,7 @@ def main():
     logging.info(f'Session_id: {session_id} Request: {request_obj}')
 
     user_id = request_obj['session'].get('application').get('application_id')
-    if settings.SEND_TO_CHATBASE and request_obj['request']['command'] is not "ping":
+    if settings.SEND_TO_CHATBASE and request_obj['request']['command'] != "ping":
         user_message = request_obj['request']['command']
         #logging.info(f'User message: [{user_message}]')
         asyncio.set_event_loop(loop)
@@ -36,7 +36,7 @@ def main():
 
     logging.info(f'Session_id: {session_id} Response: {response}')
 
-    if settings.SEND_TO_CHATBASE and response['response']['text'] is not "pong":
+    if settings.SEND_TO_CHATBASE and response['response']['text'] != "pong":
         response_message = response['response']['text']
         #logging.info(f'Response message: [{response_message}]')
         asyncio.set_event_loop(loop)
