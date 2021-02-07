@@ -84,7 +84,7 @@ def seed_phrases():
     # two %s are necessary! %points and %level :
     Phrase(PhraseType.GET_LEVEL.value, 'Ты правильно ответил на %(number)i %(question)s и достиг уровня "%(level)s"!\nСыграем ещё?').save()
     Phrase(PhraseType.GET_LEVEL.value, 'Ты угадал уже %(number)i %(question)s! Твой уровень - "%(level)s"!\nГотов ли ты продолжить?').save()
-    Phrase(PhraseType.GET_LEVEL.value, 'Твой уровень - "%(level)s". Правильно дан ответ на %(number)i %(question)s! !\nИграем?').save()
+    Phrase(PhraseType.GET_LEVEL.value, 'Твой уровень - "%(level)s". Правильно дан ответ на %(number)i %(question)s!\nИграем?').save()
 
     Phrase(PhraseType.LETS_PLAY.value, 'Давай играть!').save()
     Phrase(PhraseType.LETS_PLAY.value, 'Начинаем игру!').save()
