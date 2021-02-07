@@ -760,7 +760,7 @@ class GetVersion(Main):
         elif self.fallback > 1:
             text = Phrase.give_fallback_2_begin() + ' Пожалуйста, ответь да или нет, -'
         else:
-            text = f'Версия нейрости {VERSION}'
+            text = f'Версия нейросити {VERSION} . '
 
         if request.state is not None:
             attempts = search_in_session(request, 'attempts')
