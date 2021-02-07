@@ -464,11 +464,18 @@ class AskQuestion(Main):
             number_of_answers = len(question.possible_answers)
             for i, answer in enumerate(question.possible_answers):
                 buttons.append(button(answer.answer, hide=True))
-                if not self.give_clue:
+                if not self.give_clue and not question.possible_answers_tts:
                     if i != number_of_answers - 1:
                         tts += ' - ' + answer.answer + ','
                     else:
                         tts += ' - или ' + answer.answer + '?'
+            if not self.give_clue and question.possible_answers_tts:
+                number_of_answers_tts = len(question.possible_answers_tts)
+                for i, answer_tts in enumerate(question.possible_answers_tts):
+                    if i != number_of_answers_tts - 1:
+                        tts += ' - ' + answer_tts.answer + ','
+                    else:
+                        tts += ' - или ' + answer_tts.answer + '?'
         if clue_button or (not search_in_session(request, 'clue_given') and not self.give_clue):
             buttons.append(button('Подсказка', hide=True))
         buttons.append(button('Пропустить', hide=True))
