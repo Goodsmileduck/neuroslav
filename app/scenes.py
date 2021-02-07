@@ -431,7 +431,7 @@ class AskQuestion(Main):
                 question = give_random_question(request=request, user=user)
                 if not question:
                     return self.make_response('Святые транзисторы, это просто невероятно, ты прошёл все вопросы! Поздравляю! \n'
-                                              'Я чувствую, что моя нейросеть полностью восстановилась! Возвращайся чуть пойже для улучшения точности моей базы данных. \nСПАСИБО!!!')
+                                              'Я чувствую, что моя нейросеть полностью восстановилась! Возвращайся чуть позже для улучшения точности моей базы данных. \nСПАСИБО!!!')
             gained_level, level, points = user.gained_new_level()
             if self.lets_play:
                 if points < 1:
@@ -523,11 +523,10 @@ class AskQuestion(Main):
         elif user.difficulty == 1 and user_meant.repeat_options():
             return AskQuestion(repeat_options=True)
 
-        # Handle global intents !!!
-
         # Assume answer as wrong
         attempts = search_in_session(request, 'attempts')
         if attempts and attempts >= settings.MAX_ATTEMPTS:
+            UserQuestion(user=user, question=question_id, passed=False).save()
             return AskQuestion(give_denial=True)
         logging.warning(f"{request['session']['session_id']}: ATTEMPTS - {attempts}")
         self.wrong_answer = True
