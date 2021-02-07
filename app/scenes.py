@@ -306,7 +306,7 @@ class Welcome(Main):
 
         if user_meant.lets_play() or user_meant.confirm():
             if user.difficulty is not None:
-                return AskQuestion()
+                return AskQuestion(lets_play=True)
             else:
                 return DifficultyChoice()
         elif user_meant.deny():
@@ -340,18 +340,18 @@ class DifficultyChoice(Main):
         if user_meant.easy():
             user.difficulty = 1
             user.save()
-            return AskQuestion()
+            return AskQuestion(lets_play=True)
         elif user_meant.hard():
             user.difficulty = 2
             user.save()
-            return AskQuestion()
+            return AskQuestion(lets_play=True)
         elif user_meant.repeat():
             return DifficultyChoice()
         return handle_fallbacks(request, DifficultyChoice)
 
 
 class AskQuestion(Main):
-    def __init__(self, give_clue=False, give_confirmation=False, give_denial=False, repeat=False, repeat_options=False):
+    def __init__(self, give_clue=False, give_confirmation=False, give_denial=False, repeat=False, repeat_options=False, lets_play=False):
         super(AskQuestion, self).__init__()
         self.give_clue = give_clue
         self.give_confirmation = give_confirmation
@@ -359,6 +359,7 @@ class AskQuestion(Main):
         self.wrong_answer = False
         self.repeat = repeat
         self.repeat_options = repeat_options
+        self.lets_play = lets_play
 
     def reply(self, request: Request):
         clue_button = False
@@ -429,8 +430,11 @@ class AskQuestion(Main):
                     return self.make_response('Святые транзисторы, это просто невероятно, ты прошёл все вопросы! Поздравляю! \n'
                                               'Я чувствую, что моя нейросеть полностью восстановилась! Возвращайся чуть пойже для улучшения точности моей базы данных. \nСПАСИБО!!!')
             gained_level, level, points = user.gained_new_level()
-            if points < 1:
-                text = tts = "Моя кратковременная память ограничена. Я смогу проверить только 2 ответа на каждый вопрос. У тебя всегда есть возможность взять подсказку, пропустить или повторить вопрос. "
+            if self.lets_play:
+                if points < 1:
+                    text = tts = "Моя кратковременная память ограничена. Я смогу проверить только 2 ответа на каждый вопрос. У тебя всегда есть возможность взять подсказку, пропустить или повторить вопрос.\nНачнём!\n"
+                else:
+                    text = tts = 'Давай играть!\n'
             text += question.question
             if question.tts and question.tts != '':
                 tts += question.tts
