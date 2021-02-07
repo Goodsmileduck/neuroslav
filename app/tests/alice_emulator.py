@@ -38,6 +38,7 @@ class AliceEmulator:
         self.set_user(user_id, app_id)
 
     def set_text(self, text, original_utterance = ''):
+        print(f'user: {text}')
         self.request['request']['command'] = text
         if original_utterance == '':
             original_utterance = text
@@ -47,6 +48,7 @@ class AliceEmulator:
         self.response = self.handler.handle(self.request)
         if auto_update_state:
             self.update_state()
+        print(f'bot: {self.response_text}')
         return self.response_text
 
 
