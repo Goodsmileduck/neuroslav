@@ -11,15 +11,19 @@ import app
 import scenes
 import models
 import handlers
+import time
+import random
 
 
 class HandlerTest(unittest.TestCase):
     handler = None
+    is_web_requests = False
     # Init
     def setUp(self):
         self.handler = handlers.HandleAppRequest()
-        # self.handler = handlers.HandleWebRequest('https://neuroslav.prod.kubeapp.ru') # production
-        # self.handler = handlers.HandleWebRequest('https://neuroslav-jx-staging.kubeapp.ru') #staging
+        #self.handler = handlers.HandleWebRequest('https://neuroslav.prod.kubeapp.ru') # production
+        #self.is_web_requests = True
+        #self.handler = handlers.HandleWebRequest('https://neuroslav-jx-staging.kubeapp.ru') #staging
         # self.handler = handlers.HandleWebRequest('https://c6f5bb40e06f.ngrok.io')  # dev
         pass
     # Clean up
@@ -76,10 +80,11 @@ class HandlerTest(unittest.TestCase):
         question_id_1 = alice.response_state['question_id']
         question = models.Question.objects.get({'_id': question_id_1})
         self.assertIn(question.question, response_text, 'Question text must be equal to stored question_id')
-        user = scenes.current_user(alice.request)
-        self.assertNotEqual(user, None, 'User must be stored in db')
-        self.assertEqual(user.points(), 0, 'New user must be without points')
-        self.assertEqual(user.difficulty, 1, 'User difficulty must be 1 (easy)')
+        if not self.is_web_requests:
+            user = scenes.current_user(alice.request)
+            self.assertNotEqual(user, None, 'User must be stored in db')
+            self.assertEqual(user.points(), 0, 'New user must be without points')
+            self.assertEqual(user.difficulty, 1, 'User difficulty must be 1 (easy)')
         self.assertEqual(alice.response_state['scene'], 'AskQuestion', 'Scene must be AskQuestion')
         self.assertEqual(alice.response_state['clue_given'], False, 'clue_given must be False')
 
@@ -106,9 +111,10 @@ class HandlerTest(unittest.TestCase):
 
         alice.set_text('трудный')
         alice.make_request()
-        user = scenes.current_user(alice.request)
-        self.assertNotEqual(user, None, 'User must be stored in db')
-        self.assertEqual(user.difficulty, 2, 'User difficulty must be 2 (hard)')
+        if not self.is_web_requests:
+            user = scenes.current_user(alice.request)
+            self.assertNotEqual(user, None, 'User must be stored in db')
+            self.assertEqual(user.difficulty, 2, 'User difficulty must be 2 (hard)')
         self.assertEqual(alice.response_state['scene'], 'AskQuestion', 'Scene must be AskQuestion')
         self.assertEqual(alice.response_state['clue_given'], False, 'clue_given must be False')
         question_id = alice.response_state['question_id']
@@ -148,8 +154,9 @@ class HandlerTest(unittest.TestCase):
         phrases = [p.phrase for p in
                    list(models.Phrase.objects.raw({'phrase_type': models.PhraseType.YOU_ARE_RIGHT.value}))]
 
-        user = scenes.current_user(alice.request)
-        self.assertNotEqual(user, None, 'User must be stored in db')
+        if not self.is_web_requests:
+            user = scenes.current_user(alice.request)
+            self.assertNotEqual(user, None, 'User must be stored in db')
         is_running = True
         max_iterations = 4
         i = 1
@@ -159,7 +166,8 @@ class HandlerTest(unittest.TestCase):
             # Check fact
             if alice.response_state['scene'] == 'GiveFact':
                 self.assertIn(question.interesting_fact, response_text, 'Incorrect fact given')
-                self.assertLess(user.points(), 3, 'LevelCongratulation must be shown instead of GiveFact')
+                if not self.is_web_requests:
+                    self.assertLess(user.points(), 3, 'LevelCongratulation must be shown instead of GiveFact')
                 alice.set_text('да')
                 response_text = alice.make_request()
             # Our goal
@@ -175,7 +183,65 @@ class HandlerTest(unittest.TestCase):
             # Send right answer
             alice.set_text(question.right_answers[0].answer)
             response_text = alice.make_request()
-            self.assertEqual(user.points(), i, 'User has invalid points')
+            if not self.is_web_requests:
+                self.assertEqual(user.points(), i, 'User has invalid points')
+            # Check phrases for Right answer
+            if alice.response_state['scene'] != 'LevelCongratulation':
+                is_phrase_found = False
+                for phrase in phrases:
+                    if phrase in response_text:
+                        is_phrase_found = True
+                        break
+                self.assertTrue(is_phrase_found, 'Response text must contains YOU_ARE_RIGHT phrase')
+            i += 1
+
+    def test_all_easy_questions(self):
+        # Init scene
+        alice = AliceEmulator(self.handler)
+
+        alice.make_request()
+        self.assertEqual(alice.response_state['scene'], 'Welcome', 'Scene must be Welcome')
+
+        alice.set_text('давай играть')
+        response_text = alice.make_request()
+        self.assertNotEqual(response_text, '', 'Response text must not be empty')
+        self.assertEqual(alice.response_state['scene'], 'DifficultyChoice', 'Scene must be DifficultyChoice')
+
+        alice.set_text('легкий')
+        response_text = alice.make_request()
+        self.assertEqual(alice.response_state['scene'], 'AskQuestion', 'Scene must be AskQuestion')
+
+        # Some preparations
+        phrases = [p.phrase for p in
+                   list(models.Phrase.objects.raw({'phrase_type': models.PhraseType.YOU_ARE_RIGHT.value}))]
+
+        is_running = True
+        max_iterations = 90
+        i = 1
+        question = None
+
+        while is_running:
+            # Check fact
+            if alice.response_state['scene'] == 'GiveFact':
+                self.assertIn(question.interesting_fact, response_text, 'Incorrect fact given')
+                alice.set_text('да')
+                response_text = alice.make_request()
+            if alice.response_state['scene'] == 'LevelCongratulation':
+                alice.set_text('да')
+                response_text = alice.make_request()
+            # Our goal
+            if "Святые транзисторы, это просто невероятно, ты прошёл все вопросы! Поздравляю!" in response_text:
+                break
+            if i >= max_iterations:
+                self.assertTrue(False, 'Max iterations reached')
+
+            # Current question
+            self.assertEqual(alice.response_state['scene'], 'AskQuestion', 'Scene must be AskQuestion')
+            question_id = alice.response_state['question_id']
+            question = models.Question.objects.get({'_id': question_id})
+            # Send right answer
+            alice.set_text(random.choice(question.right_answers).answer)
+            response_text = alice.make_request()
             # Check phrases for Right answer
             if alice.response_state['scene'] != 'LevelCongratulation':
                 is_phrase_found = False
@@ -211,9 +277,10 @@ class HandlerTest(unittest.TestCase):
             self.assertEqual(alice.response_state['scene'], 'DifficultyChoice', 'Scene must be DifficultyChoice')
             alice.set_text(difficulty['text'])
             alice.make_request()
-            user = scenes.current_user(alice.request)
-            self.assertNotEqual(user, None, 'User must be stored in db')
-            self.assertEqual(user.difficulty, difficulty['value'], 'User difficulty is wrong')
+            if not self.is_web_requests:
+                user = scenes.current_user(alice.request)
+                self.assertNotEqual(user, None, 'User must be stored in db')
+                self.assertEqual(user.difficulty, difficulty['value'], 'User difficulty is wrong')
 
         # TODO Add negative tests
 
@@ -239,16 +306,37 @@ class HandlerTest(unittest.TestCase):
 
     def test_case02_several_times(self):
         for i in range(1, 100):
+            print(f'test_case02_several_times {i} / 100')
             self.test_case02()
+            if self.is_web_requests:
+                time.sleep(0.5)
 
     def test_case07_several_times(self):
         for i in range(1, 100):
+            print(f'test_case07_several_times {i} / 100')
             self.test_case07()
+            if self.is_web_requests:
+                time.sleep(0.5)
 
     def test_case09_several_times(self):
         for i in range(1, 100):
+            print(f'test_case09_several_times {i} / 100')
+            start_time = time.time()
             self.test_case09()
+            end_time = time.time()
+            print(f'time: {end_time-start_time}')
+            if self.is_web_requests:
+                time.sleep(0.5)
 
+    def test_all_easy_questions_several_times(self):
+        for i in range(1, 20):
+            print(f'test_all_easy_questions_several_times {i} / 100')
+            start_time = time.time()
+            self.test_all_easy_questions()
+            end_time = time.time()
+            print(f'time: {end_time-start_time}')
+            if self.is_web_requests:
+                time.sleep(0.5)
 
 if __name__ == "__main__":
     unittest.main()
