@@ -76,6 +76,7 @@ class PhraseType(Enum):
 	FALLBACK_EXIT = 11
 	FALLBACK_2_BEGIN = 12
 	GET_LEVEL = 13
+	LETS_PLAY = 14
 
 
 class Phrase(MongoModel):
@@ -147,6 +148,10 @@ class Phrase(MongoModel):
 	@staticmethod
 	def give_fallback_2_begin():
 		return Phrase.random_phrase(PhraseType.FALLBACK_2_BEGIN)
+
+	@staticmethod
+	def give_lets_play():
+		return Phrase.random_phrase(PhraseType.LETS_PLAY)
 
 
 class User(MongoModel):

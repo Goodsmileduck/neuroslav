@@ -437,7 +437,7 @@ class AskQuestion(Main):
                 if points < 1:
                     text = tts = "Моя кратковременная память ограничена. Я смогу проверить только 2 ответа на каждый вопрос. У тебя всегда есть возможность взять подсказку, пропустить или повторить вопрос.\nНачнём!\n"
                 else:
-                    text = tts = 'Давай играть!\n'
+                    text = tts = Phrase.give_lets_play() + '\n'
             text += question.question
             if question.tts and question.tts != '':
                 tts += question.tts
@@ -759,7 +759,7 @@ class GetHelp(Main):
         logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
         if user_meant.lets_play() or user_meant.confirm():
             if user.difficulty:
-                return AskQuestion()
+                return AskQuestion(lets_play=True)
             else:
                 return DifficultyChoice()
         elif user_meant.repeat():
@@ -800,12 +800,13 @@ class GetVersion(Main):
         logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
         if user_meant.lets_play() or user_meant.confirm():
             if user.difficulty:
-                return AskQuestion()
+                return AskQuestion(lets_play=True)
             else:
                 return DifficultyChoice()
         elif user_meant.repeat():
             return GetVersion()
         return handle_fallbacks(request, GetVersion)
+
 
 class WhatCanYouDo(Main):
     def reply(self, request: Request):
@@ -829,7 +830,7 @@ class WhatCanYouDo(Main):
         logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
         if user_meant.lets_play() or user_meant.confirm():
             if user.difficulty:
-                return AskQuestion()
+                return AskQuestion(lets_play=True)
             else:
                 return DifficultyChoice()
         elif user_meant.repeat():
@@ -863,7 +864,7 @@ class GetLevel(Main):
         logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
         if user_meant.lets_play() or user_meant.confirm():
             if user.difficulty:
-                return AskQuestion()
+                return AskQuestion(lets_play=True)
             else:
                 return DifficultyChoice()
         elif user_meant.repeat():
