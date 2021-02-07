@@ -48,6 +48,7 @@ class Question(MongoModel):
 	difficulty = fields.IntegerField(choices=DIFFICULTIES)
 	right_answers = fields.EmbeddedDocumentListField('Answer')
 	possible_answers = fields.EmbeddedDocumentListField('Answer', blank=True)
+	possible_answers_tts = fields.EmbeddedDocumentListField('Answer', blank=True)
 
 	def __str__(self):
 		return self.question

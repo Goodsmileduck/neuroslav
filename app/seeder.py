@@ -17,12 +17,16 @@ def seed_questions_from_csv():
             # print(q['id'])
             right_answers = []
             possible_answers = []
+            possible_answers_tts = []
             for x in q["right_answers"].split("|"):
                 if x is not None and x != '':
                     right_answers.append(Answer(x.lower()))
             for x in q["possible_answers"].split("|"):
                 if x is not None and x != '':
                     possible_answers.append(Answer(x))
+            for x in q["possible_answers_tts"].split("|"):
+                if x is not None and x != '':
+                    possible_answers_tts.append(Answer(x.lower()))
             Question(
                 id=q["id"],
                 question_type=q["question_type"],
@@ -35,7 +39,9 @@ def seed_questions_from_csv():
                 interesting_fact=q.get('interesting_fact', ''),
                 interesting_fact_tts=q.get('interesting_fact_tts', ''),
                 interesting_fact_pic_id=q.get('interesting_fact_pic_id', ''),
-                possible_answers=possible_answers).save()
+                possible_answers=possible_answers,
+                possible_answers_tts=possible_answers_tts
+            ).save()
 
 
 def seed_questions():
