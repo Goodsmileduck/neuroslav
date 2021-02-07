@@ -125,11 +125,13 @@ class UserMeaning:
         return cleaned in match_answers
 
     def confirm(self):
-        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо', 'я готов', 'готов', 'да да', 'ага', 'идём', 'идем']
+        match_answers = ['да', 'конечно', 'пожалуй', 'да конечно', 'конечно да', 'давай', 'думаю да', 'хорошо',
+                         'я готов', 'готов', 'да да', 'ага', 'идём', 'идем']
         return intents.YANDEX_CONFIRM in self.user_intents or self.is_answer_in_match_answers(match_answers)
 
     def do_continue(self):
-        match_answers = ['давай продолжим', 'продолжим', 'продолжаем', 'хочу продолжить', 'давай продолжать', 'продолжай', 'давай продолжай', 'продолжи', 'продолжить', 'продолжать']
+        match_answers = ['давай продолжим', 'продолжим', 'продолжаем', 'хочу продолжить', 'давай продолжать',
+                         'продолжай', 'давай продолжай', 'продолжи', 'продолжить', 'продолжать']
         return self.is_answer_in_match_answers(match_answers)
 
     def deny(self):
@@ -759,7 +761,7 @@ class GetHelp(Main):
         user_meant = UserMeaning(request)
         user_intent = request.intents
         logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
-        if user_meant.lets_play() or user_meant.confirm():
+        if user_meant.lets_play() or user_meant.confirm() or user_meant.do_continue():
             if user.difficulty:
                 return AskQuestion(lets_play=True)
             else:
@@ -800,7 +802,7 @@ class GetVersion(Main):
         user_meant = UserMeaning(request)
         user_intent = request.intents
         logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
-        if user_meant.lets_play() or user_meant.confirm():
+        if user_meant.lets_play() or user_meant.confirm() or user_meant.do_continue():
             if user.difficulty:
                 return AskQuestion(lets_play=True)
             else:
@@ -830,7 +832,7 @@ class WhatCanYouDo(Main):
         user_meant = UserMeaning(request)
         user_intent = request.intents
         logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
-        if user_meant.lets_play() or user_meant.confirm():
+        if user_meant.lets_play() or user_meant.confirm() or user_meant.do_continue():
             if user.difficulty:
                 return AskQuestion(lets_play=True)
             else:
@@ -864,7 +866,7 @@ class GetLevel(Main):
         user_meant = UserMeaning(request)
         user_intent = request.intents
         logging.info(f"{request['session']['session_id']}: User intent - {user_intent}")
-        if user_meant.lets_play() or user_meant.confirm():
+        if user_meant.lets_play() or user_meant.confirm() or user_meant.do_continue():
             if user.difficulty:
                 return AskQuestion(lets_play=True)
             else:
