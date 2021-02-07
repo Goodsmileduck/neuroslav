@@ -81,10 +81,13 @@ def clear_text(text):
 def answer_is_right(request, question):
     try:
         user_reply = clear_text(request['request']['command'])
-        AVOID_WORDS = ('я', 'думаю', 'наверное', 'кажется', 'это', 'был', 'была', 'были', 'мне')
+        right_answers = [answer.answer for answer in question.right_answers]
+        if user_reply in right_answers:
+            return True
+        AVOID_WORDS = ('я', 'думаю', 'наверное', 'кажется', 'это', 'был', 'была', 'были', 'мне', 'конечно', 'разумеется'
+                       'безусловно', )
         text_list = user_reply.split()
         user_reply = ' '.join([word for word in text_list if word not in AVOID_WORDS])
-        right_answers = [answer.answer for answer in question.right_answers]
         # print(right_answers)
         return user_reply in right_answers or user_reply in settings.CHEATS
     except Exception as e:
