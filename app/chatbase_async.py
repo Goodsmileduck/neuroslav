@@ -30,7 +30,7 @@ async def _send_message(user_id, session_id, message_type, message):
         ),
     )
     if response.status != 200:
-        logger.info("error submiting stats %d", response.status)
+        logging.info("error submiting stats %d", response.status)
     await response.release()
 
 async def sendUserMessage(message, user_id, session_id):
