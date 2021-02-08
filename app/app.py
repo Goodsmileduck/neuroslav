@@ -6,7 +6,7 @@ from request import Request
 from chatbase_async import sendUserMessage, sendBotResponse
 import seeder
 import settings
-
+from threading import Thread
 
 loop = asyncio.new_event_loop()
 
@@ -22,25 +22,22 @@ def main():
     # Функция получает тело запроса и возвращает ответ.
     request_obj = request.json
     session_id = request_obj.get('session', {}).get('session_id', None)
-    
-    logging.info(f'Session_id: {session_id} Request: {request_obj}')
-
     user_id = request_obj['session'].get('application').get('application_id')
-    if settings.SEND_TO_CHATBASE and request_obj['request']['command'] != "ping":
-        user_message = request_obj['request']['command']
-        #logging.info(f'User message: [{user_message}]')
-        asyncio.set_event_loop(loop)
-        asyncio.get_event_loop().run_until_complete(sendUserMessage(user_id=user_id, message=user_message, session_id=session_id))
+
+    logging.info(f'Session_id: {session_id} Request: {request_obj}')
 
     response = handler(request_obj)
 
     logging.info(f'Session_id: {session_id} Response: {response}')
 
-    if settings.SEND_TO_CHATBASE and response['response']['text'] != "pong":
+    if settings.SEND_TO_CHATBASE and request_obj['request']['command'] != "ping":
+        user_message = request_obj['request']['command']
         response_message = response['response']['text']
         #logging.info(f'Response message: [{response_message}]')
         asyncio.set_event_loop(loop)
-        asyncio.get_event_loop().run_until_complete(sendBotResponse(user_id=user_id, message=response_message, session_id=session_id))
+        asyncio.ensure_future(sendUserMessage(user_id=user_id, message=user_message, session_id=session_id))
+        asyncio.ensure_future(sendBotResponse(user_id=user_id, message=response_message, session_id=session_id))
+        
 
     return json.dumps(
         response,
@@ -76,6 +73,9 @@ def start_background_loop(loop):
 if __name__ == '__main__':
     seeder.seed_all()
     debug.test()
+    loop = asyncio.new_event_loop()
+    t = Thread(target=start_background_loop, args=(loop,), daemon=True)
+    t.start()
     app.run(host='0.0.0.0')
 
 
