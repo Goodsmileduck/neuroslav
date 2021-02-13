@@ -328,10 +328,16 @@ class Welcome(Main):
 
 class DifficultyChoice(Main):
     def reply(self, request: Request):
+        user = current_user(request)
+        gained_new_level, level, points = user.gained_new_level()
+
         if self.fallback == 1:
             text = Phrase.give_fallback_general()
         elif self.fallback > 1:
             text = Phrase.give_fallback_2_begin() + ' Скажи, пожалуйста, какой уровень сложности ты выбираешь: лёгкий или трудный?'
+        elif points < 1 or user is None:
+            text = 'У тебя 0 очков и уровень Крестьянин. Отвечай правильно на вопросы чтобы повысить свой уровень и обучить мою нейронную сеть. '\
+                   'Есть легкий и трудный уровни сложности. Какой ты выберешь?'
         else:
             text = 'Есть легкий и трудный уровни сложности. Какой ты выберешь?'
 
@@ -441,7 +447,7 @@ class AskQuestion(Main):
             gained_level, level, points = user.gained_new_level()
             if self.lets_play:
                 if points < 1:
-                    text = tts = "Моя кратковременная память ограничена. Я смогу проверить только 2 ответа на каждый вопрос. У тебя всегда есть возможность взять подсказку, пропустить или повторить вопрос.\nНачнём!\n"
+                    text = tts = "Моя кратковременная память ограничена. Я смогу проверить только 2 ответа на каждый вопрос. У тебя всегда есть возможность взять подсказку, изменить сложность, пропустить или повторить вопрос.\nНачнём!\n"
                 else:
                     text = tts = Phrase.give_lets_play() + '\n'
             else:

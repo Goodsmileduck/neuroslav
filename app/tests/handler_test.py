@@ -20,10 +20,10 @@ class HandlerTest(unittest.TestCase):
     is_web_requests = False
     # Init
     def setUp(self):
-        self.handler = handlers.HandleAppRequest()
+        #self.handler = handlers.HandleAppRequest()
         #self.handler = handlers.HandleWebRequest('https://neuroslav.prod.kubeapp.ru') # production
-        #self.is_web_requests = True
-        #self.handler = handlers.HandleWebRequest('https://neuroslav-jx-staging.kubeapp.ru') #staging
+        self.is_web_requests = True
+        self.handler = handlers.HandleWebRequest('https://neuroslav-jx-staging.kubeapp.ru') #staging
         # self.handler = handlers.HandleWebRequest('https://c6f5bb40e06f.ngrok.io')  # dev
         pass
     # Clean up
