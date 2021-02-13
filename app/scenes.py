@@ -149,12 +149,12 @@ class UserMeaning:
 
     def easy(self):
         match_answers = ['легкий', 'давай легкий', 'выбираю легкий', 'хочу легкий', 'простой', 'давай простой',
-                         'хочу простой', 'легкий уровень', 'простой уровень']
+                         'хочу простой', 'легкий уровень', 'простой уровень', 'легче']
         return self.is_answer_in_match_answers(match_answers)
 
     def hard(self):
         match_answers = ['трудный', 'давай трудный', 'хочу трудный', 'выбираю трудный', 'сложный', 'сложный уровень',
-                         'трудный уровень']
+                         'трудный уровень', 'сложнее', 'труднее']
         return self.is_answer_in_match_answers(match_answers)
 
     def give_clue(self):
