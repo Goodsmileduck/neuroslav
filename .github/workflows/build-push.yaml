@@ -1,0 +1,100 @@
+name: Build neuroslav Container
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}
+
+env:
+  github_event_name: ${{ inputs.github_event_name }}
+  docker_image_amp: registry.digitalocean.com/goodsmileduck/uplancebot
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: neuroslav-buildx-${{ github.sha }}
+          restore-keys: |
+            neuroslav-buildx-
+
+      - name: Login to GAR
+        uses: docker/login-action@v1
+        with:
+          registry: us-docker.pkg.dev
+          username: _json_key
+          password: ${{ secrets.GCR_SERVICEACCOUNT }}
+
+      - name: Set short sha
+        id: vars
+        run: echo "::set-output name=sha_short::${GITHUB_SHA::7}"
+
+      - name: Bump version and tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.0
+        with:
+          github_token: ${{ secrets.GIT_ACTION_PAT }}
+          tag_prefix: v
+          dry_run: ${{ github.event_name == 'pull_request' && true || false }}
+          fetch_all_tags: true
+
+      - name: For PR build only
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          file: Dockerfile
+          tags: |
+            ${{ env.docker_image_amp }}:${{ steps.vars.outputs.sha_short }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      - name: For merge build and push neuroslav
+        if: ${{ github.event_name == 'push' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          file: Dockerfile
+          tags: |
+            ${{ env.docker_image_amp }}:neuroslav
+            ${{ env.docker_image_amp }}:${{ steps.vars.outputs.sha_short }}
+          labels: |
+            sha_short=${{ steps.vars.outputs.sha_short}}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+      - name: Generate changelog
+        id: changelog
+        uses: metcalfc/changelog-generator@v1.0.0
+        with:
+          myToken: ${{ secrets.GIT_ACTION_PAT }}
+          base-ref: ${{steps.tag_version.outputs.previous_tag }}
+
+      - name: Create Release
+        if: ${{ github.event_name == 'push' }}
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_ACTION_PAT }}
+        with:
+          tag_name: ${{steps.tag_version.outputs.new_tag }}
+          release_name: ${{steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
