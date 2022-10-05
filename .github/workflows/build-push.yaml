@@ -31,12 +31,13 @@ jobs:
           restore-keys: |
             neuroslav-buildx-
 
-      - name: Login to GAR
-        uses: docker/login-action@v1
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
         with:
-          registry: us-docker.pkg.dev
-          username: _json_key
-          password: ${{ secrets.GCR_SERVICEACCOUNT }}
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 600
 
       - name: Set short sha
         id: vars
@@ -46,7 +47,6 @@ jobs:
         id: tag_version
         uses: mathieudutour/github-tag-action@v6.0
         with:
-          github_token: ${{ secrets.GIT_ACTION_PAT }}
           tag_prefix: v
           dry_run: ${{ github.event_name == 'pull_request' && true || false }}
           fetch_all_tags: true
