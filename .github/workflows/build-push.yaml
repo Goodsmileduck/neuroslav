@@ -11,7 +11,6 @@ on:
 concurrency: ${{ github.workflow }}
 
 env:
-  github_event_name: ${{ inputs.github_event_name }}
   docker_image_amp: registry.digitalocean.com/goodsmileduck/uplancebot
 
 jobs:
