@@ -83,7 +83,7 @@ jobs:
         id: changelog
         uses: metcalfc/changelog-generator@v1.0.0
         with:
-          myToken: ${{ secrets.GIT_ACTION_PAT }}
+          myToken: ${{ secrets.GITHUB_TOKEN }}
           base-ref: ${{steps.tag_version.outputs.previous_tag }}
 
       - name: Create Release
