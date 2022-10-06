@@ -1,4 +1,4 @@
-name: Build neuroslav Container
+name: Build neuroslav image
 
 on:
   push:
@@ -72,7 +72,7 @@ jobs:
           push: true
           file: Dockerfile
           tags: |
-            ${{ env.docker_image }}:${{steps.tag_version.outputs.new_tag }}
+            ${{ env.docker_image }}:${{ steps.tag_version.outputs.new_tag }}
             ${{ env.docker_image }}:${{ steps.vars.outputs.sha_short }}
           labels: |
             sha_short=${{ steps.vars.outputs.sha_short}}
